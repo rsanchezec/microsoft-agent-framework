@@ -1,0 +1,62 @@
+# Archivos de entorno con credenciales
+.env
+.env.local
+.env.*.local
+*.env
+
+# Otros archivos sensibles
+credentials.json
+secrets.yaml
+config.local.py
+
+# Entorno virtual de Python
+.venv/
+venv/
+ENV/
+env/
+
+# Cache de Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Notebooks Jupyter
+.ipynb_checkpoints
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Archivos temporales
+*.tmp
+*.bak
+
+# Distribuciones de Python
+build/
+dist/
+*.egg-info/
+*.egg
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Documentación generada
+docs/_build/
+
+# Azure y otros archivos de configuración local
+.azure/
+local_settings.py

@@ -1,0 +1,1849 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>020 - Group Chat Workflows | Microsoft Agent Framework</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #1a1a1a;
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        header p {
+            font-size: 1.2em;
+            opacity: 0.95;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        h2 {
+            color: #11998e;
+            font-size: 2em;
+            margin: 30px 0 20px 0;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #38ef7d;
+        }
+
+        h3 {
+            color: #0f8074;
+            font-size: 1.5em;
+            margin: 25px 0 15px 0;
+        }
+
+        h4 {
+            color: #0d6b61;
+            font-size: 1.2em;
+            margin: 20px 0 10px 0;
+        }
+
+        p {
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+
+        .toc {
+            background: #f0fdf9;
+            border-left: 4px solid #11998e;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+
+        .toc h3 {
+            margin-top: 0;
+            color: #11998e;
+        }
+
+        .toc ul {
+            list-style-position: inside;
+            margin-left: 20px;
+        }
+
+        .toc li {
+            margin: 8px 0;
+        }
+
+        .toc a {
+            color: #0f8074;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .toc a:hover {
+            color: #38ef7d;
+            text-decoration: underline;
+        }
+
+        code {
+            background: #f0fdf9;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.9em;
+            color: #0f8074;
+        }
+
+        pre {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 20px 0;
+            border-left: 4px solid #38ef7d;
+        }
+
+        pre code {
+            background: transparent;
+            color: inherit;
+            padding: 0;
+        }
+
+        .diagram {
+            background: #f0fdf9;
+            border: 2px solid #38ef7d;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+            font-family: monospace;
+            white-space: pre;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        th {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        tr:nth-child(even) {
+            background: #f0fdf9;
+        }
+
+        tr:hover {
+            background: #d9f7f0;
+            transition: background 0.3s;
+        }
+
+        .info-box {
+            background: #e6f9f5;
+            border-left: 5px solid #11998e;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+
+        .info-box.warning {
+            background: #fff9e6;
+            border-left-color: #ffa726;
+        }
+
+        .info-box.success {
+            background: #e8f5e9;
+            border-left-color: #66bb6a;
+        }
+
+        .info-box.danger {
+            background: #ffebee;
+            border-left-color: #ef5350;
+        }
+
+        .info-box strong {
+            color: #11998e;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .info-box.warning strong {
+            color: #f57c00;
+        }
+
+        .info-box.success strong {
+            color: #388e3c;
+        }
+
+        .info-box.danger strong {
+            color: #c62828;
+        }
+
+        ul, ol {
+            margin-left: 30px;
+            margin-bottom: 15px;
+        }
+
+        li {
+            margin: 8px 0;
+        }
+
+        .highlight {
+            background: linear-gradient(120deg, #38ef7d 0%, #11998e 100%);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
+        footer {
+            background: #0d6b61;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            margin-top: 40px;
+        }
+
+        .badge {
+            display: inline-block;
+            background: #11998e;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            margin-right: 5px;
+            font-weight: 600;
+        }
+
+        .badge.pattern {
+            background: #38ef7d;
+            color: #0d6b61;
+        }
+
+        .badge.component {
+            background: #20b2aa;
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 1.8em;
+            }
+
+            .content {
+                padding: 20px;
+            }
+
+            table {
+                font-size: 0.9em;
+            }
+        }
+
+        .flow-diagram {
+            background: white;
+            border: 2px solid #38ef7d;
+            border-radius: 10px;
+            padding: 30px;
+            margin: 25px 0;
+            box-shadow: 0 4px 15px rgba(17, 153, 142, 0.15);
+        }
+
+        .flow-step {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            text-align: center;
+            font-weight: 600;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+        }
+
+        .flow-arrow {
+            text-align: center;
+            color: #11998e;
+            font-size: 1.5em;
+            margin: 5px 0;
+        }
+
+        .code-comment {
+            color: #6a9955;
+        }
+
+        .code-keyword {
+            color: #569cd6;
+        }
+
+        .code-string {
+            color: #ce9178;
+        }
+
+        .code-function {
+            color: #dcdcaa;
+        }
+
+        .section-number {
+            display: inline-block;
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 35px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🗣️ Group Chat Workflows</h1>
+            <p>Conversaciones Colaborativas Multi-Agente | Microsoft Agent Framework</p>
+            <p style="font-size: 0.9em; margin-top: 10px; opacity: 0.9;">Script: 020_group_chat_workflow.py</p>
+        </header>
+
+        <div class="content">
+            <!-- Table of Contents -->
+            <div class="toc">
+                <h3>📑 Tabla de Contenidos</h3>
+                <ul>
+                    <li><a href="#introduccion">1. Introducción a Group Chat Workflows</a></li>
+                    <li><a href="#conceptos">2. Conceptos Fundamentales</a></li>
+                    <li><a href="#patron1">3. Patrón 1: Round-Robin Selection</a></li>
+                    <li><a href="#patron2">4. Patrón 2: Debate Pattern</a></li>
+                    <li><a href="#patron3">5. Patrón 3: Task-Based Selection</a></li>
+                    <li><a href="#state-snapshot">6. GroupChatStateSnapshot</a></li>
+                    <li><a href="#selector-functions">7. Funciones Selector</a></li>
+                    <li><a href="#implementacion">8. Implementación Paso a Paso</a></li>
+                    <li><a href="#comparacion">9. Comparación de Patrones</a></li>
+                    <li><a href="#casos-uso">10. Casos de Uso</a></li>
+                    <li><a href="#mejores-practicas">11. Mejores Prácticas</a></li>
+                    <li><a href="#referencia">12. Referencia Rápida</a></li>
+                </ul>
+            </div>
+
+            <!-- Section 1: Introduction -->
+            <section id="introduccion">
+                <h2><span class="section-number">1</span>Introducción a Group Chat Workflows</h2>
+
+                <p>
+                    <strong>Group Chat Workflows</strong> permite que múltiples agentes participen en conversaciones colaborativas,
+                    donde un <span class="highlight">selector o manager</span> decide qué agente habla en cada turno.
+                </p>
+
+                <div class="info-box">
+                    <strong>💡 ¿Qué es un Group Chat?</strong>
+                    Un Group Chat es un patrón de workflow donde múltiples agentes participan en una conversación estructurada,
+                    con un mecanismo de orquestación que controla el flujo de la conversación decidiendo quién habla y cuándo.
+                </div>
+
+                <h3>🎯 Características Principales</h3>
+                <ul>
+                    <li><strong>Colaboración Natural:</strong> Múltiples agentes interactúan entre sí</li>
+                    <li><strong>Orquestación Flexible:</strong> Selector basado en funciones o LLM</li>
+                    <li><strong>Conversaciones Estructuradas:</strong> History tracking automático</li>
+                    <li><strong>Control Fino:</strong> Decide quién habla y cuándo</li>
+                    <li><strong>Patrones Reutilizables:</strong> Round-robin, debate, task-based</li>
+                    <li><strong>Límites de Seguridad:</strong> Evita loops infinitos con max_rounds</li>
+                </ul>
+
+                <h3>🆚 Group Chat vs Workflows Tradicionales</h3>
+                <table>
+                    <tr>
+                        <th>Aspecto</th>
+                        <th>Workflows Secuenciales/Paralelos</th>
+                        <th>Group Chat</th>
+                    </tr>
+                    <tr>
+                        <td><strong>Flujo</strong></td>
+                        <td>Predefinido en código</td>
+                        <td>Dinámico, decidido en runtime</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Decisiones</strong></td>
+                        <td>Estáticas (if/else en código)</td>
+                        <td>Selector function decide</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Colaboración</strong></td>
+                        <td>Pipeline (A → B → C)</td>
+                        <td>Conversacional (A ⟷ B ⟷ C)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Historia</strong></td>
+                        <td>Manual (pasar contexto)</td>
+                        <td>Automática (GroupChatStateSnapshot)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Orquestación</strong></td>
+                        <td>Edges explícitos</td>
+                        <td>Selector decide turnos</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Uso ideal</strong></td>
+                        <td>Pipelines, transformaciones</td>
+                        <td>Debates, paneles, brainstorming</td>
+                    </tr>
+                </table>
+
+                <div class="flow-diagram">
+                    <h4 style="text-align: center; color: #11998e; margin-bottom: 20px;">🔄 Flujo de Group Chat</h4>
+                    <div class="flow-step">Usuario proporciona tarea inicial</div>
+                    <div class="flow-arrow">↓</div>
+                    <div class="flow-step">Selector decide primer agente</div>
+                    <div class="flow-arrow">↓</div>
+                    <div class="flow-step">Agente 1 responde</div>
+                    <div class="flow-arrow">↓</div>
+                    <div class="flow-step">Selector analiza estado y decide siguiente</div>
+                    <div class="flow-arrow">↓</div>
+                    <div class="flow-step">Agente 2 responde (ve historial)</div>
+                    <div class="flow-arrow">↓</div>
+                    <div class="flow-step">... (continúa hasta que selector retorna None)</div>
+                    <div class="flow-arrow">↓</div>
+                    <div class="flow-step">Conversación completa</div>
+                </div>
+            </section>
+
+            <!-- Section 2: Fundamental Concepts -->
+            <section id="conceptos">
+                <h2><span class="section-number">2</span>Conceptos Fundamentales</h2>
+
+                <h3>🧩 Componentes Clave</h3>
+
+                <h4><span class="badge component">GroupChatBuilder</span></h4>
+                <p>Constructor del workflow de group chat. Configura participantes y selector.</p>
+                <pre><code><span class="code-keyword">from</span> agent_framework <span class="code-keyword">import</span> GroupChatBuilder
+
+workflow = (
+    GroupChatBuilder()
+    .select_speakers(selector_function, display_name=<span class="code-string">"Manager"</span>)
+    .participants(
+        agent1=agent1_instance,
+        agent2=agent2_instance
+    )
+    .build()
+)</code></pre>
+
+                <h4><span class="badge component">GroupChatStateSnapshot</span></h4>
+                <p>Snapshot inmutable del estado actual del chat, proporcionado a la función selector.</p>
+                <pre><code><span class="code-keyword">class</span> GroupChatStateSnapshot(TypedDict):
+    task: ChatMessage           <span class="code-comment"># Tarea original del usuario</span>
+    participants: dict[str, str]  <span class="code-comment"># nombre → descripción</span>
+    conversation: tuple[ChatMessage, ...]  <span class="code-comment"># Todos los mensajes</span>
+    history: tuple[GroupChatTurn, ...]     <span class="code-comment"># Turnos con speakers</span>
+    round_index: int            <span class="code-comment"># Número de ronda actual</span>
+    pending_agent: str | None   <span class="code-comment"># Agente activo actualmente</span></code></pre>
+
+                <h4><span class="badge component">Selector Function</span></h4>
+                <p>Función que analiza el estado y decide el siguiente speaker.</p>
+                <pre><code><span class="code-keyword">def</span> <span class="code-function">my_selector</span>(state: GroupChatStateSnapshot) -> Optional[str]:
+    <span class="code-comment"># Analizar estado</span>
+    <span class="code-comment"># Retornar nombre del siguiente agente o None para terminar</span>
+    <span class="code-keyword">return</span> <span class="code-string">"agent_name"</span>  <span class="code-comment"># o None</span></code></pre>
+
+                <div class="info-box warning">
+                    <strong>⚠️ Importante: Función Selector</strong>
+                    La función selector debe retornar:
+                    <ul>
+                        <li><code>str</code> - Nombre del siguiente participante para continuar</li>
+                        <li><code>None</code> - Para finalizar la conversación</li>
+                    </ul>
+                    El nombre debe coincidir exactamente con los definidos en <code>.participants()</code>.
+                </div>
+
+                <h3>📊 Tipos de Orquestación</h3>
+                <table>
+                    <tr>
+                        <th>Tipo</th>
+                        <th>Método</th>
+                        <th>Descripción</th>
+                        <th>Uso</th>
+                    </tr>
+                    <tr>
+                        <td><strong>Function-based</strong></td>
+                        <td><code>.select_speakers()</code></td>
+                        <td>Lógica de selección en código Python</td>
+                        <td>Reglas predecibles (round-robin, condicionales)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>LLM-based</strong></td>
+                        <td><code>.set_prompt_based_manager()</code></td>
+                        <td>LLM decide el siguiente speaker</td>
+                        <td>Decisiones complejas basadas en contenido</td>
+                    </tr>
+                </table>
+
+                <div class="info-box">
+                    <strong>💡 ¿Cuándo usar cada tipo?</strong>
+                    <ul>
+                        <li><strong>Function-based:</strong> Patrones predecibles, control total, más económico</li>
+                        <li><strong>LLM-based:</strong> Decisiones complejas, adaptabilidad, más flexible</li>
+                    </ul>
+                    El script 020 se enfoca en <strong>function-based</strong> para demostrar patrones claros.
+                </div>
+            </section>
+
+            <!-- Section 3: Pattern 1 - Round-Robin -->
+            <section id="patron1">
+                <h2><span class="section-number">3</span>Patrón 1: Round-Robin Selection</h2>
+
+                <p>
+                    <span class="badge pattern">Patrón Básico</span>
+                    El patrón <strong>Round-Robin</strong> rota entre participantes en orden circular predefinido.
+                </p>
+
+                <h3>🎯 Características</h3>
+                <ul>
+                    <li><strong>Rotación Circular:</strong> A → B → C → A → B → C...</li>
+                    <li><strong>Orden Predecible:</strong> Siempre sigue la misma secuencia</li>
+                    <li><strong>Equitativo:</strong> Todos los participantes tienen igual oportunidad</li>
+                    <li><strong>Simple:</strong> Lógica de selección muy directa</li>
+                </ul>
+
+                <h3>🔄 Flujo del Patrón</h3>
+                <div class="diagram">
+User Task
+    ↓
+Researcher (Round 1)
+    ↓
+Analyst (Round 2)
+    ↓
+Writer (Round 3)
+    ↓
+Researcher (Round 4)  ← Vuelve al inicio
+    ↓
+Analyst (Round 5)
+    ↓
+Writer (Round 6)
+    ↓
+... (hasta max_rounds)
+                </div>
+
+                <h3>💻 Implementación</h3>
+                <pre><code><span class="code-keyword">def</span> <span class="code-function">round_robin_selector</span>(state: GroupChatStateSnapshot) -> Optional[str]:
+    <span class="code-string">"""Selector que rota entre participantes en orden circular."""</span>
+
+    <span class="code-comment"># Límite de seguridad</span>
+    <span class="code-keyword">if</span> state[<span class="code-string">"round_index"</span>] >= 9:
+        <span class="code-keyword">return</span> None  <span class="code-comment"># Terminar después de 9 rondas</span>
+
+    <span class="code-comment"># Obtener último speaker</span>
+    history = state[<span class="code-string">"history"</span>]
+    last_speaker = history[-1].speaker <span class="code-keyword">if</span> history <span class="code-keyword">else</span> None
+
+    <span class="code-comment"># Definir orden de rotación</span>
+    rotation = [<span class="code-string">"researcher"</span>, <span class="code-string">"analyst"</span>, <span class="code-string">"writer"</span>]
+
+    <span class="code-comment"># Calcular siguiente speaker</span>
+    <span class="code-keyword">if</span> last_speaker <span class="code-keyword">is</span> None <span class="code-keyword">or</span> last_speaker <span class="code-keyword">not in</span> rotation:
+        next_speaker = rotation[0]
+    <span class="code-keyword">else</span>:
+        current_index = rotation.index(last_speaker)
+        next_index = (current_index + 1) % <span class="code-function">len</span>(rotation)  <span class="code-comment"># Módulo para circular</span>
+        next_speaker = rotation[next_index]
+
+    <span class="code-keyword">return</span> next_speaker</code></pre>
+
+                <h3>🏗️ Construcción del Workflow</h3>
+                <pre><code><span class="code-comment"># Crear agentes</span>
+researcher_agent = client.create_agent(
+    instructions=<span class="code-string">"Eres un investigador experto."</span>,
+    name=<span class="code-string">"researcher"</span>
+)
+
+analyst_agent = client.create_agent(
+    instructions=<span class="code-string">"Eres un analista experto."</span>,
+    name=<span class="code-string">"analyst"</span>
+)
+
+writer_agent = client.create_agent(
+    instructions=<span class="code-string">"Eres un escritor experto."</span>,
+    name=<span class="code-string">"writer"</span>
+)
+
+<span class="code-comment"># Construir workflow</span>
+workflow = (
+    GroupChatBuilder()
+    .select_speakers(
+        round_robin_selector,
+        display_name=<span class="code-string">"RoundRobinManager"</span>
+    )
+    .participants(
+        researcher=researcher_agent,
+        analyst=analyst_agent,
+        writer=writer_agent
+    )
+    .build()
+)
+
+<span class="code-comment"># Ejecutar</span>
+<span class="code-keyword">async for</span> event <span class="code-keyword">in</span> workflow.run_stream(<span class="code-string">"Analicen las tendencias de IA en 2024"</span>):
+    <span class="code-keyword">if</span> <span class="code-function">hasattr</span>(event, <span class="code-string">'text'</span>) <span class="code-keyword">and</span> event.text:
+        <span class="code-function">print</span>(<span class="code-string">f"[{event.author_name}]: {event.text}"</span>)</code></pre>
+
+                <div class="info-box success">
+                    <strong>✅ Ventajas del Round-Robin</strong>
+                    <ul>
+                        <li>Muy simple de implementar</li>
+                        <li>Predecible y fácil de debuggear</li>
+                        <li>Garantiza participación equitativa</li>
+                        <li>No requiere análisis complejo</li>
+                    </ul>
+                </div>
+
+                <div class="info-box warning">
+                    <strong>⚠️ Limitaciones</strong>
+                    <ul>
+                        <li>No es adaptativo al contenido</li>
+                        <li>Puede ser ineficiente si un agente no tiene nada que aportar</li>
+                        <li>Requiere límite de rondas explícito</li>
+                    </ul>
+                </div>
+
+                <h3>📋 Casos de Uso Ideales</h3>
+                <ul>
+                    <li>Panel de expertos con igual autoridad</li>
+                    <li>Revisión por múltiples perspectivas</li>
+                    <li>Brainstorming colaborativo</li>
+                    <li>Análisis multi-etapa (investigar → analizar → escribir)</li>
+                </ul>
+            </section>
+
+            <!-- Section 4: Pattern 2 - Debate -->
+            <section id="patron2">
+                <h2><span class="section-number">4</span>Patrón 2: Debate Pattern</h2>
+
+                <p>
+                    <span class="badge pattern">Patrón Condicional</span>
+                    El patrón <strong>Debate</strong> alterna entre dos perspectivas opuestas, seguido de una síntesis o conclusión.
+                </p>
+
+                <h3>🎯 Características</h3>
+                <ul>
+                    <li><strong>Alternancia:</strong> Dos agentes se turnan respondiendo al otro</li>
+                    <li><strong>Contador de Turnos:</strong> Limita cuántas veces cada uno puede hablar</li>
+                    <li><strong>Moderador:</strong> Un tercer agente sintetiza al final</li>
+                    <li><strong>Fases:</strong> Debate (alternancia) → Conclusión (moderador)</li>
+                </ul>
+
+                <h3>🔄 Flujo del Patrón</h3>
+                <div class="diagram">
+User Topic
+    ↓
+Optimist (Round 1)
+    ↓
+Pessimist (Round 2) ← Responde al Optimist
+    ↓
+Optimist (Round 3) ← Responde al Pessimist
+    ↓
+Pessimist (Round 4)
+    ↓
+Optimist (Round 5)
+    ↓
+Pessimist (Round 6)
+    ↓
+Moderator (Round 7) ← Sintetiza ambas perspectivas
+    ↓
+FIN
+                </div>
+
+                <h3>💻 Implementación</h3>
+                <pre><code><span class="code-keyword">def</span> <span class="code-function">debate_selector</span>(state: GroupChatStateSnapshot) -> Optional[str]:
+    <span class="code-string">"""Selector para debates: alterna entre dos perspectivas opuestas."""</span>
+
+    history = state[<span class="code-string">"history"</span>]
+
+    <span class="code-comment"># Contar cuántas veces habló cada agente</span>
+    optimist_count = <span class="code-function">sum</span>(1 <span class="code-keyword">for</span> turn <span class="code-keyword">in</span> history <span class="code-keyword">if</span> turn.speaker == <span class="code-string">"optimist"</span>)
+    pessimist_count = <span class="code-function">sum</span>(1 <span class="code-keyword">for</span> turn <span class="code-keyword">in</span> history <span class="code-keyword">if</span> turn.speaker == <span class="code-string">"pessimist"</span>)
+    moderator_count = <span class="code-function">sum</span>(1 <span class="code-keyword">for</span> turn <span class="code-keyword">in</span> history <span class="code-keyword">if</span> turn.speaker == <span class="code-string">"moderator"</span>)
+
+    <span class="code-comment"># Fase 1: Debate (máximo 3 turnos por debatiente)</span>
+    <span class="code-keyword">if</span> optimist_count < 3 <span class="code-keyword">or</span> pessimist_count < 3:
+        last_speaker = history[-1].speaker <span class="code-keyword">if</span> history <span class="code-keyword">else</span> None
+
+        <span class="code-keyword">if</span> last_speaker == <span class="code-string">"optimist"</span> <span class="code-keyword">and</span> pessimist_count < 3:
+            <span class="code-keyword">return</span> <span class="code-string">"pessimist"</span>
+        <span class="code-keyword">elif</span> last_speaker == <span class="code-string">"pessimist"</span> <span class="code-keyword">and</span> optimist_count < 3:
+            <span class="code-keyword">return</span> <span class="code-string">"optimist"</span>
+        <span class="code-keyword">else</span>:
+            <span class="code-keyword">return</span> <span class="code-string">"optimist"</span>  <span class="code-comment"># Primer turno</span>
+
+    <span class="code-comment"># Fase 2: Moderador da conclusiones (solo una vez)</span>
+    <span class="code-keyword">if</span> moderator_count == 0:
+        <span class="code-keyword">return</span> <span class="code-string">"moderator"</span>
+
+    <span class="code-comment"># Fase 3: Terminar</span>
+    <span class="code-keyword">return</span> None</code></pre>
+
+                <h3>🏗️ Construcción del Workflow</h3>
+                <pre><code><span class="code-comment"># Crear agentes del debate</span>
+optimist_agent = client.create_agent(
+    instructions=<span class="code-string">"Eres un optimista. Resalta aspectos positivos."</span>,
+    name=<span class="code-string">"optimist"</span>
+)
+
+pessimist_agent = client.create_agent(
+    instructions=<span class="code-string">"Eres un pesimista. Identifica riesgos."</span>,
+    name=<span class="code-string">"pessimist"</span>
+)
+
+moderator_agent = client.create_agent(
+    instructions=<span class="code-string">"Eres un moderador neutral. Sintetiza ambos puntos de vista."</span>,
+    name=<span class="code-string">"moderator"</span>
+)
+
+<span class="code-comment"># Construir workflow</span>
+workflow = (
+    GroupChatBuilder()
+    .select_speakers(
+        debate_selector,
+        display_name=<span class="code-string">"DebateModerator"</span>
+    )
+    .participants(
+        optimist=optimist_agent,
+        pessimist=pessimist_agent,
+        moderator=moderator_agent
+    )
+    .build()
+)
+
+<span class="code-comment"># Ejecutar debate</span>
+<span class="code-keyword">async for</span> event <span class="code-keyword">in</span> workflow.run_stream(<span class="code-string">"¿Cuál es el futuro del trabajo remoto?"</span>):
+    <span class="code-keyword">if</span> <span class="code-function">hasattr</span>(event, <span class="code-string">'text'</span>) <span class="code-keyword">and</span> event.text:
+        <span class="code-function">print</span>(<span class="code-string">f"[{event.author_name}]: {event.text}"</span>)</code></pre>
+
+                <div class="info-box success">
+                    <strong>✅ Ventajas del Debate Pattern</strong>
+                    <ul>
+                        <li>Explora múltiples perspectivas sobre un tema</li>
+                        <li>Fomenta análisis crítico (pros y contras)</li>
+                        <li>Síntesis final proporciona conclusión balanceada</li>
+                        <li>Control fino sobre cuántas veces cada uno habla</li>
+                    </ul>
+                </div>
+
+                <h3>📋 Casos de Uso Ideales</h3>
+                <ul>
+                    <li>Análisis de decisiones (pros vs contras)</li>
+                    <li>Evaluación de riesgos vs oportunidades</li>
+                    <li>Debates académicos o filosóficos</li>
+                    <li>Revisión de propuestas (ventajas vs desventajas)</li>
+                    <li>Simulación de negociaciones</li>
+                </ul>
+
+                <h3>🎭 Variantes del Debate</h3>
+                <table>
+                    <tr>
+                        <th>Variante</th>
+                        <th>Descripción</th>
+                        <th>Ejemplo</th>
+                    </tr>
+                    <tr>
+                        <td><strong>Dos Perspectivas</strong></td>
+                        <td>Optimista vs Pesimista (implementado)</td>
+                        <td>Ventajas vs Desventajas</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Tres+ Perspectivas</strong></td>
+                        <td>Múltiples viewpoints</td>
+                        <td>Tecnológico, Económico, Social</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Sin Moderador</strong></td>
+                        <td>Solo alternancia, sin síntesis</td>
+                        <td>Brainstorming libre</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Rondas Abiertas</strong></td>
+                        <td>Sin límite de turnos (cuidado con loops)</td>
+                        <td>Debate hasta consenso</td>
+                    </tr>
+                </table>
+            </section>
+
+            <!-- Section 5: Pattern 3 - Task-Based -->
+            <section id="patron3">
+                <h2><span class="section-number">5</span>Patrón 3: Task-Based Selection</h2>
+
+                <p>
+                    <span class="badge pattern">Patrón Adaptativo</span>
+                    El patrón <strong>Task-Based</strong> analiza el contenido de la conversación y selecciona el especialista más apropiado.
+                </p>
+
+                <h3>🎯 Características</h3>
+                <ul>
+                    <li><strong>Análisis de Contenido:</strong> Detecta palabras clave en mensajes</li>
+                    <li><strong>Coordinador Central:</strong> Un agente analiza y delega</li>
+                    <li><strong>Especialistas:</strong> Múltiples agentes con expertise específico</li>
+                    <li><strong>Dinámico:</strong> La secuencia depende del contenido</li>
+                </ul>
+
+                <h3>🔄 Flujo del Patrón</h3>
+                <div class="diagram">
+User Task: "Crear app de análisis de datos con Python"
+    ↓
+Coordinator (analiza tarea)
+    ↓
+    ├─ Detecta "data" → Data Specialist
+    ↓
+Data Specialist (responde sobre datos)
+    ↓
+Coordinator (analiza respuesta)
+    ↓
+    ├─ Detecta "code" y "python" → Code Specialist
+    ↓
+Code Specialist (responde sobre implementación)
+    ↓
+Coordinator (2 especialistas ya contribuyeron)
+    ↓
+FIN
+                </div>
+
+                <h3>💻 Implementación</h3>
+                <pre><code><span class="code-keyword">def</span> <span class="code-function">task_based_selector</span>(state: GroupChatStateSnapshot) -> Optional[str]:
+    <span class="code-string">"""Selector basado en la tarea: analiza contenido y decide experto."""</span>
+
+    history = state[<span class="code-string">"history"</span>]
+    round_index = state[<span class="code-string">"round_index"</span>]
+    conversation = state[<span class="code-string">"conversation"</span>]
+
+    <span class="code-comment"># Límite de seguridad</span>
+    <span class="code-keyword">if</span> round_index >= 10:
+        <span class="code-keyword">return</span> None
+
+    last_speaker = history[-1].speaker <span class="code-keyword">if</span> history <span class="code-keyword">else</span> None
+
+    <span class="code-comment"># Analizar contenido de los últimos mensajes</span>
+    recent_text = <span class="code-string">" "</span>.join(
+        msg.text.lower() <span class="code-keyword">for</span> msg <span class="code-keyword">in</span> conversation[-3:] <span class="code-keyword">if</span> msg.text
+    )
+
+    <span class="code-comment"># Primer turno: coordinator analiza</span>
+    <span class="code-keyword">if</span> last_speaker <span class="code-keyword">is</span> None:
+        <span class="code-keyword">return</span> <span class="code-string">"coordinator"</span>
+
+    <span class="code-comment"># Después de coordinator, seleccionar especialista apropiado</span>
+    <span class="code-keyword">if</span> last_speaker == <span class="code-string">"coordinator"</span>:
+        <span class="code-keyword">if</span> <span class="code-string">"code"</span> <span class="code-keyword">in</span> recent_text <span class="code-keyword">or</span> <span class="code-string">"python"</span> <span class="code-keyword">in</span> recent_text:
+            <span class="code-keyword">return</span> <span class="code-string">"code_specialist"</span>
+        <span class="code-keyword">elif</span> <span class="code-string">"data"</span> <span class="code-keyword">in</span> recent_text <span class="code-keyword">or</span> <span class="code-string">"analysis"</span> <span class="code-keyword">in</span> recent_text:
+            <span class="code-keyword">return</span> <span class="code-string">"data_specialist"</span>
+        <span class="code-keyword">elif</span> <span class="code-string">"design"</span> <span class="code-keyword">in</span> recent_text <span class="code-keyword">or</span> <span class="code-string">"ui"</span> <span class="code-keyword">in</span> recent_text:
+            <span class="code-keyword">return</span> <span class="code-string">"design_specialist"</span>
+        <span class="code-keyword">else</span>:
+            <span class="code-keyword">return</span> <span class="code-string">"code_specialist"</span>  <span class="code-comment"># Default</span>
+
+    <span class="code-comment"># Si habló un especialista, volver a coordinator</span>
+    <span class="code-keyword">if</span> last_speaker <span class="code-keyword">in</span> [<span class="code-string">"code_specialist"</span>, <span class="code-string">"data_specialist"</span>, <span class="code-string">"design_specialist"</span>]:
+        specialist_count = <span class="code-function">sum</span>(
+            1 <span class="code-keyword">for</span> turn <span class="code-keyword">in</span> history
+            <span class="code-keyword">if</span> turn.speaker <span class="code-keyword">in</span> [<span class="code-string">"code_specialist"</span>, <span class="code-string">"data_specialist"</span>, <span class="code-string">"design_specialist"</span>]
+        )
+
+        <span class="code-comment"># Después de 2 especialistas, terminar</span>
+        <span class="code-keyword">if</span> specialist_count >= 2:
+            <span class="code-keyword">return</span> None
+        <span class="code-keyword">else</span>:
+            <span class="code-keyword">return</span> <span class="code-string">"coordinator"</span>
+
+    <span class="code-keyword">return</span> None</code></pre>
+
+                <h3>🏗️ Construcción del Workflow</h3>
+                <pre><code><span class="code-comment"># Crear coordinator</span>
+coordinator_agent = client.create_agent(
+    instructions=<span class="code-string">"Eres un coordinador. Analiza tareas y delega."</span>,
+    name=<span class="code-string">"coordinator"</span>
+)
+
+<span class="code-comment"># Crear especialistas</span>
+code_agent = client.create_agent(
+    instructions=<span class="code-string">"Eres especialista en programación y desarrollo."</span>,
+    name=<span class="code-string">"code_specialist"</span>
+)
+
+data_agent = client.create_agent(
+    instructions=<span class="code-string">"Eres especialista en análisis de datos."</span>,
+    name=<span class="code-string">"data_specialist"</span>
+)
+
+design_agent = client.create_agent(
+    instructions=<span class="code-string">"Eres especialista en diseño UI/UX."</span>,
+    name=<span class="code-string">"design_specialist"</span>
+)
+
+<span class="code-comment"># Construir workflow</span>
+workflow = (
+    GroupChatBuilder()
+    .select_speakers(
+        task_based_selector,
+        display_name=<span class="code-string">"TaskCoordinator"</span>
+    )
+    .participants(
+        coordinator=coordinator_agent,
+        code_specialist=code_agent,
+        data_specialist=data_agent,
+        design_specialist=design_agent
+    )
+    .build()
+)
+
+<span class="code-comment"># Ejecutar</span>
+<span class="code-keyword">async for</span> event <span class="code-keyword">in</span> workflow.run_stream(<span class="code-string">"Crear app de análisis de datos"</span>):
+    <span class="code-keyword">if</span> <span class="code-function">hasattr</span>(event, <span class="code-string">'text'</span>) <span class="code-keyword">and</span> event.text:
+        <span class="code-function">print</span>(<span class="code-string">f"[{event.author_name}]: {event.text}"</span>)</code></pre>
+
+                <div class="info-box success">
+                    <strong>✅ Ventajas del Task-Based Pattern</strong>
+                    <ul>
+                        <li>Selección dinámica basada en el contenido</li>
+                        <li>Eficiente: solo hablan especialistas relevantes</li>
+                        <li>Escalable: fácil agregar más especialistas</li>
+                        <li>Realista: simula delegación en equipos</li>
+                    </ul>
+                </div>
+
+                <div class="info-box warning">
+                    <strong>⚠️ Consideraciones</strong>
+                    <ul>
+                        <li>Análisis de keywords es simple (puede mejorarse con embeddings/LLM)</li>
+                        <li>Requiere palabras clave bien definidas</li>
+                        <li>Necesita lógica para evitar loops (límite de especialistas)</li>
+                    </ul>
+                </div>
+
+                <h3>📋 Casos de Uso Ideales</h3>
+                <ul>
+                    <li>Asistente con múltiples capacidades especializadas</li>
+                    <li>Sistema de delegación de tareas</li>
+                    <li>Consultoría multi-experto</li>
+                    <li>Soporte técnico con especialistas por área</li>
+                    <li>Workflow adaptativo según contenido</li>
+                </ul>
+
+                <h3>🔧 Mejoras Posibles</h3>
+                <table>
+                    <tr>
+                        <th>Mejora</th>
+                        <th>Descripción</th>
+                        <th>Implementación</th>
+                    </tr>
+                    <tr>
+                        <td><strong>Embeddings</strong></td>
+                        <td>Análisis semántico en lugar de keywords</td>
+                        <td>Usar Azure OpenAI embeddings para similarity</td>
+                    </tr>
+                    <tr>
+                        <td><strong>LLM Classifier</strong></td>
+                        <td>LLM decide el especialista apropiado</td>
+                        <td>Prompt: "¿Qué especialista es mejor para esta tarea?"</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Metadata Tags</strong></td>
+                        <td>Agentes tienen tags de expertise</td>
+                        <td>Match tags con contenido de la tarea</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Confidence Scores</strong></td>
+                        <td>Especialista puede declinar si no es relevante</td>
+                        <td>Especialista retorna confidence, re-route si bajo</td>
+                    </tr>
+                </table>
+            </section>
+
+            <!-- Section 6: State Snapshot -->
+            <section id="state-snapshot">
+                <h2><span class="section-number">6</span>GroupChatStateSnapshot</h2>
+
+                <p>
+                    <code>GroupChatStateSnapshot</code> es un <strong>snapshot inmutable</strong> del estado actual del chat,
+                    proporcionado a la función selector para que tome decisiones.
+                </p>
+
+                <h3>📊 Estructura Completa</h3>
+                <pre><code><span class="code-keyword">class</span> GroupChatStateSnapshot(TypedDict):
+    <span class="code-string">"""Estado inmutable del chat en un momento dado."""</span>
+
+    task: ChatMessage
+    <span class="code-comment"># La tarea original proporcionada por el usuario</span>
+    <span class="code-comment"># Tipo: ChatMessage con content, role, etc.</span>
+
+    participants: dict[str, str]
+    <span class="code-comment"># Diccionario de participantes: nombre → descripción</span>
+    <span class="code-comment"># Ejemplo: {"researcher": "Research expert", "analyst": "Analysis expert"}</span>
+
+    conversation: tuple[ChatMessage, ...]
+    <span class="code-comment"># Historial completo de todos los mensajes</span>
+    <span class="code-comment"># Incluye mensajes del usuario y de todos los agentes</span>
+    <span class="code-comment"># Inmutable (tuple)</span>
+
+    history: tuple[GroupChatTurn, ...]
+    <span class="code-comment"># Historial de turnos con información del speaker</span>
+    <span class="code-comment"># Cada GroupChatTurn contiene: speaker (str), messages, etc.</span>
+    <span class="code-comment"># Útil para rastrear quién habló y en qué orden</span>
+
+    round_index: int
+    <span class="code-comment"># Número de la ronda actual (0-indexed)</span>
+    <span class="code-comment"># Incrementa con cada turno</span>
+    <span class="code-comment"># Útil para límites de seguridad</span>
+
+    pending_agent: str | None
+    <span class="code-comment"># Nombre del agente que está activo actualmente</span>
+    <span class="code-comment"># None si no hay agente activo</span></code></pre>
+
+                <h3>🔍 Uso de Cada Campo</h3>
+                <table>
+                    <tr>
+                        <th>Campo</th>
+                        <th>Tipo</th>
+                        <th>Uso en Selector</th>
+                        <th>Ejemplo</th>
+                    </tr>
+                    <tr>
+                        <td><code>task</code></td>
+                        <td>ChatMessage</td>
+                        <td>Analizar la tarea original</td>
+                        <td><code>state["task"].content</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>participants</code></td>
+                        <td>dict[str, str]</td>
+                        <td>Ver quiénes están disponibles</td>
+                        <td><code>list(state["participants"].keys())</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>conversation</code></td>
+                        <td>tuple[ChatMessage]</td>
+                        <td>Analizar mensajes recientes</td>
+                        <td><code>state["conversation"][-3:]</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>history</code></td>
+                        <td>tuple[GroupChatTurn]</td>
+                        <td>Ver quién habló y cuándo</td>
+                        <td><code>state["history"][-1].speaker</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>round_index</code></td>
+                        <td>int</td>
+                        <td>Límites de seguridad</td>
+                        <td><code>if state["round_index"] >= 10: return None</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>pending_agent</code></td>
+                        <td>str | None</td>
+                        <td>Saber si hay agente activo</td>
+                        <td><code>state["pending_agent"]</code></td>
+                    </tr>
+                </table>
+
+                <h3>💡 Ejemplos de Uso en Selector</h3>
+
+                <h4>Ejemplo 1: Contar cuántas veces habló un agente</h4>
+                <pre><code>history = state[<span class="code-string">"history"</span>]
+researcher_count = <span class="code-function">sum</span>(1 <span class="code-keyword">for</span> turn <span class="code-keyword">in</span> history <span class="code-keyword">if</span> turn.speaker == <span class="code-string">"researcher"</span>)</code></pre>
+
+                <h4>Ejemplo 2: Analizar mensajes recientes</h4>
+                <pre><code>conversation = state[<span class="code-string">"conversation"</span>]
+recent_text = <span class="code-string">" "</span>.join(msg.text.lower() <span class="code-keyword">for</span> msg <span class="code-keyword">in</span> conversation[-3:] <span class="code-keyword">if</span> msg.text)
+
+<span class="code-keyword">if</span> <span class="code-string">"urgente"</span> <span class="code-keyword">in</span> recent_text:
+    <span class="code-keyword">return</span> <span class="code-string">"priority_specialist"</span></code></pre>
+
+                <h4>Ejemplo 3: Alternar entre dos agentes</h4>
+                <pre><code>history = state[<span class="code-string">"history"</span>]
+last_speaker = history[-1].speaker <span class="code-keyword">if</span> history <span class="code-keyword">else</span> None
+
+<span class="code-keyword">if</span> last_speaker == <span class="code-string">"agent_a"</span>:
+    <span class="code-keyword">return</span> <span class="code-string">"agent_b"</span>
+<span class="code-keyword">else</span>:
+    <span class="code-keyword">return</span> <span class="code-string">"agent_a"</span></code></pre>
+
+                <h4>Ejemplo 4: Límite de seguridad</h4>
+                <pre><code><span class="code-keyword">if</span> state[<span class="code-string">"round_index"</span>] >= 20:
+    <span class="code-function">print</span>(<span class="code-string">"Límite de rondas alcanzado"</span>)
+    <span class="code-keyword">return</span> None  <span class="code-comment"># Terminar</span></code></pre>
+
+                <div class="info-box">
+                    <strong>💡 Nota: Inmutabilidad</strong>
+                    El snapshot es <strong>inmutable</strong>. No puedes modificarlo. Solo puedes leerlo y tomar decisiones
+                    basándote en su contenido. Esto garantiza que el estado sea consistente durante la ejecución del selector.
+                </div>
+            </section>
+
+            <!-- Section 7: Selector Functions -->
+            <section id="selector-functions">
+                <h2><span class="section-number">7</span>Funciones Selector</h2>
+
+                <p>
+                    Las <strong>funciones selector</strong> son el corazón de los Group Chat Workflows. Deciden quién habla a continuación.
+                </p>
+
+                <h3>📋 Firma de la Función</h3>
+                <pre><code><span class="code-keyword">def</span> <span class="code-function">my_selector</span>(state: GroupChatStateSnapshot) -> Optional[str]:
+    <span class="code-string">"""
+    Función que decide el siguiente speaker.
+
+    Args:
+        state: Snapshot inmutable del estado actual
+
+    Returns:
+        str - Nombre del siguiente participante (continuar)
+        None - Terminar la conversación
+    """</span>
+    <span class="code-comment"># Tu lógica aquí</span>
+    <span class="code-keyword">return</span> <span class="code-string">"agent_name"</span>  <span class="code-comment"># o None</span></code></pre>
+
+                <div class="info-box danger">
+                    <strong>⚠️ IMPORTANTE: Nombres Exactos</strong>
+                    El nombre retornado por el selector debe coincidir <strong>exactamente</strong> con los nombres
+                    definidos en <code>.participants()</code>. Si no coincide, habrá un error.
+                    <pre><code><span class="code-comment"># ✅ CORRECTO</span>
+.participants(researcher=agent1, analyst=agent2)
+<span class="code-keyword">return</span> <span class="code-string">"researcher"</span>  <span class="code-comment"># ← Coincide</span>
+
+<span class="code-comment"># ❌ INCORRECTO</span>
+.participants(researcher=agent1, analyst=agent2)
+<span class="code-keyword">return</span> <span class="code-string">"Researcher"</span>  <span class="code-comment"># ← No coincide (mayúscula)</span></code></pre>
+                </div>
+
+                <h3>🛠️ Patrones Comunes de Selector</h3>
+
+                <h4>1. Selector de Rotación Circular</h4>
+                <pre><code><span class="code-keyword">def</span> <span class="code-function">circular_selector</span>(state: GroupChatStateSnapshot) -> Optional[str]:
+    agents = [<span class="code-string">"agent1"</span>, <span class="code-string">"agent2"</span>, <span class="code-string">"agent3"</span>]
+    current_index = state[<span class="code-string">"round_index"</span>] % <span class="code-function">len</span>(agents)
+    <span class="code-keyword">return</span> agents[current_index] <span class="code-keyword">if</span> state[<span class="code-string">"round_index"</span>] < 10 <span class="code-keyword">else</span> None</code></pre>
+
+                <h4>2. Selector por Conteo de Participación</h4>
+                <pre><code><span class="code-keyword">def</span> <span class="code-function">balanced_selector</span>(state: GroupChatStateSnapshot) -> Optional[str]:
+    <span class="code-comment"># Contar participaciones</span>
+    counts = {name: 0 <span class="code-keyword">for</span> name <span class="code-keyword">in</span> state[<span class="code-string">"participants"</span>]}
+    <span class="code-keyword">for</span> turn <span class="code-keyword">in</span> state[<span class="code-string">"history"</span>]:
+        counts[turn.speaker] += 1
+
+    <span class="code-comment"># Seleccionar el que menos ha hablado</span>
+    next_speaker = <span class="code-function">min</span>(counts, key=counts.get)
+    <span class="code-keyword">return</span> next_speaker <span class="code-keyword">if</span> state[<span class="code-string">"round_index"</span>] < 15 <span class="code-keyword">else</span> None</code></pre>
+
+                <h4>3. Selector por Palabras Clave</h4>
+                <pre><code><span class="code-keyword">def</span> <span class="code-function">keyword_selector</span>(state: GroupChatStateSnapshot) -> Optional[str]:
+    last_message = state[<span class="code-string">"conversation"</span>][-1].text.lower()
+
+    <span class="code-keyword">if</span> <span class="code-string">"código"</span> <span class="code-keyword">in</span> last_message:
+        <span class="code-keyword">return</span> <span class="code-string">"code_expert"</span>
+    <span class="code-keyword">elif</span> <span class="code-string">"datos"</span> <span class="code-keyword">in</span> last_message:
+        <span class="code-keyword">return</span> <span class="code-string">"data_expert"</span>
+    <span class="code-keyword">else</span>:
+        <span class="code-keyword">return</span> None  <span class="code-comment"># Terminar si no hay keywords</span></code></pre>
+
+                <h4>4. Selector Condicional Multi-Fase</h4>
+                <pre><code><span class="code-keyword">def</span> <span class="code-function">multi_phase_selector</span>(state: GroupChatStateSnapshot) -> Optional[str]:
+    round_index = state[<span class="code-string">"round_index"</span>]
+
+    <span class="code-comment"># Fase 1: Investigación (rondas 0-2)</span>
+    <span class="code-keyword">if</span> round_index < 3:
+        <span class="code-keyword">return</span> <span class="code-string">"researcher"</span>
+
+    <span class="code-comment"># Fase 2: Análisis (rondas 3-5)</span>
+    <span class="code-keyword">elif</span> round_index < 6:
+        <span class="code-keyword">return</span> <span class="code-string">"analyst"</span>
+
+    <span class="code-comment"># Fase 3: Escritura (rondas 6-8)</span>
+    <span class="code-keyword">elif</span> round_index < 9:
+        <span class="code-keyword">return</span> <span class="code-string">"writer"</span>
+
+    <span class="code-comment"># Fase 4: Revisión final (ronda 9)</span>
+    <span class="code-keyword">elif</span> round_index == 9:
+        <span class="code-keyword">return</span> <span class="code-string">"reviewer"</span>
+
+    <span class="code-comment"># Terminar</span>
+    <span class="code-keyword">return</span> None</code></pre>
+
+                <h3>✅ Mejores Prácticas para Selectores</h3>
+                <div class="info-box success">
+                    <ul>
+                        <li><strong>Siempre incluir límite de seguridad:</strong> Usar <code>round_index</code> para evitar loops infinitos</li>
+                        <li><strong>Retornar None para terminar:</strong> No olvidar la condición de finalización</li>
+                        <li><strong>Nombres exactos:</strong> Verificar que coincidan con <code>.participants()</code></li>
+                        <li><strong>Lógica simple y clara:</strong> Selectores complejos son difíciles de debuggear</li>
+                        <li><strong>Logging útil:</strong> Imprimir decisiones para debugging</li>
+                        <li><strong>Manejo de edge cases:</strong> ¿Qué pasa si <code>history</code> está vacío?</li>
+                    </ul>
+                </div>
+
+                <h3>❌ Errores Comunes</h3>
+                <div class="info-box danger">
+                    <ul>
+                        <li><strong>No incluir límite:</strong> Loop infinito consume recursos</li>
+                        <li><strong>Nombre incorrecto:</strong> Typo o mayúsculas/minúsculas incorrectas</li>
+                        <li><strong>No retornar None nunca:</strong> Conversación no termina</li>
+                        <li><strong>Acceder a <code>history[-1]</code> sin verificar:</strong> IndexError si vacío</li>
+                        <li><strong>Lógica compleja sin debug:</strong> Difícil encontrar errores</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Section 8: Step-by-Step Implementation -->
+            <section id="implementacion">
+                <h2><span class="section-number">8</span>Implementación Paso a Paso</h2>
+
+                <p>Guía completa para implementar un Group Chat Workflow desde cero.</p>
+
+                <h3>🚀 Paso 1: Imports y Setup</h3>
+                <pre><code><span class="code-keyword">import</span> os
+<span class="code-keyword">from</span> dotenv <span class="code-keyword">import</span> load_dotenv
+<span class="code-keyword">import</span> asyncio
+<span class="code-keyword">from</span> agent_framework_azure_ai <span class="code-keyword">import</span> AzureAIAgentClient
+<span class="code-keyword">from</span> azure.identity.aio <span class="code-keyword">import</span> DefaultAzureCredential
+<span class="code-keyword">from</span> agent_framework <span class="code-keyword">import</span> GroupChatBuilder, GroupChatStateSnapshot
+<span class="code-keyword">from</span> typing <span class="code-keyword">import</span> Optional
+
+load_dotenv()
+
+AZURE_ENDPOINT = os.getenv(<span class="code-string">"AZURE_AI_PROJECT_ENDPOINT"</span>)
+AZURE_MODEL = os.getenv(<span class="code-string">"AZURE_AI_MODEL_DEPLOYMENT_NAME"</span>)</code></pre>
+
+                <h3>🎯 Paso 2: Definir Función Selector</h3>
+                <pre><code><span class="code-keyword">def</span> <span class="code-function">my_selector</span>(state: GroupChatStateSnapshot) -> Optional[str]:
+    <span class="code-string">"""Tu lógica de selección aquí"""</span>
+
+    <span class="code-comment"># Límite de seguridad</span>
+    <span class="code-keyword">if</span> state[<span class="code-string">"round_index"</span>] >= 10:
+        <span class="code-keyword">return</span> None
+
+    <span class="code-comment"># Tu lógica de decisión</span>
+    <span class="code-comment"># Ejemplo: Round-robin simple</span>
+    agents = [<span class="code-string">"agent1"</span>, <span class="code-string">"agent2"</span>, <span class="code-string">"agent3"</span>]
+    index = state[<span class="code-string">"round_index"</span>] % <span class="code-function">len</span>(agents)
+
+    <span class="code-keyword">return</span> agents[index]</code></pre>
+
+                <h3>👥 Paso 3: Crear Agentes</h3>
+                <pre><code><span class="code-keyword">async def</span> <span class="code-function">create_agent</span>(credential, instructions: str, name: str):
+    <span class="code-string">"""Helper para crear agente con cliente"""</span>
+    client = AzureAIAgentClient(
+        async_credential=credential,
+        should_cleanup_agent=True
+    )
+    agent = client.create_agent(instructions=instructions, name=name)
+
+    <span class="code-comment"># Warm-up</span>
+    <span class="code-keyword">await</span> agent.run(<span class="code-string">"Hola, confirma que estás listo."</span>)
+    <span class="code-function">print</span>(<span class="code-string">f"[OK] Agente '{name}' creado"</span>)
+
+    <span class="code-keyword">return</span> client, agent
+
+<span class="code-comment"># Uso</span>
+<span class="code-keyword">async with</span> DefaultAzureCredential() <span class="code-keyword">as</span> credential:
+    clients = []
+
+    <span class="code-keyword">try</span>:
+        client1, agent1 = <span class="code-keyword">await</span> create_agent(
+            credential,
+            <span class="code-string">"Eres un investigador experto."</span>,
+            <span class="code-string">"agent1"</span>
+        )
+        clients.append(client1)
+
+        client2, agent2 = <span class="code-keyword">await</span> create_agent(
+            credential,
+            <span class="code-string">"Eres un analista experto."</span>,
+            <span class="code-string">"agent2"</span>
+        )
+        clients.append(client2)
+
+        <span class="code-comment"># ... más agentes</span></code></pre>
+
+                <h3>🏗️ Paso 4: Construir Workflow</h3>
+                <pre><code>        <span class="code-comment"># Construir el workflow</span>
+        workflow = (
+            GroupChatBuilder()
+            .select_speakers(
+                my_selector,
+                display_name=<span class="code-string">"MyManager"</span>
+            )
+            .participants(
+                agent1=agent1,
+                agent2=agent2,
+                agent3=agent3
+            )
+            .build()
+        )</code></pre>
+
+                <div class="info-box">
+                    <strong>💡 Nota sobre <code>display_name</code></strong>
+                    El <code>display_name</code> es cómo se mostrará el selector en los logs/outputs.
+                    Es opcional pero recomendado para claridad.
+                </div>
+
+                <h3>▶️ Paso 5: Ejecutar Workflow</h3>
+                <pre><code>        <span class="code-comment"># Ejecutar workflow</span>
+        task = <span class="code-string">"Tu tarea aquí"</span>
+
+        <span class="code-keyword">async for</span> event <span class="code-keyword">in</span> workflow.run_stream(task):
+            <span class="code-keyword">if</span> <span class="code-function">hasattr</span>(event, <span class="code-string">'text'</span>) <span class="code-keyword">and</span> event.text:
+                author = <span class="code-function">getattr</span>(event, <span class="code-string">'author_name'</span>, <span class="code-string">'Unknown'</span>)
+                <span class="code-function">print</span>(<span class="code-string">f"\n[{author}]: {event.text}"</span>)
+
+        <span class="code-function">print</span>(<span class="code-string">"\n✅ Conversación completada"</span>)</code></pre>
+
+                <h3>🧹 Paso 6: Cleanup</h3>
+                <pre><code>    <span class="code-keyword">finally</span>:
+        <span class="code-comment"># Cerrar todos los clientes</span>
+        <span class="code-keyword">for</span> client <span class="code-keyword">in</span> clients:
+            <span class="code-keyword">await</span> client.__aexit__(None, None, None)</code></pre>
+
+                <h3>📝 Código Completo del Ejemplo</h3>
+                <pre><code><span class="code-keyword">async def</span> <span class="code-function">main</span>():
+    <span class="code-keyword">async with</span> DefaultAzureCredential() <span class="code-keyword">as</span> credential:
+        clients = []
+
+        <span class="code-keyword">try</span>:
+            <span class="code-comment"># 1. Crear agentes</span>
+            client1, agent1 = <span class="code-keyword">await</span> create_agent(credential, <span class="code-string">"..."</span>, <span class="code-string">"agent1"</span>)
+            clients.append(client1)
+
+            client2, agent2 = <span class="code-keyword">await</span> create_agent(credential, <span class="code-string">"..."</span>, <span class="code-string">"agent2"</span>)
+            clients.append(client2)
+
+            <span class="code-comment"># 2. Construir workflow</span>
+            workflow = (
+                GroupChatBuilder()
+                .select_speakers(my_selector, display_name=<span class="code-string">"Manager"</span>)
+                .participants(agent1=agent1, agent2=agent2)
+                .build()
+            )
+
+            <span class="code-comment"># 3. Ejecutar</span>
+            <span class="code-keyword">async for</span> event <span class="code-keyword">in</span> workflow.run_stream(<span class="code-string">"Tu tarea"</span>):
+                <span class="code-keyword">if</span> <span class="code-function">hasattr</span>(event, <span class="code-string">'text'</span>) <span class="code-keyword">and</span> event.text:
+                    <span class="code-function">print</span>(<span class="code-string">f"[{event.author_name}]: {event.text}"</span>)
+
+        <span class="code-keyword">finally</span>:
+            <span class="code-comment"># 4. Cleanup</span>
+            <span class="code-keyword">for</span> client <span class="code-keyword">in</span> clients:
+                <span class="code-keyword">await</span> client.__aexit__(None, None, None)
+
+<span class="code-keyword">if</span> __name__ == <span class="code-string">"__main__"</span>:
+    asyncio.run(main())</code></pre>
+            </section>
+
+            <!-- Section 9: Pattern Comparison -->
+            <section id="comparacion">
+                <h2><span class="section-number">9</span>Comparación de Patrones</h2>
+
+                <table>
+                    <tr>
+                        <th>Aspecto</th>
+                        <th>Round-Robin</th>
+                        <th>Debate</th>
+                        <th>Task-Based</th>
+                    </tr>
+                    <tr>
+                        <td><strong>Complejidad</strong></td>
+                        <td>⭐ Muy Simple</td>
+                        <td>⭐⭐ Media</td>
+                        <td>⭐⭐⭐ Alta</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Orden de Speakers</strong></td>
+                        <td>Predefinido circular</td>
+                        <td>Alternancia condicional</td>
+                        <td>Dinámico por contenido</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Adaptabilidad</strong></td>
+                        <td>❌ Baja (fijo)</td>
+                        <td>✅ Media (fases)</td>
+                        <td>✅✅ Alta (contenido)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Equidad</strong></td>
+                        <td>✅✅ Máxima</td>
+                        <td>✅ Balanceada</td>
+                        <td>❌ Variable</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Uso de Estado</strong></td>
+                        <td><code>round_index</code>, <code>history</code></td>
+                        <td><code>history</code> (conteo)</td>
+                        <td><code>conversation</code>, <code>history</code></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Condición de Fin</strong></td>
+                        <td>Max rounds</td>
+                        <td>Después de moderador</td>
+                        <td>Después de N especialistas</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Número de Agentes</strong></td>
+                        <td>3 (researcher, analyst, writer)</td>
+                        <td>3 (optimist, pessimist, moderator)</td>
+                        <td>4+ (coordinator + especialistas)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Mejor Para</strong></td>
+                        <td>Paneles, revisiones multi-etapa</td>
+                        <td>Debates, pros vs contras</td>
+                        <td>Delegación dinámica, consultoría</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Predictibilidad</strong></td>
+                        <td>✅✅ Muy predecible</td>
+                        <td>✅ Predecible</td>
+                        <td>❌ Impredecible</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Debugging</strong></td>
+                        <td>✅ Fácil</td>
+                        <td>✅ Medio</td>
+                        <td>⚠️ Complejo</td>
+                    </tr>
+                </table>
+
+                <h3>🎯 Guía de Selección de Patrón</h3>
+                <div class="flow-diagram">
+                    <h4 style="text-align: center; color: #11998e; margin-bottom: 15px;">¿Qué patrón usar?</h4>
+                    <pre style="background: white; color: #1a1a1a; padding: 20px; text-align: left;">
+¿Todos los agentes deben participar equitativamente?
+│
+├─ Sí → <strong>Round-Robin</strong>
+│       Uso: Paneles, revisiones multi-perspectiva
+│
+└─ No → ¿La tarea es un debate o análisis de pros/contras?
+        │
+        ├─ Sí → <strong>Debate Pattern</strong>
+        │       Uso: Evaluaciones, análisis de riesgos
+        │
+        └─ No → ¿La selección depende del contenido/tarea?
+                │
+                ├─ Sí → <strong>Task-Based</strong>
+                │       Uso: Delegación dinámica, consultoría
+                │
+                └─ No → Considera un <strong>patrón híbrido</strong> o LLM-based</pre>
+                </div>
+
+                <h3>🔗 Combinando Patrones</h3>
+                <p>Puedes crear patrones híbridos combinando características:</p>
+                <ul>
+                    <li><strong>Round-Robin con Condición de Salida:</strong> Rotar hasta que un agente indique "completado"</li>
+                    <li><strong>Debate con Múltiples Perspectivas:</strong> 3+ agentes debatiendo, no solo 2</li>
+                    <li><strong>Task-Based con Round-Robin:</strong> Coordinator delega, luego los especialistas rotan</li>
+                    <li><strong>Multi-Fase:</strong> Fase 1 (research) → Fase 2 (debate) → Fase 3 (synthesis)</li>
+                </ul>
+            </section>
+
+            <!-- Section 10: Use Cases -->
+            <section id="casos-uso">
+                <h2><span class="section-number">10</span>Casos de Uso</h2>
+
+                <h3>📚 Casos de Uso por Patrón</h3>
+
+                <h4>Round-Robin</h4>
+                <ul>
+                    <li><strong>Panel de Expertos Académicos:</strong> Varios investigadores analizan un paper</li>
+                    <li><strong>Revisión de Código:</strong> Security expert → Performance expert → Maintainability expert</li>
+                    <li><strong>Análisis Multi-Capa:</strong> Técnico → Económico → Social → Ético</li>
+                    <li><strong>Brainstorming Colaborativo:</strong> Todos aportan ideas equitativamente</li>
+                    <li><strong>Simulación de Comité:</strong> Cada miembro vota o comenta en orden</li>
+                </ul>
+
+                <h4>Debate Pattern</h4>
+                <ul>
+                    <li><strong>Análisis de Inversiones:</strong> Bull investor vs Bear investor → Financial advisor</li>
+                    <li><strong>Evaluación de Propuestas:</strong> Proponent vs Opponent → Decision maker</li>
+                    <li><strong>Revisión de Estrategia:</strong> Optimista vs Realista → CEO decide</li>
+                    <li><strong>Análisis de Riesgos:</strong> Risk manager vs Opportunity manager → CRO</li>
+                    <li><strong>Debate Académico:</strong> Thesis defender vs Examiner → Committee conclusion</li>
+                </ul>
+
+                <h4>Task-Based Selection</h4>
+                <ul>
+                    <li><strong>Asistente AI Multi-Capacidad:</strong> Coordinator delega a code/data/design specialists</li>
+                    <li><strong>Soporte Técnico:</strong> Triaging agent → Hardware/Software/Network specialist</li>
+                    <li><strong>Consultoría Legal:</strong> Intake agent → Corporate/Tax/IP specialist</li>
+                    <li><strong>Workflow Adaptativo:</strong> Content analyzer → Writer/Editor/Researcher según necesidad</li>
+                    <li><strong>Sistema de Aprobaciones:</strong> Request analyzer → Appropriate approver (manager/finance/legal)</li>
+                </ul>
+
+                <h3>🏢 Casos de Uso Empresariales</h3>
+
+                <table>
+                    <tr>
+                        <th>Industria</th>
+                        <th>Caso de Uso</th>
+                        <th>Agentes</th>
+                        <th>Patrón</th>
+                    </tr>
+                    <tr>
+                        <td><strong>Finanzas</strong></td>
+                        <td>Análisis de inversión</td>
+                        <td>Bull analyst, Bear analyst, Financial advisor</td>
+                        <td>Debate</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Healthcare</strong></td>
+                        <td>Diagnóstico multi-especialidad</td>
+                        <td>Coordinator, Cardiologist, Neurologist, Radiologist</td>
+                        <td>Task-Based</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Legal</strong></td>
+                        <td>Revisión de contrato</td>
+                        <td>Contract lawyer, IP lawyer, Tax lawyer</td>
+                        <td>Round-Robin</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Desarrollo</strong></td>
+                        <td>Code review multi-aspecto</td>
+                        <td>Security, Performance, Maintainability, Tests</td>
+                        <td>Round-Robin</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Marketing</strong></td>
+                        <td>Campaña multi-canal</td>
+                        <td>Coordinator, Social media, Email, SEO, PPC</td>
+                        <td>Task-Based</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Academia</strong></td>
+                        <td>Peer review de investigación</td>
+                        <td>Methodologist, Statistician, Domain expert, Editor</td>
+                        <td>Round-Robin</td>
+                    </tr>
+                </table>
+
+                <h3>🎮 Casos de Uso Creativos</h3>
+                <ul>
+                    <li><strong>Simulación de Role-Playing Game:</strong> DM, Player1, Player2, Player3 (Round-Robin)</li>
+                    <li><strong>Escritura Colaborativa:</strong> Plot writer, Dialogue writer, Editor (Task-Based)</li>
+                    <li><strong>Juego de Detective:</strong> Detective, Witness1, Witness2, Suspect (Round-Robin/Debate)</li>
+                    <li><strong>Simulación de Equipo de Trabajo:</strong> Manager, Dev, QA, Designer (Task-Based)</li>
+                    <li><strong>Podcast Simulado:</strong> Host, Guest1, Guest2, Fact-checker (Round-Robin)</li>
+                </ul>
+            </section>
+
+            <!-- Section 11: Best Practices -->
+            <section id="mejores-practicas">
+                <h2><span class="section-number">11</span>Mejores Prácticas</h2>
+
+                <h3>✅ DO: Haz Esto</h3>
+                <div class="info-box success">
+                    <ul>
+                        <li><strong>Siempre incluir límite de rondas:</strong>
+                            <pre style="margin-top: 10px;"><code><span class="code-keyword">if</span> state[<span class="code-string">"round_index"</span>] >= MAX_ROUNDS:
+    <span class="code-keyword">return</span> None</code></pre>
+                        </li>
+                        <li><strong>Validar nombres de participantes:</strong> Asegurarte de que coincidan exactamente</li>
+                        <li><strong>Agregar logging en el selector:</strong> Imprime decisiones para debugging</li>
+                        <li><strong>Manejar edge cases:</strong> ¿Qué pasa si <code>history</code> está vacío?</li>
+                        <li><strong>Documentar la lógica del selector:</strong> Docstrings claros</li>
+                        <li><strong>Testear con diferentes inputs:</strong> Verificar comportamiento en casos extremos</li>
+                        <li><strong>Usar nombres descriptivos:</strong> <code>"researcher"</code> mejor que <code>"agent1"</code></li>
+                    </ul>
+                </div>
+
+                <h3>❌ DON'T: Evita Esto</h3>
+                <div class="info-box danger">
+                    <ul>
+                        <li><strong>No olvides el límite de rondas:</strong> Loops infinitos consumen recursos y dinero</li>
+                        <li><strong>No uses nombres inconsistentes:</strong> <code>"Researcher"</code> vs <code>"researcher"</code></li>
+                        <li><strong>No retornes nombres inválidos:</strong> Verificar que el agente exista</li>
+                        <li><strong>No accedas a índices sin verificar:</strong> <code>history[-1]</code> puede fallar</li>
+                        <li><strong>No hagas selectores muy complejos:</strong> Dificulta debugging y mantenimiento</li>
+                        <li><strong>No ignores el tipo de retorno:</strong> Debe ser <code>Optional[str]</code></li>
+                        <li><strong>No modifiques el estado:</strong> Es inmutable, solo léelo</li>
+                    </ul>
+                </div>
+
+                <h3>🛡️ Seguridad y Límites</h3>
+                <pre><code><span class="code-comment"># ✅ CORRECTO: Múltiples límites de seguridad</span>
+<span class="code-keyword">def</span> <span class="code-function">safe_selector</span>(state: GroupChatStateSnapshot) -> Optional[str]:
+    <span class="code-comment"># Límite 1: Máximo de rondas</span>
+    <span class="code-keyword">if</span> state[<span class="code-string">"round_index"</span>] >= 20:
+        <span class="code-function">print</span>(<span class="code-string">"[LÍMITE] Máximo de rondas alcanzado"</span>)
+        <span class="code-keyword">return</span> None
+
+    <span class="code-comment"># Límite 2: Máximo de participaciones por agente</span>
+    history = state[<span class="code-string">"history"</span>]
+    agent_counts = {}
+    <span class="code-keyword">for</span> turn <span class="code-keyword">in</span> history:
+        agent_counts[turn.speaker] = agent_counts.get(turn.speaker, 0) + 1
+
+    <span class="code-keyword">if</span> <span class="code-function">any</span>(count > 5 <span class="code-keyword">for</span> count <span class="code-keyword">in</span> agent_counts.values()):
+        <span class="code-function">print</span>(<span class="code-string">"[LÍMITE] Un agente ha hablado demasiadas veces"</span>)
+        <span class="code-keyword">return</span> None
+
+    <span class="code-comment"># Tu lógica aquí...</span></code></pre>
+
+                <h3>🔍 Debugging y Observabilidad</h3>
+                <pre><code><span class="code-comment"># Agregar logging útil en el selector</span>
+<span class="code-keyword">def</span> <span class="code-function">logged_selector</span>(state: GroupChatStateSnapshot) -> Optional[str]:
+    round_idx = state[<span class="code-string">"round_index"</span>]
+    last_speaker = state[<span class="code-string">"history"</span>][-1].speaker <span class="code-keyword">if</span> state[<span class="code-string">"history"</span>] <span class="code-keyword">else</span> None
+
+    <span class="code-function">print</span>(<span class="code-string">f"\n[SELECTOR] Round {round_idx}:"</span>)
+    <span class="code-function">print</span>(<span class="code-string">f"  Last speaker: {last_speaker}"</span>)
+
+    <span class="code-comment"># Tu lógica de decisión</span>
+    next_speaker = decide_next_speaker(state)
+
+    <span class="code-function">print</span>(<span class="code-string">f"  Next speaker: {next_speaker}"</span>)
+
+    <span class="code-keyword">return</span> next_speaker</code></pre>
+
+                <h3>🧪 Testing de Selectores</h3>
+                <pre><code><span class="code-comment"># Testear selector con mocks</span>
+<span class="code-keyword">def</span> <span class="code-function">test_round_robin_selector</span>():
+    <span class="code-comment"># Mock state</span>
+    mock_state = {
+        <span class="code-string">"round_index"</span>: 0,
+        <span class="code-string">"history"</span>: [],
+        <span class="code-string">"participants"</span>: {<span class="code-string">"agent1"</span>: <span class="code-string">""</span>, <span class="code-string">"agent2"</span>: <span class="code-string">""</span>},
+        <span class="code-string">"conversation"</span>: (),
+        <span class="code-string">"task"</span>: None,
+        <span class="code-string">"pending_agent"</span>: None
+    }
+
+    <span class="code-comment"># Test primer turno</span>
+    result = round_robin_selector(mock_state)
+    <span class="code-keyword">assert</span> result == <span class="code-string">"agent1"</span>, <span class="code-string">"Debería seleccionar agent1 primero"</span>
+
+    <span class="code-comment"># Test límite</span>
+    mock_state[<span class="code-string">"round_index"</span>] = 10
+    result = round_robin_selector(mock_state)
+    <span class="code-keyword">assert</span> result <span class="code-keyword">is</span> None, <span class="code-string">"Debería terminar en round 10"</span>
+
+    <span class="code-function">print</span>(<span class="code-string">"✅ Todos los tests pasaron"</span>)</code></pre>
+
+                <h3>⚡ Performance y Optimización</h3>
+                <ul>
+                    <li><strong>Análisis de contenido eficiente:</strong> Solo analizar mensajes recientes, no todo el historial</li>
+                    <li><strong>Evitar operaciones costosas:</strong> No llamar APIs externas en el selector</li>
+                    <li><strong>Cache de decisiones:</strong> Si es apropiado para tu caso de uso</li>
+                    <li><strong>Limitar largo de conversación:</strong> Considerar ventana deslizante de contexto</li>
+                </ul>
+
+                <h3>📊 Monitoreo en Producción</h3>
+                <pre><code><span class="code-comment"># Recopilar métricas del selector</span>
+metrics = {
+    <span class="code-string">"total_rounds"</span>: 0,
+    <span class="code-string">"agent_selections"</span>: {},
+    <span class="code-string">"early_terminations"</span>: 0
+}
+
+<span class="code-keyword">def</span> <span class="code-function">monitored_selector</span>(state: GroupChatStateSnapshot) -> Optional[str]:
+    metrics[<span class="code-string">"total_rounds"</span>] += 1
+
+    next_speaker = <span class="code-comment"># ... tu lógica ...</span>
+
+    <span class="code-keyword">if</span> next_speaker <span class="code-keyword">is</span> None:
+        metrics[<span class="code-string">"early_terminations"</span>] += 1
+    <span class="code-keyword">else</span>:
+        metrics[<span class="code-string">"agent_selections"</span>][next_speaker] = \
+            metrics[<span class="code-string">"agent_selections"</span>].get(next_speaker, 0) + 1
+
+    <span class="code-keyword">return</span> next_speaker</code></pre>
+            </section>
+
+            <!-- Section 12: Quick Reference -->
+            <section id="referencia">
+                <h2><span class="section-number">12</span>Referencia Rápida</h2>
+
+                <h3>📦 Imports Necesarios</h3>
+                <pre><code><span class="code-keyword">from</span> agent_framework <span class="code-keyword">import</span> GroupChatBuilder, GroupChatStateSnapshot
+<span class="code-keyword">from</span> typing <span class="code-keyword">import</span> Optional</code></pre>
+
+                <h3>🏗️ Estructura Básica</h3>
+                <pre><code><span class="code-comment"># 1. Selector</span>
+<span class="code-keyword">def</span> <span class="code-function">my_selector</span>(state: GroupChatStateSnapshot) -> Optional[str]:
+    <span class="code-keyword">return</span> <span class="code-string">"agent_name"</span>  <span class="code-comment"># o None</span>
+
+<span class="code-comment"># 2. Workflow</span>
+workflow = (
+    GroupChatBuilder()
+    .select_speakers(my_selector, display_name=<span class="code-string">"Manager"</span>)
+    .participants(agent1=agent1, agent2=agent2)
+    .build()
+)
+
+<span class="code-comment"># 3. Ejecutar</span>
+<span class="code-keyword">async for</span> event <span class="code-keyword">in</span> workflow.run_stream(<span class="code-string">"task"</span>):
+    <span class="code-keyword">if</span> <span class="code-function">hasattr</span>(event, <span class="code-string">'text'</span>) <span class="code-keyword">and</span> event.text:
+        <span class="code-function">print</span>(<span class="code-string">f"[{event.author_name}]: {event.text}"</span>)</code></pre>
+
+                <h3>🔑 Métodos de GroupChatBuilder</h3>
+                <table>
+                    <tr>
+                        <th>Método</th>
+                        <th>Parámetros</th>
+                        <th>Descripción</th>
+                    </tr>
+                    <tr>
+                        <td><code>.select_speakers()</code></td>
+                        <td>function, display_name (opcional)</td>
+                        <td>Define selector basado en función</td>
+                    </tr>
+                    <tr>
+                        <td><code>.set_prompt_based_manager()</code></td>
+                        <td>agent, display_name</td>
+                        <td>Define selector basado en LLM</td>
+                    </tr>
+                    <tr>
+                        <td><code>.participants()</code></td>
+                        <td>**kwargs (nombre=agente)</td>
+                        <td>Define los agentes participantes</td>
+                    </tr>
+                    <tr>
+                        <td><code>.build()</code></td>
+                        <td>-</td>
+                        <td>Construye el workflow</td>
+                    </tr>
+                </table>
+
+                <h3>📊 Campos de GroupChatStateSnapshot</h3>
+                <table>
+                    <tr>
+                        <th>Campo</th>
+                        <th>Tipo</th>
+                        <th>Acceso</th>
+                    </tr>
+                    <tr>
+                        <td><code>task</code></td>
+                        <td>ChatMessage</td>
+                        <td><code>state["task"]</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>participants</code></td>
+                        <td>dict[str, str]</td>
+                        <td><code>state["participants"]</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>conversation</code></td>
+                        <td>tuple[ChatMessage]</td>
+                        <td><code>state["conversation"]</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>history</code></td>
+                        <td>tuple[GroupChatTurn]</td>
+                        <td><code>state["history"]</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>round_index</code></td>
+                        <td>int</td>
+                        <td><code>state["round_index"]</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>pending_agent</code></td>
+                        <td>str | None</td>
+                        <td><code>state["pending_agent"]</code></td>
+                    </tr>
+                </table>
+
+                <h3>🎯 Snippets Útiles</h3>
+
+                <h4>Obtener último speaker</h4>
+                <pre><code>history = state[<span class="code-string">"history"</span>]
+last_speaker = history[-1].speaker <span class="code-keyword">if</span> history <span class="code-keyword">else</span> None</code></pre>
+
+                <h4>Contar participaciones de un agente</h4>
+                <pre><code>count = <span class="code-function">sum</span>(1 <span class="code-keyword">for</span> turn <span class="code-keyword">in</span> state[<span class="code-string">"history"</span>] <span class="code-keyword">if</span> turn.speaker == <span class="code-string">"agent_name"</span>)</code></pre>
+
+                <h4>Analizar mensajes recientes</h4>
+                <pre><code>recent_text = <span class="code-string">" "</span>.join(
+    msg.text.lower() <span class="code-keyword">for</span> msg <span class="code-keyword">in</span> state[<span class="code-string">"conversation"</span>][-3:] <span class="code-keyword">if</span> msg.text
+)</code></pre>
+
+                <h4>Selector round-robin simple</h4>
+                <pre><code>agents = [<span class="code-string">"a"</span>, <span class="code-string">"b"</span>, <span class="code-string">"c"</span>]
+index = state[<span class="code-string">"round_index"</span>] % <span class="code-function">len</span>(agents)
+<span class="code-keyword">return</span> agents[index] <span class="code-keyword">if</span> state[<span class="code-string">"round_index"</span>] < MAX <span class="code-keyword">else</span> None</code></pre>
+
+                <h3>⚠️ Errores Comunes y Soluciones</h3>
+                <table>
+                    <tr>
+                        <th>Error</th>
+                        <th>Causa</th>
+                        <th>Solución</th>
+                    </tr>
+                    <tr>
+                        <td>KeyError: 'agent_name'</td>
+                        <td>Nombre no existe en participants</td>
+                        <td>Verificar nombres exactos con .participants()</td>
+                    </tr>
+                    <tr>
+                        <td>IndexError: list index out of range</td>
+                        <td>Acceso a history[-1] cuando vacío</td>
+                        <td>Verificar: <code>if history: ...</code></td>
+                    </tr>
+                    <tr>
+                        <td>Loop infinito / timeout</td>
+                        <td>Selector nunca retorna None</td>
+                        <td>Agregar límite con round_index</td>
+                    </tr>
+                    <tr>
+                        <td>TypeError: selector returned int</td>
+                        <td>Tipo de retorno incorrecto</td>
+                        <td>Retornar str o None, no int/bool</td>
+                    </tr>
+                </table>
+
+                <h3>🔗 Resources</h3>
+                <ul>
+                    <li><strong>Script Fuente:</strong> <code>020_group_chat_workflow.py</code></li>
+                    <li><strong>CLAUDE.md:</strong> Documentación completa del proyecto</li>
+                    <li><strong>Patrones Relacionados:</strong>
+                        <ul>
+                            <li>019_conditional_workflows.py - Workflows con decisiones dinámicas</li>
+                            <li>021_supervisor_pattern.py - Patrón supervisor jerárquico</li>
+                        </ul>
+                    </li>
+                </ul>
+            </section>
+        </div>
+
+        <footer>
+            <p><strong>Microsoft Agent Framework</strong> - Group Chat Workflows</p>
+            <p>Script: 020_group_chat_workflow.py | Documentación generada: 2025-12-02</p>
+        </footer>
+    </div>
+</body>
+</html>

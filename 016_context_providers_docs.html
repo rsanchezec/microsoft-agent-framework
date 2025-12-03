@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentación: Context Providers - Microsoft Agent Framework</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        h2 {
+            color: #764ba2;
+            margin-top: 30px;
+            margin-bottom: 20px;
+            font-size: 2em;
+            border-bottom: 3px solid #764ba2;
+            padding-bottom: 10px;
+        }
+
+        h3 {
+            color: #667eea;
+            margin-top: 25px;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+
+        h4 {
+            color: #555;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+
+        p {
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+
+        .diagram-container {
+            background: #f8f4ff;
+            border-radius: 8px;
+            padding: 30px;
+            margin: 30px 0;
+            border: 2px solid #764ba2;
+        }
+
+        .diagram-title {
+            text-align: center;
+            font-weight: bold;
+            color: #764ba2;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+        }
+
+        .flow-diagram {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+
+        .flow-box {
+            background: white;
+            border: 3px solid #764ba2;
+            border-radius: 8px;
+            padding: 20px 30px;
+            min-width: 180px;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .flow-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+        }
+
+        .flow-box.provider {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: bold;
+        }
+
+        .flow-box.agent {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            font-weight: bold;
+        }
+
+        .flow-box.context {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            border-color: #fcb69f;
+        }
+
+        .arrow {
+            font-size: 2em;
+            color: #764ba2;
+            font-weight: bold;
+        }
+
+        .arrow-down {
+            font-size: 2em;
+            color: #764ba2;
+            font-weight: bold;
+            display: block;
+            text-align: center;
+            margin: 10px 0;
+        }
+
+        .code-block {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 20px 0;
+            border-left: 4px solid #764ba2;
+        }
+
+        .code-block code {
+            font-family: 'Courier New', monospace;
+            font-size: 0.95em;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            display: block;
+        }
+
+        .highlight {
+            background: #fff3cd;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: monospace;
+            color: #856404;
+        }
+
+        .info-box {
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        .warning-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        .success-box {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        .component-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .component-card {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .component-card:hover {
+            border-color: #764ba2;
+            box-shadow: 0 4px 16px rgba(118, 75, 162, 0.3);
+        }
+
+        .component-card h4 {
+            color: #764ba2;
+            margin-bottom: 15px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        th {
+            background: #764ba2;
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: bold;
+        }
+
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        tr:hover {
+            background: #f8f4ff;
+        }
+
+        .toc {
+            background: #f8f4ff;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .toc h3 {
+            color: #764ba2;
+            margin-bottom: 15px;
+        }
+
+        .toc ul {
+            list-style: none;
+            margin-left: 0;
+        }
+
+        .toc li {
+            margin-bottom: 10px;
+        }
+
+        .toc a {
+            color: #764ba2;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .toc a:hover {
+            color: #667eea;
+            text-decoration: underline;
+        }
+
+        .footer {
+            background: #2d2d2d;
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        ul, ol {
+            margin-left: 30px;
+            margin-bottom: 15px;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        .provider-lifecycle {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        @media (max-width: 768px) {
+            .flow-diagram {
+                flex-direction: column;
+            }
+
+            .arrow {
+                transform: rotate(90deg);
+            }
+
+            header h1 {
+                font-size: 1.8em;
+            }
+
+            .content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔄 Context Providers - Microsoft Agent Framework</h1>
+            <p>Documentación Completa del Script 016_context_providers.py</p>
+        </header>
+
+        <div class="content">
+            <!-- Tabla de Contenidos -->
+            <div class="toc">
+                <h3>📑 Tabla de Contenidos</h3>
+                <ul>
+                    <li><a href="#introduccion">1. Introducción</a></li>
+                    <li><a href="#conceptos">2. ¿Qué es un Context Provider?</a></li>
+                    <li><a href="#arquitectura">3. Ciclo de Vida de Context Providers</a></li>
+                    <li><a href="#implementaciones">4. Implementaciones Principales (5 Providers)</a></li>
+                    <li><a href="#uso">5. Cómo Usar Context Providers</a></li>
+                    <li><a href="#multiple">6. Múltiples Providers Combinados</a></li>
+                    <li><a href="#ventajas">7. Ventajas y Casos de Uso</a></li>
+                    <li><a href="#mejores-practicas">8. Mejores Prácticas</a></li>
+                </ul>
+            </div>
+
+            <!-- 1. Introducción -->
+            <h2 id="introduccion">1. 📖 Introducción</h2>
+            <p>
+                El script <span class="highlight">016_context_providers.py</span> demuestra cómo usar
+                <strong>Context Providers</strong> en el <strong>Microsoft Agent Framework</strong>.
+                Los Context Providers permiten <strong>inyectar contexto dinámico</strong> a los agentes
+                automáticamente antes de cada invocación, sin modificar las instrucciones base del agente.
+            </p>
+
+            <div class="success-box">
+                <strong>🎯 Propósito Principal:</strong> Separar el contexto dinámico (que cambia por invocación)
+                de la lógica estática del agente (instrucciones base), logrando agentes más flexibles y reutilizables.
+            </div>
+
+            <div class="info-box">
+                <strong>💡 Ejemplo Práctico:</strong>
+                <p>Imagina un agente de atención al cliente que necesita saber:</p>
+                <ul>
+                    <li>🕐 La fecha y hora actual (cambia constantemente)</li>
+                    <li>👤 Información del usuario (diferente por cada usuario)</li>
+                    <li>📋 Reglas de negocio actuales (horarios, políticas)</li>
+                    <li>💾 Historial de la conversación (acumulativo)</li>
+                </ul>
+                <p>
+                    En lugar de actualizar manualmente las instrucciones del agente en cada llamada,
+                    los Context Providers inyectan esta información <strong>automáticamente</strong>.
+                </p>
+            </div>
+
+            <!-- Diagrama Principal -->
+            <div class="diagram-container">
+                <div class="diagram-title">🔄 Flujo de Context Provider</div>
+                <div style="display: flex; flex-direction: column; align-items: center; gap: 20px;">
+                    <div class="flow-box">
+                        <strong>👤 Usuario</strong><br>
+                        <small>"¿Qué día es hoy?"</small>
+                    </div>
+
+                    <span class="arrow-down">↓</span>
+
+                    <div class="flow-box provider">
+                        <strong>🔄 Context Provider</strong><br>
+                        <small>invoking() - Inyecta contexto</small>
+                    </div>
+
+                    <span class="arrow-down">↓</span>
+
+                    <div class="flow-box context">
+                        <strong>📋 Contexto Inyectado</strong><br>
+                        <small>Fecha: 2025-12-02<br>Hora: 14:30:00</small>
+                    </div>
+
+                    <span class="arrow-down">↓</span>
+
+                    <div class="flow-box agent">
+                        <strong>🤖 Agente</strong><br>
+                        <small>Procesa con contexto</small>
+                    </div>
+
+                    <span class="arrow-down">↓</span>
+
+                    <div class="flow-box provider">
+                        <strong>✅ Context Provider</strong><br>
+                        <small>invoked() - Post-procesamiento</small>
+                    </div>
+
+                    <span class="arrow-down">↓</span>
+
+                    <div class="flow-box">
+                        <strong>📤 Respuesta</strong><br>
+                        <small>"Hoy es martes 2 de dic de 2025"</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. Conceptos Clave -->
+            <h2 id="conceptos">2. 🧠 ¿Qué es un Context Provider?</h2>
+
+            <p>
+                Un <strong>Context Provider</strong> es una clase que implementa dos métodos opcionales
+                que son llamados automáticamente antes y después de cada invocación del agente:
+            </p>
+
+            <div class="component-grid">
+                <div class="component-card">
+                    <h4>📥 invoking()</h4>
+                    <p><strong>Cuándo:</strong> ANTES de cada invocación</p>
+                    <p><strong>Propósito:</strong> Inyectar contexto dinámico</p>
+                    <p><strong>Retorna:</strong> <span class="highlight">Context</span> con:</p>
+                    <ul>
+                        <li><code>instructions</code> - Texto adicional</li>
+                        <li><code>messages</code> - Mensajes extras</li>
+                        <li><code>tools</code> - Herramientas extras</li>
+                    </ul>
+                </div>
+
+                <div class="component-card">
+                    <h4>📤 invoked()</h4>
+                    <p><strong>Cuándo:</strong> DESPUÉS de cada invocación</p>
+                    <p><strong>Propósito:</strong> Post-procesamiento (opcional)</p>
+                    <p><strong>Retorna:</strong> <span class="highlight">None</span></p>
+                    <p><strong>Uso típico:</strong></p>
+                    <ul>
+                        <li>Logging</li>
+                        <li>Analytics</li>
+                        <li>Actualizar estado</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="code-block"><code>from agent_framework import ContextProvider, Context
+
+class MyContextProvider(ContextProvider):
+    async def invoking(self, messages: list[dict[str, Any]], **kwargs) -&gt; Context:
+        &quot;&quot;&quot;Llamado ANTES de cada invocación&quot;&quot;&quot;
+        # Preparar contexto dinámico
+        dynamic_context = &quot;Información que cambia por invocación...&quot;
+
+        return Context(
+            instructions=dynamic_context,
+            messages=[],
+            tools=[]
+        )
+
+    async def invoked(self, messages: list[dict[str, Any]], **kwargs) -&gt; None:
+        &quot;&quot;&quot;Llamado DESPUÉS de cada invocación (opcional)&quot;&quot;&quot;
+        print(&quot;✅ Contexto inyectado exitosamente&quot;)
+</code></div>
+
+            <!-- 3. Ciclo de Vida -->
+            <h2 id="arquitectura">3. 🔄 Ciclo de Vida de Context Providers</h2>
+
+            <div class="provider-lifecycle">
+                <h4 style="color: #764ba2; margin-bottom: 20px; text-align: center;">📊 Secuencia Temporal</h4>
+                <div style="display: flex; flex-direction: column; gap: 15px;">
+                    <div style="background: #e7f3ff; padding: 15px; border-radius: 8px; border-left: 4px solid #2196F3;">
+                        <strong>1️⃣ Usuario llama a agent.run("query")</strong>
+                    </div>
+
+                    <div style="background: #fff3cd; padding: 15px; border-radius: 8px; border-left: 4px solid #ffc107;">
+                        <strong>2️⃣ Framework llama a provider.invoking()</strong><br>
+                        <small>Se inyecta contexto dinámico en este momento</small>
+                    </div>
+
+                    <div style="background: #f8f4ff; padding: 15px; border-radius: 8px; border-left: 4px solid #764ba2;">
+                        <strong>3️⃣ Agente recibe mensajes + contexto inyectado</strong><br>
+                        <small>El agente ve las instrucciones base + el contexto del provider</small>
+                    </div>
+
+                    <div style="background: #f093fb20; padding: 15px; border-radius: 8px; border-left: 4px solid #f5576c;">
+                        <strong>4️⃣ Agente procesa y genera respuesta</strong>
+                    </div>
+
+                    <div style="background: #d4edda; padding: 15px; border-radius: 8px; border-left: 4px solid #28a745;">
+                        <strong>5️⃣ Framework llama a provider.invoked()</strong><br>
+                        <small>Post-procesamiento, logging, métricas</small>
+                    </div>
+
+                    <div style="background: #e7f3ff; padding: 15px; border-radius: 8px; border-left: 4px solid #2196F3;">
+                        <strong>6️⃣ Respuesta retorna al usuario</strong>
+                    </div>
+                </div>
+            </div>
+
+            <div class="warning-box">
+                <strong>⚠️ Importante:</strong>
+                <ul>
+                    <li>El contexto inyectado es <strong>temporal</strong> - solo existe para esa invocación</li>
+                    <li>Las instrucciones base del agente <strong>NO se modifican</strong> permanentemente</li>
+                    <li>Cada invocación puede recibir contexto diferente</li>
+                    <li>Múltiples providers se combinan automáticamente</li>
+                </ul>
+            </div>
+
+            <!-- 4. Implementaciones -->
+            <h2 id="implementaciones">4. 🔩 Implementaciones Principales (5 Providers)</h2>
+
+            <p>El script demuestra 5 Context Providers diferentes, cada uno con un propósito específico:</p>
+
+            <h3>4.1. DateTimeContextProvider - Contexto Temporal</h3>
+            <div class="component-card" style="border-color: #667eea;">
+                <p><strong>Propósito:</strong> Inyectar fecha y hora actual en cada invocación</p>
+                <p><strong>Utilidad:</strong> El agente siempre tiene contexto temporal actualizado</p>
+
+                <div class="code-block"><code>class DateTimeContextProvider(ContextProvider):
+    async def invoking(self, messages, **kwargs) -&gt; Context:
+        now = datetime.now()
+        temporal_context = f&quot;&quot;&quot;
+[CONTEXTO TEMPORAL]
+- Fecha actual: {now.strftime('%Y-%m-%d')}
+- Hora actual: {now.strftime('%H:%M:%S')}
+- Día de la semana: {now.strftime('%A')}
+&quot;&quot;&quot;
+        return Context(
+            instructions=temporal_context,
+            messages=[],
+            tools=[]
+        )
+</code></div>
+
+                <div class="success-box">
+                    <strong>✅ Ventaja:</strong> El agente puede responder preguntas como "¿Qué día es hoy?"
+                    sin que el usuario tenga que pasar la fecha manualmente en cada consulta.
+                </div>
+            </div>
+
+            <h3>4.2. UserContextProvider - Información del Usuario</h3>
+            <div class="component-card" style="border-color: #f5576c;">
+                <p><strong>Propósito:</strong> Inyectar información del usuario actual</p>
+                <p><strong>Utilidad:</strong> Personalizar respuestas basadas en el usuario</p>
+
+                <div class="code-block"><code>class UserContextProvider(ContextProvider):
+    def __init__(self, user_id: str, user_name: str, user_role: str):
+        self.user_id = user_id
+        self.user_name = user_name
+        self.user_role = user_role
+
+    async def invoking(self, messages, **kwargs) -&gt; Context:
+        user_context = f&quot;&quot;&quot;
+[INFORMACIÓN DEL USUARIO]
+- ID: {self.user_id}
+- Nombre: {self.user_name}
+- Rol: {self.user_role}
+&quot;&quot;&quot;
+        return Context(instructions=user_context, messages=[], tools=[])
+</code></div>
+
+                <div class="info-box">
+                    <strong>💡 Uso Real:</strong> En producción, la información vendría de:
+                    <ul>
+                        <li>Base de datos</li>
+                        <li>Sistema de autenticación (JWT, OAuth)</li>
+                        <li>Sesión HTTP/cookies</li>
+                        <li>CRM o sistema de usuarios</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h3>4.3. BusinessRulesContextProvider - Reglas de Negocio</h3>
+            <div class="component-card" style="border-color: #ffc107;">
+                <p><strong>Propósito:</strong> Inyectar reglas de negocio dinámicas</p>
+                <p><strong>Utilidad:</strong> Aplicar políticas que cambian (horarios, cuotas, promociones)</p>
+
+                <div class="code-block"><code>class BusinessRulesContextProvider(ContextProvider):
+    def __init__(self, business_hours: tuple[int, int] = (9, 18)):
+        self.business_hours = business_hours
+
+    async def invoking(self, messages, **kwargs) -&gt; Context:
+        current_hour = datetime.now().hour
+        is_business_hours = self.business_hours[0] &lt;= current_hour &lt; self.business_hours[1]
+
+        if is_business_hours:
+            rules = &quot;✅ DENTRO del horario de atención - Procesa solicitudes normalmente&quot;
+        else:
+            rules = &quot;⏰ FUERA del horario - Informa que el servicio está cerrado&quot;
+
+        return Context(instructions=rules, messages=[], tools=[])
+</code></div>
+
+                <div class="success-box">
+                    <strong>✅ Casos de Uso:</strong>
+                    <ul>
+                        <li>Horarios de atención</li>
+                        <li>Políticas de descuentos temporales</li>
+                        <li>Límites de cuota o rate limiting</li>
+                        <li>Configuración según región/país</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h3>4.4. ConversationMemoryProvider - Memoria de Conversación</h3>
+            <div class="component-card" style="border-color: #28a745;">
+                <p><strong>Propósito:</strong> Mantener memoria de conversaciones previas</p>
+                <p><strong>Utilidad:</strong> Tracking de interacciones, tópicos, preferencias</p>
+
+                <div class="code-block"><code>class ConversationMemoryProvider(ContextProvider):
+    def __init__(self):
+        self.conversation_count = 0
+        self.topics_discussed = []
+
+    async def invoking(self, messages, **kwargs) -&gt; Context:
+        self.conversation_count += 1
+
+        memory_context = f&quot;&quot;&quot;
+[MEMORIA DE CONVERSACIÓN]
+- Número de interacciones: {self.conversation_count}
+- Tópicos discutidos: {len(self.topics_discussed)}
+&quot;&quot;&quot;
+        return Context(instructions=memory_context, messages=[], tools=[])
+</code></div>
+
+                <div class="info-box">
+                    <strong>💡 Nota:</strong> Este provider tiene <strong>estado mutable</strong> que se
+                    actualiza en cada invocación. Útil para tracking y analytics.
+                </div>
+            </div>
+
+            <h3>4.5. DynamicPricingContextProvider - Estado Dinámico</h3>
+            <div class="component-card" style="border-color: #9c27b0;">
+                <p><strong>Propósito:</strong> Contexto que cambia externamente (pricing dinámico)</p>
+                <p><strong>Utilidad:</strong> Adaptar comportamiento basado en estado externo</p>
+
+                <div class="code-block"><code>class DynamicPricingContextProvider(ContextProvider):
+    def __init__(self):
+        self.demand_level = &quot;normal&quot;
+        self.discount_rate = 0.0
+
+    def update_demand(self, level: str):
+        &quot;&quot;&quot;Método público para cambiar estado&quot;&quot;&quot;
+        self.demand_level = level
+        if level == &quot;low&quot;:
+            self.discount_rate = 0.20  # 20% descuento
+        elif level == &quot;high&quot;:
+            self.discount_rate = -0.10  # 10% aumento
+
+    async def invoking(self, messages, **kwargs) -&gt; Context:
+        pricing_context = f&quot;&quot;&quot;
+[PRICING DINÁMICO]
+- Nivel de demanda: {self.demand_level}
+- Ajuste de precio: {self.discount_rate:+.0%}
+&quot;&quot;&quot;
+        return Context(instructions=pricing_context, messages=[], tools=[])
+</code></div>
+
+                <div class="success-box">
+                    <strong>✅ Ventaja Clave:</strong> Puedes actualizar el estado del provider
+                    (<code>update_demand()</code>) en cualquier momento, y el agente automáticamente
+                    verá el nuevo contexto en la próxima invocación.
+                </div>
+            </div>
+
+            <!-- 5. Cómo Usar -->
+            <h2 id="uso">5. 🚀 Cómo Usar Context Providers</h2>
+
+            <h3>5.1. Agente con UN Context Provider</h3>
+
+            <div class="code-block"><code># 1. Crear el provider
+datetime_provider = DateTimeContextProvider()
+
+# 2. Crear agente CON el provider
+agent = client.create_agent(
+    name=&quot;Time-Aware Assistant&quot;,
+    instructions=&quot;Eres un asistente consciente del tiempo&quot;,
+    context_providers=[datetime_provider]  # ← Inyección automática
+)
+
+# 3. Usar el agente normalmente
+response = await agent.run(&quot;¿Qué día es hoy?&quot;)
+# El agente recibe automáticamente el contexto temporal
+</code></div>
+
+            <div class="info-box">
+                <strong>💡 Nota:</strong> No necesitas hacer nada especial al llamar <code>agent.run()</code>.
+                El framework se encarga automáticamente de llamar a <code>provider.invoking()</code> antes
+                de procesar la consulta.
+            </div>
+
+            <!-- 6. Múltiples Providers -->
+            <h2 id="multiple">6. 🔗 Múltiples Providers Combinados</h2>
+
+            <p>
+                Una de las características más poderosas es que puedes usar <strong>múltiples providers simultáneamente</strong>.
+                El framework los combina automáticamente.
+            </p>
+
+            <div class="diagram-container">
+                <div class="diagram-title">🔄 Flujo con Múltiples Providers</div>
+                <div style="text-align: center;">
+                    <div class="flow-box">👤 Usuario Query</div>
+                    <span class="arrow-down">↓</span>
+
+                    <div style="background: #f8f4ff; padding: 20px; border-radius: 8px; border: 2px dashed #764ba2; margin: 20px 0;">
+                        <strong style="color: #764ba2;">Framework ejecuta providers en orden:</strong>
+                        <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 15px;">
+                            <div style="background: white; padding: 10px; border-radius: 5px; border-left: 4px solid #667eea;">
+                                1️⃣ DateTimeContextProvider → Contexto temporal
+                            </div>
+                            <div style="background: white; padding: 10px; border-radius: 5px; border-left: 4px solid #f5576c;">
+                                2️⃣ UserContextProvider → Info del usuario
+                            </div>
+                            <div style="background: white; padding: 10px; border-radius: 5px; border-left: 4px solid #ffc107;">
+                                3️⃣ BusinessRulesContextProvider → Reglas de negocio
+                            </div>
+                            <div style="background: white; padding: 10px; border-radius: 5px; border-left: 4px solid #28a745;">
+                                4️⃣ ConversationMemoryProvider → Memoria
+                            </div>
+                        </div>
+                    </div>
+
+                    <span class="arrow-down">↓</span>
+                    <div class="flow-box context">
+                        <strong>📋 Contexto Combinado</strong><br>
+                        <small>Todos los contextos fusionados</small>
+                    </div>
+                    <span class="arrow-down">↓</span>
+                    <div class="flow-box agent">🤖 Agente Procesa</div>
+                </div>
+            </div>
+
+            <div class="code-block"><code># Crear múltiples providers
+datetime_provider = DateTimeContextProvider()
+user_provider = UserContextProvider(&quot;user_123&quot;, &quot;María García&quot;, &quot;Premium&quot;)
+business_provider = BusinessRulesContextProvider((9, 18))
+memory_provider = ConversationMemoryProvider()
+
+# Crear agente con TODOS los providers
+agent = client.create_agent(
+    name=&quot;Contextual Assistant&quot;,
+    instructions=&quot;Eres un asistente altamente contextual&quot;,
+    context_providers=[
+        datetime_provider,
+        user_provider,
+        business_provider,
+        memory_provider
+    ]  # ← Se combinan automáticamente
+)
+
+# El agente recibe contexto de TODOS los providers en cada invocación
+response = await agent.run(&quot;Ayúdame con mi cuenta&quot;)
+</code></div>
+
+            <div class="success-box">
+                <strong>✅ Resultado:</strong> El agente recibe un contexto completo que incluye:
+                <ul>
+                    <li>📅 Fecha y hora actual</li>
+                    <li>👤 Nombre y rol del usuario: "María García" (Premium)</li>
+                    <li>🏢 Estado del horario de atención</li>
+                    <li>💾 Número de interacciones previas</li>
+                </ul>
+                <p>Todo esto sin modificar las instrucciones base del agente.</p>
+            </div>
+
+            <!-- 7. Ventajas -->
+            <h2 id="ventajas">7. 🎯 Ventajas y Casos de Uso</h2>
+
+            <h3>7.1. Ventajas Principales</h3>
+
+            <div class="component-grid">
+                <div class="component-card">
+                    <h4>✅ Separación de Concerns</h4>
+                    <p>El contexto dinámico está separado de la lógica estática del agente.</p>
+                    <p>Más fácil de mantener y testear.</p>
+                </div>
+
+                <div class="component-card">
+                    <h4>🔄 Reutilizable</h4>
+                    <p>Un provider puede ser usado en múltiples agentes diferentes.</p>
+                    <p>DRY (Don't Repeat Yourself).</p>
+                </div>
+
+                <div class="component-card">
+                    <h4>🧩 Composable</h4>
+                    <p>Múltiples providers se combinan automáticamente.</p>
+                    <p>Mix and match según necesidades.</p>
+                </div>
+
+                <div class="component-card">
+                    <h4>⚡ Dinámico</h4>
+                    <p>El contexto puede cambiar en cada invocación.</p>
+                    <p>No necesitas recrear el agente.</p>
+                </div>
+
+                <div class="component-card">
+                    <h4>🧪 Testeable</h4>
+                    <p>Los providers son clases independientes.</p>
+                    <p>Fáciles de testear aisladamente.</p>
+                </div>
+
+                <div class="component-card">
+                    <h4>📊 Observable</h4>
+                    <p>El método <code>invoked()</code> permite logging/metrics.</p>
+                    <p>Visibilidad del comportamiento.</p>
+                </div>
+            </div>
+
+            <h3>7.2. Casos de Uso en Producción</h3>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Caso de Uso</th>
+                        <th>Provider Apropiado</th>
+                        <th>Ejemplo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Información del usuario</td>
+                        <td>UserContextProvider</td>
+                        <td>Personalización, permisos, preferencias</td>
+                    </tr>
+                    <tr>
+                        <td>Contexto temporal</td>
+                        <td>DateTimeContextProvider</td>
+                        <td>Recordatorios, scheduling, zonas horarias</td>
+                    </tr>
+                    <tr>
+                        <td>Reglas de negocio</td>
+                        <td>BusinessRulesContextProvider</td>
+                        <td>Horarios, políticas, límites, cuotas</td>
+                    </tr>
+                    <tr>
+                        <td>Datos externos</td>
+                        <td>DatabaseContextProvider</td>
+                        <td>CRM, inventario, estado de sistemas</td>
+                    </tr>
+                    <tr>
+                        <td>Estado de sesión</td>
+                        <td>SessionContextProvider</td>
+                        <td>Carrito de compras, progreso, workflow</td>
+                    </tr>
+                    <tr>
+                        <td>Personalización</td>
+                        <td>HistoryContextProvider</td>
+                        <td>Comportamiento pasado, preferencias aprendidas</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- 8. Mejores Prácticas -->
+            <h2 id="mejores-practicas">8. ✨ Mejores Prácticas</h2>
+
+            <h3>8.1. Diseño de Context Providers</h3>
+
+            <div class="warning-box">
+                <strong>⚠️ DO's:</strong>
+                <ul>
+                    <li>✅ Mantén los providers <strong>pequeños y enfocados</strong> (single responsibility)</li>
+                    <li>✅ Usa providers para <strong>contexto que cambia frecuentemente</strong></li>
+                    <li>✅ Nombra los providers descriptivamente (<code>DateTimeContextProvider</code> mejor que <code>Provider1</code>)</li>
+                    <li>✅ Documenta claramente qué contexto inyecta cada provider</li>
+                    <li>✅ Considera el <strong>costo de tokens</strong> del contexto inyectado</li>
+                </ul>
+            </div>
+
+            <div class="warning-box">
+                <strong>❌ DON'Ts:</strong>
+                <ul>
+                    <li>❌ NO uses providers para contexto estático (ponlo en instrucciones base)</li>
+                    <li>❌ NO inyectes contexto excesivamente largo (consume tokens)</li>
+                    <li>❌ NO hagas operaciones pesadas en <code>invoking()</code> (bloquea la invocación)</li>
+                    <li>❌ NO compartas estado mutable entre agentes sin sincronización</li>
+                </ul>
+            </div>
+
+            <h3>8.2. Performance y Optimización</h3>
+
+            <div class="info-box">
+                <strong>💡 Tips de Performance:</strong>
+                <ul>
+                    <li>
+                        <strong>Cache cuando sea posible:</strong> Si el contexto es costoso de calcular,
+                        considera cachear resultados con TTL.
+                    </li>
+                    <li>
+                        <strong>Lazy loading:</strong> Solo carga datos cuando sean realmente necesarios.
+                    </li>
+                    <li>
+                        <strong>Async I/O:</strong> Si necesitas datos externos, usa operaciones async para
+                        no bloquear.
+                    </li>
+                    <li>
+                        <strong>Tamaño del contexto:</strong> Monitorea el tamaño del contexto inyectado -
+                        afecta costos y latencia.
+                    </li>
+                </ul>
+            </div>
+
+            <h3>8.3. Testing</h3>
+
+            <div class="code-block"><code># Ejemplo de test para un Context Provider
+import pytest
+
+@pytest.mark.asyncio
+async def test_datetime_provider():
+    # Arrange
+    provider = DateTimeContextProvider()
+
+    # Act
+    context = await provider.invoking(messages=[], **{})
+
+    # Assert
+    assert &quot;CONTEXTO TEMPORAL&quot; in context.instructions
+    assert &quot;Fecha actual&quot; in context.instructions
+    assert len(context.messages) == 0
+    assert len(context.tools) == 0
+</code></div>
+
+            <!-- Resumen Final -->
+            <h2>🎯 Resumen Final</h2>
+
+            <div class="success-box">
+                <h3 style="margin-top: 0;">Conceptos Clave Aprendidos:</h3>
+                <ol>
+                    <li><strong>Context Providers</strong> inyectan contexto dinámico automáticamente</li>
+                    <li><strong>invoking()</strong> se llama ANTES de cada invocación (inyección)</li>
+                    <li><strong>invoked()</strong> se llama DESPUÉS de cada invocación (post-procesamiento)</li>
+                    <li><strong>Múltiples providers</strong> se pueden combinar en un solo agente</li>
+                    <li><strong>5 implementaciones</strong>: DateTime, User, BusinessRules, Memory, DynamicPricing</li>
+                    <li><strong>Separación de concerns</strong>: contexto dinámico vs lógica estática</li>
+                    <li><strong>Reutilizable y testeable</strong>: providers son clases independientes</li>
+                </ol>
+            </div>
+
+            <div class="info-box">
+                <h3 style="margin-top: 0;">Próximos Pasos Sugeridos:</h3>
+                <ul>
+                    <li>🛠️ Implementar <strong>Middleware</strong> para interceptar y modificar comportamiento</li>
+                    <li>📊 Agregar <strong>Observabilidad y Telemetría</strong> para monitoreo</li>
+                    <li>🔀 Crear <strong>Context Providers personalizados</strong> para tu caso de uso</li>
+                    <li>💾 Integrar con bases de datos para <strong>contexto persistente</strong></li>
+                    <li>🔐 Agregar <strong>AuthContextProvider</strong> para permisos y seguridad</li>
+                    <li>🌍 Implementar <strong>LocaleContextProvider</strong> para internacionalización</li>
+                </ul>
+            </div>
+
+            <!-- Tabla de Referencia -->
+            <h2>📚 Referencia Rápida</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Concepto</th>
+                        <th>Descripción</th>
+                        <th>Código</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Crear Provider</strong></td>
+                        <td>Heredar de ContextProvider</td>
+                        <td><code>class MyProvider(ContextProvider):</code></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Método de inyección</strong></td>
+                        <td>Implementar invoking()</td>
+                        <td><code>async def invoking(...) -> Context:</code></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Retornar contexto</strong></td>
+                        <td>Crear objeto Context</td>
+                        <td><code>return Context(instructions=..., messages=[], tools=[])</code></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Usar provider</strong></td>
+                        <td>Pasarlo al crear agente</td>
+                        <td><code>context_providers=[provider1, provider2]</code></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Post-procesamiento</strong></td>
+                        <td>Implementar invoked() (opcional)</td>
+                        <td><code>async def invoked(...) -> None:</code></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Estado mutable</strong></td>
+                        <td>Variables de instancia</td>
+                        <td><code>self.count += 1</code></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="warning-box" style="margin-top: 30px;">
+                <strong>⚠️ Recordatorio Importante:</strong>
+                <p>Los Context Providers son para <strong>contexto dinámico</strong> que cambia frecuentemente.
+                Para contexto estático que no cambia, inclúyelo directamente en las <code>instructions</code>
+                del agente.</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <h3>🔄 Documentación de Context Providers</h3>
+            <p>Script: <strong>016_context_providers.py</strong></p>
+            <p>Microsoft Agent Framework + Azure AI Foundry</p>
+            <p>5 Providers | Inyección Automática | Composable</p>
+            <p style="margin-top: 15px; opacity: 0.8;">
+                Generado automáticamente | © 2025
+            </p>
+        </div>
+    </div>
+</body>
+</html>

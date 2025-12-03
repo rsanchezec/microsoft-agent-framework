@@ -1,0 +1,1316 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentación: Workflow Secuencial con Microsoft Agent Framework</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        h2 {
+            color: #667eea;
+            margin-top: 30px;
+            margin-bottom: 20px;
+            font-size: 2em;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        h3 {
+            color: #764ba2;
+            margin-top: 25px;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+
+        h4 {
+            color: #555;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+
+        p {
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+
+        .diagram-container {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 30px;
+            margin: 30px 0;
+            border: 2px solid #667eea;
+        }
+
+        .diagram-title {
+            text-align: center;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+        }
+
+        .flow-diagram {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+
+        .flow-box {
+            background: white;
+            border: 3px solid #667eea;
+            border-radius: 8px;
+            padding: 20px 30px;
+            min-width: 180px;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .flow-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+        }
+
+        .flow-box.start {
+            background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+            border-color: #84fab0;
+        }
+
+        .flow-box.agent {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: bold;
+        }
+
+        .flow-box.output {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            border-color: #f093fb;
+            color: white;
+        }
+
+        .arrow {
+            font-size: 2em;
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .code-block {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 20px 0;
+            border-left: 4px solid #667eea;
+        }
+
+        .code-block code {
+            font-family: 'Courier New', monospace;
+            font-size: 0.95em;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            display: block;
+        }
+
+        .highlight {
+            background: #fff3cd;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: monospace;
+            color: #856404;
+        }
+
+        .info-box {
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        .warning-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        .success-box {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        .component-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .component-card {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .component-card:hover {
+            border-color: #667eea;
+            box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3);
+        }
+
+        .component-card h4 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        th {
+            background: #667eea;
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: bold;
+        }
+
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        tr:hover {
+            background: #e7f3ff;
+        }
+
+        .execution-flow {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .step {
+            display: flex;
+            align-items: flex-start;
+            margin: 15px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .step-number {
+            background: #667eea;
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+
+        .step-content {
+            flex-grow: 1;
+        }
+
+        .step-title {
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        ul, ol {
+            margin-left: 30px;
+            margin-bottom: 15px;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        .architecture-diagram {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .layer {
+            background: white;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .layer-title {
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+
+        .footer {
+            background: #2d2d2d;
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .toc {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .toc h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .toc ul {
+            list-style: none;
+            margin-left: 0;
+        }
+
+        .toc li {
+            margin-bottom: 10px;
+        }
+
+        .toc a {
+            color: #667eea;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .toc a:hover {
+            color: #764ba2;
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .flow-diagram {
+                flex-direction: column;
+            }
+
+            .arrow {
+                transform: rotate(90deg);
+            }
+
+            header h1 {
+                font-size: 1.8em;
+            }
+
+            .content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📊 Workflow Secuencial con Microsoft Agent Framework</h1>
+            <p>Documentación Completa del Script 012_sequential_workflow.py</p>
+        </header>
+
+        <div class="content">
+            <!-- Tabla de Contenidos -->
+            <div class="toc">
+                <h3>📑 Tabla de Contenidos</h3>
+                <ul>
+                    <li><a href="#introduccion">1. Introducción</a></li>
+                    <li><a href="#conceptos">2. Conceptos Clave</a></li>
+                    <li><a href="#arquitectura">3. Arquitectura del Sistema</a></li>
+                    <li><a href="#componentes">4. Componentes Principales</a></li>
+                    <li><a href="#flujo">5. Flujo de Ejecución</a></li>
+                    <li><a href="#codigo">6. Análisis del Código</a></li>
+                    <li><a href="#visualizacion">7. Visualización del Workflow</a></li>
+                    <li><a href="#mejores-practicas">8. Mejores Prácticas</a></li>
+                </ul>
+            </div>
+
+            <!-- 1. Introducción -->
+            <h2 id="introduccion">1. 📖 Introducción</h2>
+            <p>
+                El script <span class="highlight">012_sequential_workflow.py</span> demuestra cómo crear un
+                <strong>workflow secuencial</strong> utilizando el <strong>Microsoft Agent Framework</strong> con
+                <strong>Azure AI Foundry</strong>. Un workflow secuencial permite orquestar múltiples agentes de IA
+                donde la salida de un agente se convierte en la entrada del siguiente, creando una cadena de procesamiento.
+            </p>
+
+            <div class="info-box">
+                <strong>💡 Caso de Uso:</strong> Este ejemplo implementa un pipeline de dos etapas:
+                <ul>
+                    <li><strong>Etapa 1:</strong> Un agente investigador recopila información sobre un tema</li>
+                    <li><strong>Etapa 2:</strong> Un agente escritor crea un ensayo basado en la investigación</li>
+                </ul>
+            </div>
+
+            <!-- Diagrama de Flujo Principal -->
+            <div class="diagram-container">
+                <div class="diagram-title">🔄 Flujo Secuencial Simplificado</div>
+                <div class="flow-diagram">
+                    <div class="flow-box start">
+                        <strong>📥 Input</strong><br>
+                        <small>"Investiga el impacto<br>de la IA en la sociedad"</small>
+                    </div>
+                    <span class="arrow">→</span>
+                    <div class="flow-box agent">
+                        <strong>🔍 Researcher Agent</strong><br>
+                        <small>Investiga y recopila información</small>
+                    </div>
+                    <span class="arrow">→</span>
+                    <div class="flow-box agent">
+                        <strong>✍️ Writer Agent</strong><br>
+                        <small>Escribe ensayo basado<br>en la investigación</small>
+                    </div>
+                    <span class="arrow">→</span>
+                    <div class="flow-box output">
+                        <strong>📤 Output</strong><br>
+                        <small>Ensayo completo</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. Conceptos Clave -->
+            <h2 id="conceptos">2. 🧠 Conceptos Clave</h2>
+
+            <div class="component-grid">
+                <div class="component-card">
+                    <h4>🔧 Workflow</h4>
+                    <p>
+                        Un workflow es una secuencia de tareas automatizadas que se ejecutan en orden.
+                        Cada tarea (executor) puede procesar datos y pasarlos a la siguiente tarea.
+                    </p>
+                </div>
+
+                <div class="component-card">
+                    <h4>⚙️ Executor</h4>
+                    <p>
+                        Un executor es una función decorada con <span class="highlight">@executor</span>
+                        que representa una tarea individual en el workflow. Recibe entrada, la procesa y
+                        produce salida.
+                    </p>
+                </div>
+
+                <div class="component-card">
+                    <h4>🤖 Agent</h4>
+                    <p>
+                        Un agente de IA con instrucciones específicas que puede ejecutar tareas,
+                        responder preguntas y mantener conversaciones contextuales.
+                    </p>
+                </div>
+
+                <div class="component-card">
+                    <h4>🔗 WorkflowBuilder</h4>
+                    <p>
+                        Clase que permite construir workflows de forma declarativa, conectando executors
+                        mediante edges (aristas) para definir el flujo de datos.
+                    </p>
+                </div>
+
+                <div class="component-card">
+                    <h4>📨 Context (ctx)</h4>
+                    <p>
+                        Objeto <span class="highlight">WorkflowContext</span> que permite a los executors
+                        comunicarse entre sí mediante <span class="highlight">send_message()</span> y
+                        producir resultados con <span class="highlight">yield_output()</span>.
+                    </p>
+                </div>
+
+                <div class="component-card">
+                    <h4>🎨 WorkflowViz</h4>
+                    <p>
+                        Herramienta para visualizar workflows generando diagramas en formato Mermaid,
+                        HTML interactivo o imágenes PNG.
+                    </p>
+                </div>
+            </div>
+
+            <!-- 3. Arquitectura del Sistema -->
+            <h2 id="arquitectura">3. 🏗️ Arquitectura del Sistema</h2>
+
+            <div class="architecture-diagram">
+                <div class="layer">
+                    <div class="layer-title">🔐 Capa de Autenticación</div>
+                    <p><strong>DefaultAzureCredential</strong></p>
+                    <p>Gestiona la autenticación con Azure usando credenciales del sistema (Azure CLI, Managed Identity, etc.)</p>
+                </div>
+
+                <div class="layer">
+                    <div class="layer-title">🔌 Capa de Cliente</div>
+                    <p><strong>AzureAIAgentClient</strong></p>
+                    <p>Cada agente tiene su propio cliente independiente para mantener sesiones separadas</p>
+                    <div class="code-block"><code>client = AzureAIAgentClient(
+    async_credential=credential,
+    should_cleanup_agent=True  # Limpia agente después de uso
+)</code></div>
+                </div>
+
+                <div class="layer">
+                    <div class="layer-title">🤖 Capa de Agentes</div>
+                    <p><strong>Researcher Agent</strong> + <strong>Writer Agent</strong></p>
+                    <p>Agentes especializados con instrucciones específicas para sus roles</p>
+                </div>
+
+                <div class="layer">
+                    <div class="layer-title">⚙️ Capa de Executors</div>
+                    <p><strong>Executor Factories</strong></p>
+                    <p>Funciones factory que crean executors con acceso a los agentes mediante closures</p>
+                </div>
+
+                <div class="layer">
+                    <div class="layer-title">🔄 Capa de Workflow</div>
+                    <p><strong>WorkflowBuilder</strong></p>
+                    <p>Orquesta la ejecución secuencial conectando los executors</p>
+                </div>
+
+                <div class="layer">
+                    <div class="layer-title">📊 Capa de Visualización</div>
+                    <p><strong>WorkflowViz + HTML/PNG Export</strong></p>
+                    <p>Genera visualizaciones del workflow en múltiples formatos</p>
+                </div>
+            </div>
+
+            <!-- 4. Componentes Principales -->
+            <h2 id="componentes">4. 🔩 Componentes Principales</h2>
+
+            <h3>4.1. Función: <span class="highlight">create_agent()</span></h3>
+            <div class="code-block"><code>def create_agent(client: AzureAIAgentClient,
+                 instructions: str,
+                 name: str,
+                 tools: Optional[list] = None):
+    &quot;&quot;&quot;
+    Crea y retorna un agente de IA.
+
+    Args:
+        client: Cliente de Azure AI
+        instructions: Instrucciones/prompt del agente
+        name: Nombre identificador del agente
+        tools: Lista opcional de herramientas
+
+    Returns:
+        ChatAgent: Agente configurado
+    &quot;&quot;&quot;
+    params = {
+        &quot;instructions&quot;: instructions,
+        &quot;name&quot;: name
+    }
+
+    if tools:
+        params[&quot;tools&quot;] = tools
+
+    return client.create_agent(**params)</code></div>
+
+            <div class="info-box">
+                <strong>📝 Propósito:</strong> Función helper que encapsula la creación de agentes,
+                permitiendo agregar herramientas opcionalmente de forma limpia.
+            </div>
+
+            <h3>4.2. Función: <span class="highlight">create_and_initialize_agent()</span></h3>
+            <div class="code-block"><code>async def create_and_initialize_agent(
+    credential,
+    instructions: str,
+    name: str,
+    tools: Optional[list] = None
+):
+    &quot;&quot;&quot;
+    Crea un agente con su propio cliente y lo inicializa.
+
+    IMPORTANTE: Retorna tanto el cliente como el agente para
+    mantener el cliente abierto durante toda la ejecución.
+
+    Returns:
+        tuple: (client, agent)
+    &quot;&quot;&quot;
+    # Cada agente necesita su PROPIO cliente
+    client = AzureAIAgentClient(
+        async_credential=credential,
+        should_cleanup_agent=True
+    )
+
+    agent = create_agent(
+        client=client,
+        instructions=instructions,
+        name=name,
+        tools=tools
+    )
+
+    # Ejecutar una vez para obtener el ID real del agente
+    await agent.run(&quot;Hola, confirma que estas listo.&quot;)
+    agent_id = agent.chat_client.agent_id
+
+    print(f&quot;[OK] Agente '{name}' creado (ID: {agent_id})&quot;)
+
+    return client, agent</code></div>
+
+            <div class="warning-box">
+                <strong>⚠️ Importante:</strong> La función retorna tanto el cliente como el agente.
+                Esto es crucial porque si solo retornáramos el agente, el cliente se cerraría al
+                salir del scope de la función, causando errores de "session closed".
+            </div>
+
+            <h3>4.3. Executor Factories</h3>
+
+            <h4>Factory del Researcher:</h4>
+            <div class="code-block"><code>def create_researcher_executor(researcher_agent):
+    &quot;&quot;&quot;Factory para crear el executor del researcher con acceso al agente&quot;&quot;&quot;
+
+    @executor(id=&quot;run_researcher_agent&quot;)
+    async def run_researcher_agent(query: str, ctx: WorkflowContext[str]) -&gt; None:
+        print(f&quot;\n[RESEARCHER] Investigando: {query}&quot;)
+
+        # Ejecutar el agente con la consulta
+        response = await researcher_agent.run(query)
+        result = str(response)
+
+        print(f&quot;[RESEARCHER] Resultado: {result[:100]}...&quot;)
+
+        # Enviar resultado al siguiente executor
+        await ctx.send_message(result)
+
+    return run_researcher_agent</code></div>
+
+            <h4>Factory del Writer:</h4>
+            <div class="code-block"><code>def create_writer_executor(writer_agent):
+    &quot;&quot;&quot;Factory para crear el executor del writer con acceso al agente&quot;&quot;&quot;
+
+    @executor(id=&quot;run_writer_agent&quot;)
+    async def run_writer_agent(research_data: str, ctx: WorkflowContext[str]) -&gt; None:
+        prompt = f&quot;Basándote en esta investigación, escribe un ensayo:\n\n{research_data}&quot;
+
+        print(f&quot;\n[WRITER] Escribiendo ensayo basado en investigación...&quot;)
+
+        # Ejecutar el agente con el prompt
+        response = await writer_agent.run(prompt)
+        result = str(response)
+
+        print(f&quot;[WRITER] Ensayo completado!&quot;)
+
+        # Producir salida final del workflow
+        await ctx.yield_output(result)
+
+    return run_writer_agent</code></div>
+
+            <div class="success-box">
+                <strong>✅ Patrón de Diseño:</strong> Usamos el patrón <strong>Factory</strong> con
+                <strong>closures</strong> para dar a los executors acceso a los agentes. El decorator
+                <span class="highlight">@executor</span> no puede recibir parámetros adicionales,
+                por lo que usamos factories que "capturan" el agente en su scope.
+            </div>
+
+            <h3>4.4. Funciones de Visualización</h3>
+
+            <h4>Guardar como HTML:</h4>
+            <div class="code-block"><code>def save_workflow_diagram_html(mermaid_content: str,
+                               filename: str = &quot;workflow_diagram.html&quot;):
+    &quot;&quot;&quot;
+    Guarda el diagrama Mermaid como un archivo HTML interactivo.
+
+    Ventajas:
+    - Abre en cualquier navegador
+    - Interactivo con zoom
+    - No requiere dependencias adicionales
+    &quot;&quot;&quot;
+    html_template = f&quot;&quot;&quot;&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+    &lt;script src=&quot;https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div class=&quot;mermaid&quot;&gt;
+{mermaid_content}
+    &lt;/div&gt;
+    &lt;script&gt;
+        mermaid.initialize({{ startOnLoad: true }});
+    &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;&quot;&quot;&quot;
+
+    Path(filename).write_text(html_template, encoding='utf-8')
+    return Path(filename).absolute()</code></div>
+
+            <h4>Guardar como PNG:</h4>
+            <div class="code-block"><code>async def save_workflow_diagram_png(mermaid_content: str,
+                                    filename: str = &quot;workflow_diagram.png&quot;):
+    &quot;&quot;&quot;
+    Guarda el diagrama como imagen PNG usando mermaid.ink API.
+
+    Proceso:
+    1. Codifica el código Mermaid en base64
+    2. Llama a la API pública mermaid.ink
+    3. Guarda la imagen resultante
+    &quot;&quot;&quot;
+    try:
+        # Codificar en base64
+        mermaid_bytes = mermaid_content.encode('utf-8')
+        base64_str = base64.b64encode(mermaid_bytes).decode('utf-8')
+
+        # URL de la API
+        url = f&quot;https://mermaid.ink/img/{base64_str}&quot;
+
+        # Descargar imagen
+        async with httpx.AsyncClient() as client:
+            response = await client.get(url, timeout=30.0)
+            response.raise_for_status()
+
+            # Guardar
+            Path(filename).write_bytes(response.content)
+            return Path(filename).absolute()
+    except Exception as e:
+        print(f&quot;Error al generar PNG: {e}&quot;)
+        return None</code></div>
+
+            <!-- 5. Flujo de Ejecución -->
+            <h2 id="flujo">5. 🔄 Flujo de Ejecución Detallado</h2>
+
+            <div class="execution-flow">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <div class="step-title">Inicialización de Credenciales</div>
+                        <p>Se crea <span class="highlight">DefaultAzureCredential</span> que intenta
+                        múltiples métodos de autenticación (Azure CLI, Managed Identity, etc.)</p>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <div class="step-title">Creación del Researcher Agent</div>
+                        <p>Se crea un cliente independiente y un agente con instrucciones para investigar.
+                        Se ejecuta una consulta inicial para inicializar el agente y obtener su ID.</p>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <div class="step-title">Creación del Writer Agent</div>
+                        <p>Similar al paso anterior, pero con instrucciones para escribir ensayos de forma
+                        creativa y coherente.</p>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <div class="step-title">Creación de Executors</div>
+                        <p>Se llaman las factories <span class="highlight">create_researcher_executor()</span>
+                        y <span class="highlight">create_writer_executor()</span> pasando los agentes.
+                        Esto crea los executors con acceso a los agentes mediante closures.</p>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">5</div>
+                    <div class="step-content">
+                        <div class="step-title">Construcción del Workflow</div>
+                        <p>Se usa <span class="highlight">WorkflowBuilder</span> para:</p>
+                        <ul>
+                            <li>Conectar researcher_executor → writer_executor con <span class="highlight">.add_edge()</span></li>
+                            <li>Definir researcher como punto de inicio con <span class="highlight">.set_start_executor()</span></li>
+                            <li>Construir el workflow con <span class="highlight">.build()</span></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">6</div>
+                    <div class="step-content">
+                        <div class="step-title">Generación de Visualizaciones</div>
+                        <p>Se crea <span class="highlight">WorkflowViz</span> y se generan:</p>
+                        <ul>
+                            <li>Archivo HTML interactivo</li>
+                            <li>Imagen PNG (usando API web)</li>
+                            <li>Salida en consola (código Mermaid)</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">7</div>
+                    <div class="step-content">
+                        <div class="step-title">Ejecución del Workflow</div>
+                        <p>Se llama a <span class="highlight">workflow.run_stream()</span> con la consulta inicial.
+                        El workflow ejecuta secuencialmente:</p>
+                        <ul>
+                            <li><strong>Researcher:</strong> Recibe la consulta, investiga, envía resultado</li>
+                            <li><strong>Writer:</strong> Recibe la investigación, escribe el ensayo, produce output final</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">8</div>
+                    <div class="step-content">
+                        <div class="step-title">Captura de Eventos</div>
+                        <p>El loop <span class="highlight">async for event in workflow.run_stream()</span>
+                        captura eventos. Cuando detecta un <span class="highlight">WorkflowOutputEvent</span>,
+                        muestra el resultado final.</p>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">9</div>
+                    <div class="step-content">
+                        <div class="step-title">Limpieza de Recursos</div>
+                        <p>En el bloque <span class="highlight">finally</span>, se cierran todos los clientes
+                        de forma ordenada para liberar recursos y sesiones HTTP.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 6. Análisis del Código -->
+            <h2 id="codigo">6. 💻 Análisis del Código Principal</h2>
+
+            <h3>6.1. Función main() - Estructura General</h3>
+            <div class="code-block"><code>async def main():
+    async with DefaultAzureCredential() as credential:
+        clients = []  # Lista para rastrear clientes y cerrarlos después
+        try:
+            # === CREACIÓN DE AGENTES ===
+            researcher_client, researcher_agent = await create_and_initialize_agent(...)
+            clients.append(researcher_client)
+
+            writer_client, writer_agent = await create_and_initialize_agent(...)
+            clients.append(writer_client)
+
+            # === CONSTRUCCIÓN DEL WORKFLOW ===
+            researcher_executor = create_researcher_executor(researcher_agent)
+            writer_executor = create_writer_executor(writer_agent)
+
+            workflow = (
+                WorkflowBuilder()
+                .add_edge(researcher_executor, writer_executor)
+                .set_start_executor(researcher_executor)
+                .build()
+            )
+
+            # === VISUALIZACIÓN ===
+            viz = WorkflowViz(workflow)
+            mermaid_content = viz.to_mermaid()
+            save_workflow_diagram_html(mermaid_content)
+            await save_workflow_diagram_png(mermaid_content)
+
+            # === EJECUCIÓN ===
+            async for event in workflow.run_stream(&quot;query&quot;):
+                if isinstance(event, WorkflowOutputEvent):
+                    print(event.data)
+
+        finally:
+            # === LIMPIEZA ===
+            for client in clients:
+                await client.__aexit__(None, None, None)</code></div>
+
+            <h3>6.2. Patrón de Context Manager</h3>
+            <div class="info-box">
+                <strong>🔐 Uso de <span class="highlight">async with</span>:</strong>
+                <p>El código usa consistentemente <span class="highlight">async with</span> para garantizar
+                que los recursos asíncronos se cierren correctamente, incluso si ocurre un error:</p>
+                <ul>
+                    <li><span class="highlight">async with DefaultAzureCredential()</span> → Cierra sesiones de autenticación</li>
+                    <li><span class="highlight">async with httpx.AsyncClient()</span> → Cierra conexiones HTTP</li>
+                    <li>Cierre manual de clientes en <span class="highlight">finally</span> → Garantiza limpieza</li>
+                </ul>
+            </div>
+
+            <h3>6.3. Comunicación Entre Executors</h3>
+            <div class="diagram-container">
+                <div class="diagram-title">📨 Flujo de Datos Entre Executors</div>
+                <div style="background: white; padding: 20px; border-radius: 8px;">
+                    <div style="margin-bottom: 20px;">
+                        <strong style="color: #667eea;">Researcher Executor:</strong>
+                        <div class="code-block" style="margin-top: 10px;"><code>async def run_researcher_agent(query: str, ctx: WorkflowContext[str]):
+    response = await researcher_agent.run(query)
+    result = str(response)
+
+    # 📤 Envía al siguiente executor
+    await ctx.send_message(result)</code></div>
+                    </div>
+
+                    <div style="text-align: center; font-size: 2em; margin: 20px 0;">⬇️</div>
+
+                    <div>
+                        <strong style="color: #764ba2;">Writer Executor:</strong>
+                        <div class="code-block" style="margin-top: 10px;"><code>async def run_writer_agent(research_data: str, ctx: WorkflowContext[str]):
+    # 📥 Recibe 'research_data' del anterior
+    prompt = f&quot;Basándote en esta investigación: {research_data}&quot;
+    response = await writer_agent.run(prompt)
+    result = str(response)
+
+    # 🎯 Produce output final del workflow
+    await ctx.yield_output(result)</code></div>
+                    </div>
+                </div>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Método</th>
+                        <th>Propósito</th>
+                        <th>Uso</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span class="highlight">ctx.send_message(data)</span></td>
+                        <td>Envía datos al siguiente executor en la cadena</td>
+                        <td>Comunicación entre executors intermedios</td>
+                    </tr>
+                    <tr>
+                        <td><span class="highlight">ctx.yield_output(data)</span></td>
+                        <td>Produce el resultado final del workflow</td>
+                        <td>Salida del último executor</td>
+                    </tr>
+                    <tr>
+                        <td><span class="highlight">Parámetros tipados</span></td>
+                        <td>Recibe datos del executor anterior</td>
+                        <td>El framework inyecta automáticamente</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- 7. Visualización del Workflow -->
+            <h2 id="visualizacion">7. 📊 Visualización del Workflow</h2>
+
+            <h3>7.1. ¿Por Qué Aparecen Nodos "internal_*"?</h3>
+            <div class="warning-box">
+                <strong>🤔 Pregunta Común:</strong> El diagrama muestra nodos como
+                <span class="highlight">internal_run_researcher_agent</span> y
+                <span class="highlight">internal_run_writer_agent</span>. ¿Por qué?
+            </div>
+
+            <p><strong>Respuesta:</strong> El framework <span class="highlight">WorkflowBuilder</span> crea
+            wrappers internos para manejar:</p>
+            <ul>
+                <li><strong>Conversión de tipos:</strong> Transforma datos entre executors</li>
+                <li><strong>Gestión de mensajes:</strong> Implementa <span class="highlight">ctx.send_message()</span></li>
+                <li><strong>Inyección de parámetros:</strong> Pasa datos del anterior al siguiente</li>
+                <li><strong>Manejo de errores:</strong> Captura y propaga excepciones</li>
+            </ul>
+
+            <div class="diagram-container">
+                <div class="diagram-title">🔍 Vista Detallada del Framework</div>
+                <div style="background: white; padding: 20px; border-radius: 8px;">
+                    <div style="display: grid; grid-template-columns: 1fr auto 1fr; gap: 20px; align-items: center;">
+                        <div style="background: #e7f3ff; padding: 15px; border-radius: 8px; border: 2px solid #2196F3;">
+                            <strong>Lo que escribes:</strong>
+                            <div class="code-block" style="margin-top: 10px;"><code>@executor(id=&quot;run_researcher&quot;)
+async def run_researcher(query, ctx):
+    result = await agent.run(query)
+    await ctx.send_message(result)</code></div>
+                        </div>
+
+                        <div style="font-size: 2em;">→</div>
+
+                        <div style="background: #fff3cd; padding: 15px; border-radius: 8px; border: 2px solid #ffc107;">
+                            <strong>Lo que crea el framework:</strong>
+                            <ul style="margin-top: 10px; margin-bottom: 0;">
+                                <li><span class="highlight">internal_run_researcher</span><br><small>Wrapper de gestión</small></li>
+                                <li><span class="highlight">run_researcher</span><br><small>Tu función original</small></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="success-box">
+                <strong>✅ Conclusión:</strong> Los nodos <span class="highlight">internal_*</span> son
+                parte de la implementación interna del framework y <strong>no afectan la funcionalidad</strong>.
+                El flujo sigue siendo secuencial: Input → Researcher → Writer → Output.
+            </div>
+
+            <h3>7.2. Formatos de Visualización Disponibles</h3>
+            <div class="component-grid">
+                <div class="component-card">
+                    <h4>📄 HTML Interactivo</h4>
+                    <p><strong>Archivo:</strong> <span class="highlight">workflow_diagram.html</span></p>
+                    <p><strong>Ventajas:</strong></p>
+                    <ul>
+                        <li>Abre en cualquier navegador</li>
+                        <li>Interactivo con zoom</li>
+                        <li>No requiere instalaciones</li>
+                        <li>Funciona offline</li>
+                    </ul>
+                </div>
+
+                <div class="component-card">
+                    <h4>🖼️ Imagen PNG</h4>
+                    <p><strong>Archivo:</strong> <span class="highlight">workflow_diagram.png</span></p>
+                    <p><strong>Ventajas:</strong></p>
+                    <ul>
+                        <li>Fácil de compartir</li>
+                        <li>Insertable en docs</li>
+                        <li>Compatible universalmente</li>
+                        <li>Ligero</li>
+                    </ul>
+                </div>
+
+                <div class="component-card">
+                    <h4>💻 Código Mermaid</h4>
+                    <p><strong>Salida:</strong> <span class="highlight">Consola</span></p>
+                    <p><strong>Ventajas:</strong></p>
+                    <ul>
+                        <li>Versionable en Git</li>
+                        <li>Editable como texto</li>
+                        <li>Compatible con Markdown</li>
+                        <li>GitHub lo renderiza</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 8. Mejores Prácticas -->
+            <h2 id="mejores-practicas">8. ✨ Mejores Prácticas</h2>
+
+            <h3>8.1. Gestión de Recursos</h3>
+            <div class="success-box">
+                <strong>✅ Hacer:</strong>
+                <ul>
+                    <li>Usar <span class="highlight">async with</span> para context managers</li>
+                    <li>Mantener lista de clientes para cerrarlos en <span class="highlight">finally</span></li>
+                    <li>Cerrar recursos incluso si ocurren errores</li>
+                </ul>
+            </div>
+
+            <div class="warning-box">
+                <strong>❌ Evitar:</strong>
+                <ul>
+                    <li>Crear clientes sin cerrarlos</li>
+                    <li>Retornar agentes sin retornar sus clientes</li>
+                    <li>Dejar sesiones HTTP abiertas</li>
+                </ul>
+            </div>
+
+            <h3>8.2. Diseño de Executors</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Aspecto</th>
+                        <th>Recomendación</th>
+                        <th>Razón</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Acceso a agentes</strong></td>
+                        <td>Usar factory functions con closures</td>
+                        <td>Los decorators no pueden recibir parámetros</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Comunicación</strong></td>
+                        <td>Usar <span class="highlight">ctx.send_message()</span></td>
+                        <td>Estándar del framework para pasar datos</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Output final</strong></td>
+                        <td>Usar <span class="highlight">ctx.yield_output()</span></td>
+                        <td>Indica el final del workflow</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Logging</strong></td>
+                        <td>Agregar prints descriptivos</td>
+                        <td>Facilita debugging y seguimiento</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Type hints</strong></td>
+                        <td>Especificar tipos de parámetros</td>
+                        <td>El framework usa tipos para inyección de datos</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>8.3. Estructura de Workflows</h3>
+            <div class="diagram-container">
+                <div class="diagram-title">📐 Patrones de Workflow Recomendados</div>
+
+                <div style="background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                    <h4 style="color: #667eea; margin-bottom: 15px;">✅ Secuencial (Este Ejemplo)</h4>
+                    <div class="flow-diagram">
+                        <div class="flow-box agent">A</div>
+                        <span class="arrow">→</span>
+                        <div class="flow-box agent">B</div>
+                        <span class="arrow">→</span>
+                        <div class="flow-box agent">C</div>
+                    </div>
+                    <p style="margin-top: 15px;"><strong>Uso:</strong> Cuando cada etapa depende de la anterior</p>
+                </div>
+
+                <div style="background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                    <h4 style="color: #667eea; margin-bottom: 15px;">✅ Paralelo</h4>
+                    <div style="display: flex; justify-content: center; align-items: center; gap: 20px;">
+                        <div class="flow-box agent">Start</div>
+                        <span class="arrow">→</span>
+                        <div style="display: flex; flex-direction: column; gap: 15px;">
+                            <div class="flow-box agent">B1</div>
+                            <div class="flow-box agent">B2</div>
+                        </div>
+                        <span class="arrow">→</span>
+                        <div class="flow-box agent">Merge</div>
+                    </div>
+                    <p style="margin-top: 15px;"><strong>Uso:</strong> Cuando tareas pueden ejecutarse simultáneamente</p>
+                </div>
+
+                <div style="background: white; padding: 20px; border-radius: 8px;">
+                    <h4 style="color: #667eea; margin-bottom: 15px;">✅ Condicional</h4>
+                    <div style="display: flex; justify-content: center; align-items: center; gap: 20px;">
+                        <div class="flow-box agent">Check</div>
+                        <span class="arrow">→</span>
+                        <div style="display: flex; flex-direction: column; gap: 15px;">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <small>if true →</small>
+                                <div class="flow-box agent">Path A</div>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <small>if false →</small>
+                                <div class="flow-box agent">Path B</div>
+                            </div>
+                        </div>
+                    </div>
+                    <p style="margin-top: 15px;"><strong>Uso:</strong> Cuando el flujo depende de condiciones</p>
+                </div>
+            </div>
+
+            <h3>8.4. Configuración de Agentes</h3>
+            <div class="code-block"><code># ✅ BUENO: Instrucciones claras y específicas
+instructions = &quot;&quot;&quot;
+Eres un investigador experto en tecnología.
+Tu tarea es:
+1. Analizar el tema proporcionado
+2. Identificar puntos clave
+3. Buscar información relevante
+4. Presentar hallazgos de forma estructurada
+
+Sé objetivo, preciso y cita fuentes cuando sea posible.
+&quot;&quot;&quot;
+
+# ❌ MALO: Instrucciones vagas
+instructions = &quot;Investiga cosas&quot;</code></div>
+
+            <div class="info-box">
+                <strong>💡 Tips para Instrucciones Efectivas:</strong>
+                <ul>
+                    <li>Define el rol del agente claramente</li>
+                    <li>Lista las tareas específicas que debe realizar</li>
+                    <li>Especifica el formato de salida deseado</li>
+                    <li>Incluye restricciones o reglas importantes</li>
+                    <li>Menciona el tono o estilo de comunicación</li>
+                </ul>
+            </div>
+
+            <h3>8.5. Manejo de Errores</h3>
+            <div class="code-block"><code>async def main():
+    async with DefaultAzureCredential() as credential:
+        clients = []
+        try:
+            # Código principal
+            researcher_client, researcher_agent = await create_and_initialize_agent(...)
+            clients.append(researcher_client)
+
+            # ... más código ...
+
+        except Exception as e:
+            print(f&quot;❌ Error durante la ejecución: {e}&quot;)
+            import traceback
+            traceback.print_exc()
+
+        finally:
+            # SIEMPRE cerrar recursos
+            print(&quot;\nCerrando clientes...&quot;)
+            for client in clients:
+                try:
+                    await client.__aexit__(None, None, None)
+                except Exception as e:
+                    print(f&quot;Error al cerrar cliente: {e}&quot;)</code></div>
+
+            <h3>8.6. Testing y Debugging</h3>
+            <div class="component-grid">
+                <div class="component-card">
+                    <h4>🔍 Logs Descriptivos</h4>
+                    <div class="code-block"><code>print(f&quot;[RESEARCHER] Investigando: {query}&quot;)
+print(f&quot;[RESEARCHER] Resultado: {result[:100]}...&quot;)
+print(f&quot;[WRITER] Ensayo completado!&quot;)</code></div>
+                    <p>Facilita seguir el flujo de ejecución</p>
+                </div>
+
+                <div class="component-card">
+                    <h4>📊 Visualización</h4>
+                    <div class="code-block"><code>viz = WorkflowViz(workflow)
+mermaid = viz.to_mermaid()
+print(mermaid)</code></div>
+                    <p>Verifica que el workflow esté construido correctamente</p>
+                </div>
+
+                <div class="component-card">
+                    <h4>⏱️ Monitoreo de Tiempo</h4>
+                    <div class="code-block"><code>import time
+start = time.time()
+result = await agent.run(query)
+elapsed = time.time() - start
+print(f&quot;Tiempo: {elapsed:.2f}s&quot;)</code></div>
+                    <p>Identifica cuellos de botella</p>
+                </div>
+            </div>
+
+            <!-- Resumen Final -->
+            <h2>🎯 Resumen Final</h2>
+
+            <div class="success-box">
+                <h3 style="margin-top: 0;">Conceptos Clave Aprendidos:</h3>
+                <ol>
+                    <li><strong>Workflows Secuenciales:</strong> Orquestar múltiples agentes donde la salida de uno alimenta al siguiente</li>
+                    <li><strong>Executor Pattern:</strong> Usar decorators <span class="highlight">@executor</span> con factory functions</li>
+                    <li><strong>Context Management:</strong> Usar <span class="highlight">async with</span> para gestión de recursos</li>
+                    <li><strong>Comunicación:</strong> <span class="highlight">ctx.send_message()</span> para pasar datos, <span class="highlight">ctx.yield_output()</span> para salida final</li>
+                    <li><strong>Visualización:</strong> Múltiples formatos (HTML, PNG, Mermaid) para documentar workflows</li>
+                </ol>
+            </div>
+
+            <div class="info-box">
+                <h3 style="margin-top: 0;">Próximos Pasos Sugeridos:</h3>
+                <ul>
+                    <li>🔧 Agregar más agentes al workflow (ej: editor, revisor)</li>
+                    <li>🔀 Implementar workflows paralelos o condicionales</li>
+                    <li>🛠️ Agregar herramientas personalizadas a los agentes</li>
+                    <li>💾 Implementar persistencia de conversaciones con Thread IDs</li>
+                    <li>📊 Agregar métricas y observabilidad</li>
+                    <li>⚠️ Implementar manejo de errores más robusto</li>
+                </ul>
+            </div>
+
+            <!-- Tabla de Referencia Rápida -->
+            <h2>📚 Referencia Rápida</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Componente</th>
+                        <th>Propósito</th>
+                        <th>Ejemplo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span class="highlight">AzureAIAgentClient</span></td>
+                        <td>Cliente para gestionar agentes</td>
+                        <td><code>AzureAIAgentClient(async_credential=cred)</code></td>
+                    </tr>
+                    <tr>
+                        <td><span class="highlight">create_agent()</span></td>
+                        <td>Crear un agente de IA</td>
+                        <td><code>client.create_agent(instructions=&quot;...&quot;, name=&quot;...&quot;)</code></td>
+                    </tr>
+                    <tr>
+                        <td><span class="highlight">@executor</span></td>
+                        <td>Decorador para crear executors</td>
+                        <td><code>@executor(id=&quot;my_executor&quot;)</code></td>
+                    </tr>
+                    <tr>
+                        <td><span class="highlight">WorkflowBuilder</span></td>
+                        <td>Construir workflows</td>
+                        <td><code>WorkflowBuilder().add_edge(a, b).build()</code></td>
+                    </tr>
+                    <tr>
+                        <td><span class="highlight">ctx.send_message()</span></td>
+                        <td>Enviar datos al siguiente executor</td>
+                        <td><code>await ctx.send_message(result)</code></td>
+                    </tr>
+                    <tr>
+                        <td><span class="highlight">ctx.yield_output()</span></td>
+                        <td>Producir salida final</td>
+                        <td><code>await ctx.yield_output(result)</code></td>
+                    </tr>
+                    <tr>
+                        <td><span class="highlight">WorkflowViz</span></td>
+                        <td>Visualizar workflows</td>
+                        <td><code>WorkflowViz(workflow).to_mermaid()</code></td>
+                    </tr>
+                    <tr>
+                        <td><span class="highlight">workflow.run_stream()</span></td>
+                        <td>Ejecutar workflow con streaming</td>
+                        <td><code>async for event in workflow.run_stream(query)</code></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="footer">
+            <h3>📄 Documentación del Workflow Secuencial</h3>
+            <p>Script: <strong>012_sequential_workflow.py</strong></p>
+            <p>Microsoft Agent Framework + Azure AI Foundry</p>
+            <p style="margin-top: 15px; opacity: 0.8;">
+                Generado automáticamente | © 2025
+            </p>
+        </div>
+    </div>
+</body>
+</html>

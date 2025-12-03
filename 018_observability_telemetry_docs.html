@@ -1,0 +1,1215 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentación: Observabilidad y Telemetría - Microsoft Agent Framework</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        h2 {
+            color: #00b4d8;
+            margin-top: 30px;
+            margin-bottom: 20px;
+            font-size: 2em;
+            border-bottom: 3px solid #00b4d8;
+            padding-bottom: 10px;
+        }
+
+        h3 {
+            color: #0077b6;
+            margin-top: 25px;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+
+        h4 {
+            color: #555;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+
+        p {
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+
+        .diagram-container {
+            background: #e3f2fd;
+            border-radius: 8px;
+            padding: 30px;
+            margin: 30px 0;
+            border: 2px solid #00b4d8;
+        }
+
+        .diagram-title {
+            text-align: center;
+            font-weight: bold;
+            color: #00b4d8;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+        }
+
+        .flow-box {
+            background: white;
+            border: 3px solid #00b4d8;
+            border-radius: 8px;
+            padding: 20px 30px;
+            min-width: 180px;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .flow-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+        }
+
+        .flow-box.metric {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            font-weight: bold;
+        }
+
+        .flow-box.agent {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: bold;
+        }
+
+        .arrow-down {
+            font-size: 2em;
+            color: #00b4d8;
+            font-weight: bold;
+            display: block;
+            text-align: center;
+            margin: 10px 0;
+        }
+
+        .code-block {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 20px 0;
+            border-left: 4px solid #00b4d8;
+        }
+
+        .code-block code {
+            font-family: 'Courier New', monospace;
+            font-size: 0.95em;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            display: block;
+        }
+
+        .highlight {
+            background: #fff3cd;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: monospace;
+            color: #856404;
+        }
+
+        .info-box {
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        .warning-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        .success-box {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        .component-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .component-card {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .component-card:hover {
+            border-color: #00b4d8;
+            box-shadow: 0 4px 16px rgba(0, 180, 216, 0.3);
+        }
+
+        .component-card h4 {
+            color: #00b4d8;
+            margin-bottom: 15px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        th {
+            background: #00b4d8;
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: bold;
+        }
+
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        tr:hover {
+            background: #e3f2fd;
+        }
+
+        .toc {
+            background: #e3f2fd;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .toc h3 {
+            color: #00b4d8;
+            margin-bottom: 15px;
+        }
+
+        .toc ul {
+            list-style: none;
+            margin-left: 0;
+        }
+
+        .toc li {
+            margin-bottom: 10px;
+        }
+
+        .toc a {
+            color: #00b4d8;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .toc a:hover {
+            color: #0077b6;
+            text-decoration: underline;
+        }
+
+        .footer {
+            background: #2d2d2d;
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        ul, ol {
+            margin-left: 30px;
+            margin-bottom: 15px;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        .metrics-dashboard {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 2px solid #00b4d8;
+        }
+
+        .metric-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: #e3f2fd;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+
+        .metric-label {
+            font-weight: bold;
+            color: #0077b6;
+        }
+
+        .metric-value {
+            font-size: 1.3em;
+            color: #00b4d8;
+            font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 1.8em;
+            }
+
+            .content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📊 Observabilidad y Telemetría - Microsoft Agent Framework</h1>
+            <p>Documentación Completa del Script 018_observability_telemetry.py</p>
+        </header>
+
+        <div class="content">
+            <!-- Tabla de Contenidos -->
+            <div class="toc">
+                <h3>📑 Tabla de Contenidos</h3>
+                <ul>
+                    <li><a href="#introduccion">1. Introducción</a></li>
+                    <li><a href="#conceptos">2. ¿Qué es Observabilidad?</a></li>
+                    <li><a href="#arquitectura">3. Arquitectura de Observabilidad</a></li>
+                    <li><a href="#componentes">4. Componentes Principales</a></li>
+                    <li><a href="#metricas">5. Métricas Rastreadas</a></li>
+                    <li><a href="#implementacion">6. Implementación Práctica</a></li>
+                    <li><a href="#produccion">7. Integración en Producción</a></li>
+                    <li><a href="#mejores-practicas">8. Mejores Prácticas</a></li>
+                </ul>
+            </div>
+
+            <!-- 1. Introducción -->
+            <h2 id="introduccion">1. 📖 Introducción</h2>
+            <p>
+                El script <span class="highlight">018_observability_telemetry.py</span> demuestra cómo implementar
+                <strong>Observabilidad y Telemetría</strong> completa para aplicaciones con el
+                <strong>Microsoft Agent Framework</strong>.
+            </p>
+
+            <div class="success-box">
+                <strong>🎯 Propósito Principal:</strong> La observabilidad es <strong>crítica para producción</strong>.
+                Te permite monitorear, debuggear, optimizar y entender el comportamiento de tus agentes de IA en tiempo real.
+            </div>
+
+            <div class="warning-box">
+                <strong>⚠️ Importante:</strong> Sin observabilidad, operar agentes de IA en producción es como volar un
+                avión sin instrumentos. No sabes qué está pasando hasta que algo falla.
+            </div>
+
+            <div class="info-box">
+                <strong>💡 ¿Por qué es Crítico en IA?</strong>
+                <ul>
+                    <li>🔍 <strong>Debugging:</strong> Los LLMs son no-determinísticos (misma entrada, diferentes salidas)</li>
+                    <li>💰 <strong>Costos:</strong> Cada llamada consume tokens = dinero. Debes monitorear gastos.</li>
+                    <li>⏱️ <strong>Latencia:</strong> Las respuestas lentas afectan la experiencia del usuario</li>
+                    <li>🐛 <strong>Errores:</strong> Los LLMs pueden fallar de formas inesperadas</li>
+                    <li>📈 <strong>Patrones:</strong> Identificar qué consultas son más comunes, cuáles fallan</li>
+                    <li>✅ <strong>Calidad:</strong> Medir la calidad de las respuestas del agente</li>
+                </ul>
+            </div>
+
+            <!-- Diagrama Principal -->
+            <div class="diagram-container">
+                <div class="diagram-title">📊 Flujo de Observabilidad</div>
+                <div style="display: flex; flex-direction: column; align-items: center; gap: 20px;">
+                    <div class="flow-box">
+                        <strong>👤 Usuario</strong><br>
+                        <small>Consulta al agente</small>
+                    </div>
+
+                    <span class="arrow-down">↓</span>
+
+                    <div class="flow-box metric">
+                        <strong>⏱️ START TIMER</strong><br>
+                        <small>Iniciar medición</small>
+                    </div>
+
+                    <span class="arrow-down">↓</span>
+
+                    <div style="background: #e3f2fd; padding: 20px; border-radius: 8px; border: 2px dashed #00b4d8; width: 80%;">
+                        <strong style="color: #00b4d8; display: block; text-align: center; margin-bottom: 15px;">
+                            OBSERVABLE AGENT WRAPPER
+                        </strong>
+                        <div style="display: flex; flex-direction: column; gap: 10px;">
+                            <div style="background: white; padding: 10px; border-radius: 5px; border-left: 4px solid #2196F3;">
+                                📝 Log: Inicio de ejecución
+                            </div>
+                            <div style="background: white; padding: 10px; border-radius: 5px; border-left: 4px solid #667eea;">
+                                🤖 Ejecutar agente
+                            </div>
+                            <div style="background: white; padding: 10px; border-radius: 5px; border-left: 4px solid #28a745;">
+                                📊 Capturar métricas
+                            </div>
+                        </div>
+                    </div>
+
+                    <span class="arrow-down">↓</span>
+
+                    <div class="flow-box metric">
+                        <strong>⏱️ END TIMER</strong><br>
+                        <small>Calcular tiempo</small>
+                    </div>
+
+                    <span class="arrow-down">↓</span>
+
+                    <div class="flow-box metric">
+                        <strong>💾 METRICS COLLECTOR</strong><br>
+                        <small>Registrar todas las métricas</small>
+                    </div>
+
+                    <span class="arrow-down">↓</span>
+
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
+                        <div style="background: white; padding: 15px; border-radius: 8px; border: 2px solid #28a745;">
+                            <strong>📈 Dashboard</strong>
+                        </div>
+                        <div style="background: white; padding: 15px; border-radius: 8px; border: 2px solid #ffc107;">
+                            <strong>📝 Logs</strong>
+                        </div>
+                        <div style="background: white; padding: 15px; border-radius: 8px; border: 2px solid #2196F3;">
+                            <strong>⚠️ Alertas</strong>
+                        </div>
+                        <div style="background: white; padding: 15px; border-radius: 8px; border: 2px solid #9c27b0;">
+                            <strong>📊 Analytics</strong>
+                        </div>
+                    </div>
+
+                    <span class="arrow-down">↓</span>
+
+                    <div class="flow-box">
+                        <strong>📤 Respuesta + Métricas</strong><br>
+                        <small>Usuario recibe resultado</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. Conceptos -->
+            <h2 id="conceptos">2. 🧠 ¿Qué es Observabilidad?</h2>
+
+            <p>
+                <strong>Observabilidad</strong> es la capacidad de entender el estado interno de un sistema
+                basándose en sus salidas externas. En el contexto de agentes de IA, incluye:
+            </p>
+
+            <div class="component-grid">
+                <div class="component-card">
+                    <h4>📝 Logging</h4>
+                    <p><strong>¿Qué?</strong> Registrar eventos que ocurren</p>
+                    <p><strong>¿Por qué?</strong> Debugging, auditoría, compliance</p>
+                    <p><strong>¿Qué registrar?</strong></p>
+                    <ul>
+                        <li>Entradas del usuario</li>
+                        <li>Respuestas del agente</li>
+                        <li>Errores y excepciones</li>
+                        <li>Decisiones tomadas</li>
+                    </ul>
+                </div>
+
+                <div class="component-card">
+                    <h4>📊 Métricas</h4>
+                    <p><strong>¿Qué?</strong> Valores numéricos que miden comportamiento</p>
+                    <p><strong>¿Por qué?</strong> Monitoreo, alertas, optimización</p>
+                    <p><strong>¿Qué medir?</strong></p>
+                    <ul>
+                        <li>Tiempo de respuesta</li>
+                        <li>Uso de tokens</li>
+                        <li>Costos</li>
+                        <li>Tasas de error</li>
+                    </ul>
+                </div>
+
+                <div class="component-card">
+                    <h4>🔍 Tracing</h4>
+                    <p><strong>¿Qué?</strong> Seguir el flujo de una request</p>
+                    <p><strong>¿Por qué?</strong> Entender latencia, debugging distribuido</p>
+                    <p><strong>¿Qué rastrear?</strong></p>
+                    <ul>
+                        <li>Span de cada operación</li>
+                        <li>Tiempo por componente</li>
+                        <li>Relaciones entre servicios</li>
+                        <li>Contexto de ejecución</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="info-box">
+                <strong>💡 Los Tres Pilares de Observabilidad:</strong>
+                <ol>
+                    <li><strong>Logs:</strong> Eventos discretos con contexto (qué pasó, cuándo, dónde)</li>
+                    <li><strong>Metrics:</strong> Mediciones numéricas agregables (cuánto, qué tan rápido)</li>
+                    <li><strong>Traces:</strong> Flujo de requests a través del sistema (cómo se propagó)</li>
+                </ol>
+            </div>
+
+            <!-- 3. Arquitectura -->
+            <h2 id="arquitectura">3. 🏗️ Arquitectura de Observabilidad</h2>
+
+            <div class="diagram-container">
+                <div class="diagram-title">🏛️ Capas de la Arquitectura</div>
+                <div style="display: flex; flex-direction: column; gap: 15px;">
+                    <div style="background: white; padding: 20px; border-radius: 8px; border: 2px solid #00b4d8;">
+                        <strong style="color: #00b4d8; display: block; margin-bottom: 10px;">CAPA 1: Instrumentación</strong>
+                        <ul>
+                            <li><strong>ObservableAgent Wrapper:</strong> Envuelve agentes con observabilidad automática</li>
+                            <li><strong>Logging Estructurado:</strong> JSON logging con campos consistentes</li>
+                            <li><strong>Captura de Métricas:</strong> Tiempo, tokens, costos, errores</li>
+                        </ul>
+                    </div>
+
+                    <div style="background: white; padding: 20px; border-radius: 8px; border: 2px solid #2196F3;">
+                        <strong style="color: #2196F3; display: block; margin-bottom: 10px;">CAPA 2: Recolección</strong>
+                        <ul>
+                            <li><strong>MetricsCollector:</strong> Centraliza métricas de múltiples agentes</li>
+                            <li><strong>AgentMetrics:</strong> Almacena métricas por agente individual</li>
+                            <li><strong>Historial:</strong> Mantiene historial de todas las ejecuciones</li>
+                        </ul>
+                    </div>
+
+                    <div style="background: white; padding: 20px; border-radius: 8px; border: 2px solid #28a745;">
+                        <strong style="color: #28a745; display: block; margin-bottom: 10px;">CAPA 3: Almacenamiento</strong>
+                        <ul>
+                            <li><strong>En memoria:</strong> Para desarrollo y pruebas</li>
+                            <li><strong>Exportación JSON:</strong> Para análisis offline</li>
+                            <li><strong>Producción:</strong> Base de datos, time-series DB, APM</li>
+                        </ul>
+                    </div>
+
+                    <div style="background: white; padding: 20px; border-radius: 8px; border: 2px solid #ffc107;">
+                        <strong style="color: #ffc107; display: block; margin-bottom: 10px;">CAPA 4: Visualización y Análisis</strong>
+                        <ul>
+                            <li><strong>Dashboards:</strong> Grafana, Azure Monitor, DataDog</li>
+                            <li><strong>Alertas:</strong> Notificaciones cuando hay problemas</li>
+                            <li><strong>Analytics:</strong> Análisis de patrones y tendencias</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. Componentes -->
+            <h2 id="componentes">4. 🔩 Componentes Principales</h2>
+
+            <h3>4.1. AgentMetrics - Clase de Métricas</h3>
+
+            <div class="code-block"><code>from dataclasses import dataclass
+
+@dataclass
+class AgentMetrics:
+    &quot;&quot;&quot;Almacena métricas de un agente&quot;&quot;&quot;
+    agent_name: str
+    total_runs: int = 0
+    total_errors: int = 0
+    total_execution_time: float = 0.0
+    total_tokens_prompt: int = 0
+    total_tokens_completion: int = 0
+    total_cost_usd: float = 0.0
+    run_history: List[Dict[str, Any]] = None
+
+    @property
+    def avg_execution_time(self) -&gt; float:
+        &quot;&quot;&quot;Tiempo promedio de ejecución&quot;&quot;&quot;
+        return self.total_execution_time / self.total_runs if self.total_runs &gt; 0 else 0.0
+
+    @property
+    def total_tokens(self) -&gt; int:
+        &quot;&quot;&quot;Total de tokens usados&quot;&quot;&quot;
+        return self.total_tokens_prompt + self.total_tokens_completion
+
+    @property
+    def success_rate(self) -&gt; float:
+        &quot;&quot;&quot;Tasa de éxito en porcentaje&quot;&quot;&quot;
+        if self.total_runs == 0:
+            return 0.0
+        return (self.total_runs - self.total_errors) / self.total_runs * 100
+</code></div>
+
+            <div class="metrics-dashboard">
+                <h4 style="text-align: center; color: #00b4d8; margin-bottom: 20px;">📊 Dashboard de Ejemplo</h4>
+                <div class="metric-item">
+                    <span class="metric-label">Total de Ejecuciones:</span>
+                    <span class="metric-value">1,234</span>
+                </div>
+                <div class="metric-item">
+                    <span class="metric-label">Errores:</span>
+                    <span class="metric-value" style="color: #dc3545;">23</span>
+                </div>
+                <div class="metric-item">
+                    <span class="metric-label">Tasa de Éxito:</span>
+                    <span class="metric-value" style="color: #28a745;">98.1%</span>
+                </div>
+                <div class="metric-item">
+                    <span class="metric-label">Tiempo Promedio:</span>
+                    <span class="metric-value">2.34s</span>
+                </div>
+                <div class="metric-item">
+                    <span class="metric-label">Tokens Totales:</span>
+                    <span class="metric-value">456,789</span>
+                </div>
+                <div class="metric-item">
+                    <span class="metric-label">Costo Estimado:</span>
+                    <span class="metric-value" style="color: #ffc107;">$12.45</span>
+                </div>
+            </div>
+
+            <h3>4.2. MetricsCollector - Recolector Centralizado</h3>
+
+            <div class="code-block"><code>class MetricsCollector:
+    &quot;&quot;&quot;Collector centralizado para múltiples agentes&quot;&quot;&quot;
+
+    def __init__(self):
+        self.metrics: Dict[str, AgentMetrics] = {}
+        self.global_metrics = {
+            'total_agents': 0,
+            'total_runs': 0,
+            'total_errors': 0,
+            'total_tokens': 0,
+            'total_cost': 0.0
+        }
+
+    def record_run(
+        self,
+        agent_name: str,
+        execution_time: float,
+        tokens_prompt: int = 0,
+        tokens_completion: int = 0,
+        cost_usd: float = 0.0,
+        error: bool = False,
+        query: str = &quot;&quot;,
+        response: str = &quot;&quot;
+    ):
+        &quot;&quot;&quot;Registra una ejecución del agente&quot;&quot;&quot;
+        metrics = self.get_or_create_metrics(agent_name)
+
+        # Actualizar métricas
+        metrics.total_runs += 1
+        metrics.total_execution_time += execution_time
+        metrics.total_tokens_prompt += tokens_prompt
+        metrics.total_tokens_completion += tokens_completion
+        metrics.total_cost_usd += cost_usd
+
+        if error:
+            metrics.total_errors += 1
+
+        # Guardar en historial
+        metrics.run_history.append({
+            'timestamp': datetime.utcnow().isoformat(),
+            'execution_time': execution_time,
+            'tokens_prompt': tokens_prompt,
+            'tokens_completion': tokens_completion,
+            'cost_usd': cost_usd,
+            'error': error,
+            'query': query[:100],
+            'response': response[:100]
+        })
+
+        # Actualizar métricas globales
+        self.global_metrics['total_runs'] += 1
+        self.global_metrics['total_tokens'] += tokens_prompt + tokens_completion
+        self.global_metrics['total_cost'] += cost_usd
+        if error:
+            self.global_metrics['total_errors'] += 1
+
+        # Log estructurado
+        logger.info(&quot;Agent run completed&quot;, extra={...})
+</code></div>
+
+            <h3>4.3. ObservableAgent - Wrapper con Observabilidad Automática</h3>
+
+            <div class="code-block"><code>class ObservableAgent:
+    &quot;&quot;&quot;Wrapper que agrega observabilidad automática a cualquier agente&quot;&quot;&quot;
+
+    def __init__(self, agent, agent_name: str, cost_per_1k_tokens: float = 0.001):
+        self.agent = agent
+        self.agent_name = agent_name
+        self.cost_per_1k_tokens = cost_per_1k_tokens
+
+    async def run(self, query: str, **kwargs) -&gt; Any:
+        &quot;&quot;&quot;Ejecuta el agente con observabilidad automática&quot;&quot;&quot;
+        start_time = time.time()
+        error = False
+        response = None
+
+        try:
+            # Log inicio
+            logger.info(f&quot;Starting agent run: {self.agent_name}&quot;)
+
+            # Ejecutar agente
+            response = await self.agent.run(query, **kwargs)
+
+            # Estimar tokens (en producción, extraer del response)
+            tokens_prompt = len(query.split()) * 1.3
+            tokens_completion = len(str(response).split()) * 1.3
+
+        except Exception as e:
+            error = True
+            logger.error(f&quot;Agent run failed: {self.agent_name}&quot;, extra={'error': str(e)})
+            raise
+
+        finally:
+            # Calcular métricas
+            execution_time = time.time() - start_time
+            total_tokens = tokens_prompt + tokens_completion
+            cost_usd = (total_tokens / 1000) * self.cost_per_1k_tokens
+
+            # Registrar métricas automáticamente
+            metrics_collector.record_run(
+                agent_name=self.agent_name,
+                execution_time=execution_time,
+                tokens_prompt=int(tokens_prompt),
+                tokens_completion=int(tokens_completion),
+                cost_usd=cost_usd,
+                error=error,
+                query=query,
+                response=str(response) if response else &quot;&quot;
+            )
+
+        return response
+</code></div>
+
+            <div class="success-box">
+                <strong>✅ Ventaja del Wrapper:</strong> Una vez que envuelves un agente con
+                <span class="highlight">ObservableAgent</span>, todas las invocaciones automáticamente:
+                <ul>
+                    <li>✅ Se loguean en formato estructurado</li>
+                    <li>✅ Se mide el tiempo de ejecución</li>
+                    <li>✅ Se rastrean tokens y costos</li>
+                    <li>✅ Se capturan errores</li>
+                    <li>✅ Se guardan en el historial</li>
+                </ul>
+            </div>
+
+            <!-- 5. Métricas -->
+            <h2 id="metricas">5. 📊 Métricas Rastreadas</h2>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Métrica</th>
+                        <th>Tipo</th>
+                        <th>Descripción</th>
+                        <th>Por qué es Importante</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Execution Time</strong></td>
+                        <td>Latency</td>
+                        <td>Tiempo total de respuesta</td>
+                        <td>Experiencia del usuario, SLAs</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Tokens Prompt</strong></td>
+                        <td>Usage</td>
+                        <td>Tokens en la entrada</td>
+                        <td>Costo, optimización de prompts</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Tokens Completion</strong></td>
+                        <td>Usage</td>
+                        <td>Tokens en la respuesta</td>
+                        <td>Costo, longitud de respuestas</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Cost (USD)</strong></td>
+                        <td>Financial</td>
+                        <td>Costo estimado por run</td>
+                        <td>Budget, ROI, optimización</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Error Rate</strong></td>
+                        <td>Reliability</td>
+                        <td>Porcentaje de errores</td>
+                        <td>Calidad, debugging, alertas</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Success Rate</strong></td>
+                        <td>Reliability</td>
+                        <td>Porcentaje de éxitos</td>
+                        <td>SLAs, confiabilidad</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Total Runs</strong></td>
+                        <td>Volume</td>
+                        <td>Número de ejecuciones</td>
+                        <td>Escala, patrones de uso</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Run History</strong></td>
+                        <td>Historical</td>
+                        <td>Registro completo de runs</td>
+                        <td>Auditoría, análisis, debugging</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>5.1. Métricas Derivadas (Calculadas)</h3>
+
+            <div class="component-grid">
+                <div class="component-card">
+                    <h4>⏱️ Avg Execution Time</h4>
+                    <p><strong>Fórmula:</strong></p>
+                    <div class="code-block"><code>avg_time = total_execution_time / total_runs</code></div>
+                    <p><strong>Uso:</strong> Identificar degradación de performance</p>
+                </div>
+
+                <div class="component-card">
+                    <h4>💰 Cost per Run</h4>
+                    <p><strong>Fórmula:</strong></p>
+                    <div class="code-block"><code>cost_per_run = total_cost / total_runs</code></div>
+                    <p><strong>Uso:</strong> Optimizar costos, presupuesto</p>
+                </div>
+
+                <div class="component-card">
+                    <h4>📊 Tokens per Run</h4>
+                    <p><strong>Fórmula:</strong></p>
+                    <div class="code-block"><code>tokens_per_run = total_tokens / total_runs</code></div>
+                    <p><strong>Uso:</strong> Optimizar longitud de prompts</p>
+                </div>
+
+                <div class="component-card">
+                    <h4>✅ Success Rate</h4>
+                    <p><strong>Fórmula:</strong></p>
+                    <div class="code-block"><code>success_rate = (total_runs - total_errors) / total_runs * 100</code></div>
+                    <p><strong>Uso:</strong> SLAs, alertas de calidad</p>
+                </div>
+            </div>
+
+            <!-- 6. Implementación -->
+            <h2 id="implementacion">6. 🚀 Implementación Práctica</h2>
+
+            <h3>6.1. Logging Estructurado</h3>
+
+            <div class="code-block"><code>import logging
+import json
+from datetime import datetime
+
+def setup_structured_logging():
+    &quot;&quot;&quot;Configura logging estructurado con formato JSON&quot;&quot;&quot;
+    logger = logging.getLogger(&quot;AgentFrameworkObservability&quot;)
+    logger.setLevel(logging.INFO)
+
+    # Formatter JSON personalizado
+    class JSONFormatter(logging.Formatter):
+        def format(self, record):
+            log_data = {
+                &quot;timestamp&quot;: datetime.utcnow().isoformat(),
+                &quot;level&quot;: record.levelname,
+                &quot;logger&quot;: record.name,
+                &quot;message&quot;: record.getMessage(),
+                &quot;module&quot;: record.module,
+                &quot;function&quot;: record.funcName,
+                &quot;line&quot;: record.lineno
+            }
+
+            # Agregar campos extra si existen
+            if hasattr(record, 'extra_data'):
+                log_data.update(record.extra_data)
+
+            return json.dumps(log_data, indent=2)
+
+    handler = logging.StreamHandler()
+    handler.setFormatter(JSONFormatter())
+    logger.addHandler(handler)
+
+    return logger
+
+# Uso
+logger = setup_structured_logging()
+logger.info(&quot;Agent run completed&quot;, extra={'extra_data': {
+    'agent_name': 'MyAgent',
+    'execution_time': 1.23,
+    'tokens': 500,
+    'cost': 0.001
+}})
+</code></div>
+
+            <div class="info-box">
+                <strong>💡 Ventajas del Logging Estructurado (JSON):</strong>
+                <ul>
+                    <li>✅ <strong>Parseado automático:</strong> Herramientas como ELK pueden indexar campos</li>
+                    <li>✅ <strong>Búsquedas precisas:</strong> Filtrar por cualquier campo</li>
+                    <li>✅ <strong>Agregaciones:</strong> Calcular promedios, sumas, etc.</li>
+                    <li>✅ <strong>Consistencia:</strong> Mismo formato en todos los logs</li>
+                </ul>
+            </div>
+
+            <h3>6.2. Uso Completo - Ejemplo End-to-End</h3>
+
+            <div class="code-block"><code># 1. Setup
+logger = setup_structured_logging()
+metrics_collector = MetricsCollector()
+
+# 2. Crear agente base
+async with AzureAIAgentClient(...) as client:
+    base_agent = client.create_agent(
+        name=&quot;Assistant&quot;,
+        instructions=&quot;Eres un asistente útil&quot;
+    )
+
+    # 3. Envolver con ObservableAgent
+    observable_agent = ObservableAgent(
+        agent=base_agent,
+        agent_name=&quot;ObservableAssistant&quot;,
+        cost_per_1k_tokens=0.001
+    )
+
+    # 4. Usar normalmente - observabilidad automática
+    response = await observable_agent.run(&quot;¿Cuál es la capital de Francia?&quot;)
+    # ← Automáticamente logueado, métricas capturadas
+
+    # 5. Ver métricas
+    metrics = metrics_collector.get_or_create_metrics(&quot;ObservableAssistant&quot;)
+    metrics.print_summary()
+
+    # 6. Exportar para análisis
+    metrics_collector.export_metrics(&quot;metrics_export.json&quot;)
+</code></div>
+
+            <!-- 7. Producción -->
+            <h2 id="produccion">7. 🏭 Integración en Producción</h2>
+
+            <div class="warning-box">
+                <strong>⚠️ Importante:</strong> Este script usa implementación básica (logging estándar, métricas en memoria).
+                En producción, debes integrar con herramientas profesionales.
+            </div>
+
+            <h3>7.1. Stack de Observabilidad Recomendado</h3>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Componente</th>
+                        <th>Herramientas</th>
+                        <th>Propósito</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Logging</strong></td>
+                        <td>
+                            • Azure Application Insights<br>
+                            • ELK Stack (Elasticsearch, Logstash, Kibana)<br>
+                            • Splunk<br>
+                            • CloudWatch Logs
+                        </td>
+                        <td>Almacenar, buscar, analizar logs</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Métricas</strong></td>
+                        <td>
+                            • Prometheus + Grafana<br>
+                            • Azure Monitor<br>
+                            • DataDog<br>
+                            • New Relic
+                        </td>
+                        <td>Time-series metrics, dashboards, alertas</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Tracing</strong></td>
+                        <td>
+                            • OpenTelemetry<br>
+                            • Jaeger<br>
+                            • Zipkin<br>
+                            • Azure Application Insights
+                        </td>
+                        <td>Tracing distribuido, latencia por componente</td>
+                    </tr>
+                    <tr>
+                        <td><strong>APM</strong></td>
+                        <td>
+                            • DataDog APM<br>
+                            • New Relic APM<br>
+                            • Azure Application Insights<br>
+                            • Elastic APM
+                        </td>
+                        <td>Application Performance Monitoring completo</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>7.2. Ejemplo de Integración con OpenTelemetry</h3>
+
+            <div class="code-block"><code># Ejemplo de integración con OpenTelemetry
+from opentelemetry import trace
+from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+
+# Setup OpenTelemetry
+trace.set_tracer_provider(TracerProvider())
+tracer = trace.get_tracer(__name__)
+
+# Agregar exporter
+otlp_exporter = OTLPSpanExporter(endpoint=&quot;http://localhost:4317&quot;)
+span_processor = BatchSpanProcessor(otlp_exporter)
+trace.get_tracer_provider().add_span_processor(span_processor)
+
+# Instrumentar agente
+class TracedAgent(ObservableAgent):
+    async def run(self, query: str, **kwargs):
+        with tracer.start_as_current_span(&quot;agent_run&quot;) as span:
+            span.set_attribute(&quot;agent.name&quot;, self.agent_name)
+            span.set_attribute(&quot;query.length&quot;, len(query))
+
+            try:
+                response = await super().run(query, **kwargs)
+                span.set_attribute(&quot;response.length&quot;, len(str(response)))
+                return response
+            except Exception as e:
+                span.set_status(trace.Status(trace.StatusCode.ERROR))
+                span.record_exception(e)
+                raise
+</code></div>
+
+            <!-- 8. Mejores Prácticas -->
+            <h2 id="mejores-practicas">8. ✨ Mejores Prácticas</h2>
+
+            <h3>8.1. Qué Rastrear</h3>
+
+            <div class="success-box">
+                <strong>✅ Datos Críticos a Rastrear:</strong>
+                <ul>
+                    <li>⏱️ <strong>Latencia:</strong> P50, P95, P99 (percentiles)</li>
+                    <li>💰 <strong>Costos:</strong> Por request, por usuario, por día</li>
+                    <li>🔢 <strong>Tokens:</strong> Prompt, completion, total</li>
+                    <li>❌ <strong>Errores:</strong> Tipo, frecuencia, contexto</li>
+                    <li>👤 <strong>Uso:</strong> Requests por usuario, patrones</li>
+                    <li>📝 <strong>Queries:</strong> Tipos de consultas más comunes</li>
+                    <li>⚙️ <strong>Tools:</strong> Qué herramientas se usan más</li>
+                    <li>✅ <strong>Calidad:</strong> Satisfacción del usuario (si disponible)</li>
+                </ul>
+            </div>
+
+            <h3>8.2. Alertas Recomendadas</h3>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Alerta</th>
+                        <th>Condición</th>
+                        <th>Severidad</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Alta tasa de error</td>
+                        <td>Error rate > 5%</td>
+                        <td>CRITICAL</td>
+                        <td>Investigar inmediatamente</td>
+                    </tr>
+                    <tr>
+                        <td>Latencia elevada</td>
+                        <td>P95 > 5 segundos</td>
+                        <td>WARNING</td>
+                        <td>Revisar performance</td>
+                    </tr>
+                    <tr>
+                        <td>Costos anormales</td>
+                        <td>Costo diario > 2x promedio</td>
+                        <td>WARNING</td>
+                        <td>Revisar uso, posible abuso</td>
+                    </tr>
+                    <tr>
+                        <td>Tokens excesivos</td>
+                        <td>Tokens/request > 10k</td>
+                        <td>INFO</td>
+                        <td>Optimizar prompts</td>
+                    </tr>
+                    <tr>
+                        <td>Servicio caído</td>
+                        <td>0 requests en 5 min</td>
+                        <td>CRITICAL</td>
+                        <td>Verificar disponibilidad</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>8.3. Performance y Overhead</h3>
+
+            <div class="warning-box">
+                <strong>⚠️ Consideraciones de Performance:</strong>
+                <ul>
+                    <li>📊 <strong>Overhead mínimo:</strong> Logging/métricas deben ser rápidos (< 10ms)</li>
+                    <li>⚡ <strong>Async I/O:</strong> No bloquear el agente con logging síncrono</li>
+                    <li>💾 <strong>Sampling:</strong> En alto tráfico, considera samplear (loguear 1/N requests)</li>
+                    <li>📦 <strong>Batch writes:</strong> Agrupar logs/métricas antes de enviar</li>
+                    <li>🗜️ <strong>Compresión:</strong> Comprimir logs antes de almacenar</li>
+                </ul>
+            </div>
+
+            <h3>8.4. Privacidad y Seguridad</h3>
+
+            <div class="warning-box">
+                <strong>⚠️ IMPORTANTE - Privacidad de Datos:</strong>
+                <ul>
+                    <li>🔒 <strong>NO loguear:</strong> Información sensible (contraseñas, API keys, PII)</li>
+                    <li>📝 <strong>Redactar:</strong> Datos personales antes de loguear</li>
+                    <li>🔐 <strong>Encriptar:</strong> Logs en tránsito y en reposo</li>
+                    <li>⏳ <strong>Retention:</strong> Definir políticas de retención (GDPR, compliance)</li>
+                    <li>🚫 <strong>Acceso:</strong> Controlar quién puede ver logs/métricas</li>
+                </ul>
+            </div>
+
+            <!-- Resumen Final -->
+            <h2>🎯 Resumen Final</h2>
+
+            <div class="success-box">
+                <h3 style="margin-top: 0;">Conceptos Clave Aprendidos:</h3>
+                <ol>
+                    <li><strong>Observabilidad es crítica</strong> para operar agentes de IA en producción</li>
+                    <li><strong>Tres pilares:</strong> Logs, Metrics, Traces</li>
+                    <li><strong>AgentMetrics:</strong> Clase para almacenar métricas por agente</li>
+                    <li><strong>MetricsCollector:</strong> Centraliza métricas de múltiples agentes</li>
+                    <li><strong>ObservableAgent:</strong> Wrapper con observabilidad automática</li>
+                    <li><strong>Logging estructurado (JSON):</strong> Facilita análisis y búsqueda</li>
+                    <li><strong>Métricas rastreadas:</strong> Tiempo, tokens, costos, errores, éxito</li>
+                    <li><strong>Integración producción:</strong> OpenTelemetry, APM, dashboards</li>
+                </ol>
+            </div>
+
+            <div class="info-box">
+                <h3 style="margin-top: 0;">Próximos Pasos Sugeridos:</h3>
+                <ul>
+                    <li>🔄 Integrar con <strong>OpenTelemetry</strong> para tracing distribuido</li>
+                    <li>📊 Configurar <strong>Dashboards en Grafana</strong> con Prometheus</li>
+                    <li>⚠️ Implementar <strong>sistema de alertas</strong> para errores críticos</li>
+                    <li>💾 Usar <strong>time-series database</strong> para métricas históricas</li>
+                    <li>🔍 Agregar <strong>distributed tracing</strong> para workflows complejos</li>
+                    <li>📈 Implementar <strong>A/B testing</strong> con métricas</li>
+                    <li>🎯 Medir <strong>calidad de respuestas</strong> (evaluators, feedback)</li>
+                </ul>
+            </div>
+
+            <!-- Tabla de Referencia -->
+            <h2>📚 Referencia Rápida</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Componente</th>
+                        <th>Propósito</th>
+                        <th>Código Clave</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>AgentMetrics</strong></td>
+                        <td>Almacenar métricas</td>
+                        <td><code>@dataclass class AgentMetrics</code></td>
+                    </tr>
+                    <tr>
+                        <td><strong>MetricsCollector</strong></td>
+                        <td>Centralizar recolección</td>
+                        <td><code>metrics_collector.record_run(...)</code></td>
+                    </tr>
+                    <tr>
+                        <td><strong>ObservableAgent</strong></td>
+                        <td>Wrapper automático</td>
+                        <td><code>ObservableAgent(agent, name)</code></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Logging JSON</strong></td>
+                        <td>Logs estructurados</td>
+                        <td><code>JSONFormatter</code></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Exportar</strong></td>
+                        <td>Guardar métricas</td>
+                        <td><code>export_metrics("file.json")</code></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Ver resumen</strong></td>
+                        <td>Dashboard consola</td>
+                        <td><code>metrics.print_summary()</code></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="warning-box" style="margin-top: 30px;">
+                <strong>⚠️ Recordatorio Final:</strong>
+                <p style="font-size: 1.1em;">
+                    Sin observabilidad, estás volando a ciegas. En producción con agentes de IA, donde los costos
+                    pueden escalar rápidamente y los errores son no-determinísticos, la observabilidad no es opcional
+                    - es <strong>fundamental</strong>.
+                </p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <h3>📊 Documentación de Observabilidad y Telemetría</h3>
+            <p>Script: <strong>018_observability_telemetry.py</strong></p>
+            <p>Microsoft Agent Framework + Azure AI Foundry</p>
+            <p>Logging | Metrics | Tracing | Production-Ready</p>
+            <p style="margin-top: 15px; opacity: 0.8;">
+                Generado automáticamente | © 2025
+            </p>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,1100 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentación: Workflows Condicionales - Microsoft Agent Framework</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #f857a6 0%, #ff5858 100%);
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #f857a6 0%, #ff5858 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        h2 {
+            color: #ff5858;
+            margin-top: 30px;
+            margin-bottom: 20px;
+            font-size: 2em;
+            border-bottom: 3px solid #ff5858;
+            padding-bottom: 10px;
+        }
+
+        h3 {
+            color: #f857a6;
+            margin-top: 25px;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+
+        h4 {
+            color: #555;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+
+        p {
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+
+        .diagram-container {
+            background: #fff0f5;
+            border-radius: 8px;
+            padding: 30px;
+            margin: 30px 0;
+            border: 2px solid #ff5858;
+        }
+
+        .diagram-title {
+            text-align: center;
+            font-weight: bold;
+            color: #ff5858;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+        }
+
+        .flow-box {
+            background: white;
+            border: 3px solid #ff5858;
+            border-radius: 8px;
+            padding: 20px 30px;
+            min-width: 180px;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .flow-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+        }
+
+        .flow-box.decision {
+            background: linear-gradient(135deg, #f857a6 0%, #ff5858 100%);
+            color: white;
+            font-weight: bold;
+            border-radius: 50%;
+            width: 150px;
+            height: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+
+        .flow-box.handler {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: bold;
+        }
+
+        .flow-box.validator {
+            background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+            color: white;
+            font-weight: bold;
+        }
+
+        .arrow {
+            font-size: 2em;
+            color: #ff5858;
+            font-weight: bold;
+        }
+
+        .arrow-down {
+            font-size: 2em;
+            color: #ff5858;
+            font-weight: bold;
+            display: block;
+            text-align: center;
+            margin: 10px 0;
+        }
+
+        .code-block {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 20px 0;
+            border-left: 4px solid #ff5858;
+        }
+
+        .code-block code {
+            font-family: 'Courier New', monospace;
+            font-size: 0.95em;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            display: block;
+        }
+
+        .highlight {
+            background: #fff3cd;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: monospace;
+            color: #856404;
+        }
+
+        .info-box {
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        .warning-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        .success-box {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        .component-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .component-card {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .component-card:hover {
+            border-color: #ff5858;
+            box-shadow: 0 4px 16px rgba(255, 88, 88, 0.3);
+        }
+
+        .component-card h4 {
+            color: #ff5858;
+            margin-bottom: 15px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        th {
+            background: #ff5858;
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: bold;
+        }
+
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        tr:hover {
+            background: #fff0f5;
+        }
+
+        .toc {
+            background: #fff0f5;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .toc h3 {
+            color: #ff5858;
+            margin-bottom: 15px;
+        }
+
+        .toc ul {
+            list-style: none;
+            margin-left: 0;
+        }
+
+        .toc li {
+            margin-bottom: 10px;
+        }
+
+        .toc a {
+            color: #ff5858;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .toc a:hover {
+            color: #f857a6;
+            text-decoration: underline;
+        }
+
+        .footer {
+            background: #2d2d2d;
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        ul, ol {
+            margin-left: 30px;
+            margin-bottom: 15px;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        .pattern-comparison {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 1.8em;
+            }
+
+            .content {
+                padding: 20px;
+            }
+
+            .flow-box.decision {
+                width: 120px;
+                height: 120px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔀 Workflows Condicionales - Microsoft Agent Framework</h1>
+            <p>Documentación Completa del Script 019_conditional_workflows.py</p>
+        </header>
+
+        <div class="content">
+            <!-- Tabla de Contenidos -->
+            <div class="toc">
+                <h3>📑 Tabla de Contenidos</h3>
+                <ul>
+                    <li><a href="#introduccion">1. Introducción</a></li>
+                    <li><a href="#conceptos">2. ¿Qué son Workflows Condicionales?</a></li>
+                    <li><a href="#patrones">3. Tres Patrones Principales</a></li>
+                    <li><a href="#clasificador">4. Patrón 1: Clasificador + Routing</a></li>
+                    <li><a href="#validador">5. Patrón 2: Validador + Retry Logic</a></li>
+                    <li><a href="#complejidad">6. Patrón 3: Routing por Complejidad</a></li>
+                    <li><a href="#implementacion">7. Implementación con send_message_to()</a></li>
+                    <li><a href="#mejores-practicas">8. Mejores Prácticas</a></li>
+                </ul>
+            </div>
+
+            <!-- 1. Introducción -->
+            <h2 id="introduccion">1. 📖 Introducción</h2>
+            <p>
+                El script <span class="highlight">019_conditional_workflows.py</span> demuestra cómo crear
+                <strong>Workflows Condicionales</strong> con el <strong>Microsoft Agent Framework</strong>.
+                A diferencia de workflows secuenciales (A→B→C) o paralelos (A→[B,C,D]→E), los workflows condicionales
+                permiten que el <strong>flujo de ejecución cambie dinámicamente</strong> basándose en condiciones,
+                resultados previos, o decisiones del agente.
+            </p>
+
+            <div class="success-box">
+                <strong>🎯 Concepto Clave:</strong> Los workflows condicionales introducen <strong>lógica de decisión</strong>
+                (if/else, switch, loops) en el flujo, permitiendo comportamiento adaptativo e inteligente.
+            </div>
+
+            <div class="info-box">
+                <strong>💡 Analogía del Mundo Real:</strong>
+                <p>Imagina un sistema de atención médica:</p>
+                <ul>
+                    <li>🏥 <strong>Triage:</strong> Clasifica al paciente (urgente, moderado, leve)</li>
+                    <li>🔀 <strong>Routing:</strong> Basado en la clasificación, lo envía a:
+                        <ul>
+                            <li>→ Emergencias (si urgente)</li>
+                            <li>→ Consulta general (si moderado)</li>
+                            <li>→ Enfermería (si leve)</li>
+                        </ul>
+                    </li>
+                    <li>🔄 <strong>Retry:</strong> Si el diagnóstico es incierto, pide segunda opinión</li>
+                </ul>
+                <p>Este es un workflow condicional en acción.</p>
+            </div>
+
+            <!-- Diagrama Principal -->
+            <div class="diagram-container">
+                <div class="diagram-title">🔀 Flujo Condicional vs Secuencial</div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+                    <!-- Secuencial -->
+                    <div>
+                        <h4 style="text-align: center; color: #667eea; margin-bottom: 15px;">Secuencial (Lineal)</h4>
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
+                            <div style="background: #667eea; color: white; padding: 15px; border-radius: 8px; width: 80%;">A</div>
+                            <span style="font-size: 1.5em; color: #667eea;">↓</span>
+                            <div style="background: #667eea; color: white; padding: 15px; border-radius: 8px; width: 80%;">B</div>
+                            <span style="font-size: 1.5em; color: #667eea;">↓</span>
+                            <div style="background: #667eea; color: white; padding: 15px; border-radius: 8px; width: 80%;">C</div>
+                        </div>
+                        <p style="text-align: center; margin-top: 10px; font-size: 0.9em;">Siempre el mismo camino</p>
+                    </div>
+
+                    <!-- Condicional -->
+                    <div>
+                        <h4 style="text-align: center; color: #ff5858; margin-bottom: 15px;">Condicional (Adaptativo)</h4>
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
+                            <div style="background: #ff5858; color: white; padding: 15px; border-radius: 8px; width: 80%;">A</div>
+                            <span style="font-size: 1.5em; color: #ff5858;">↓</span>
+                            <div style="background: #f857a6; color: white; padding: 15px; border-radius: 50%; width: 100px; height: 100px; display: flex; align-items: center; justify-content: center; font-weight: bold;">IF/ELSE</div>
+                            <div style="display: flex; gap: 10px; width: 100%;">
+                                <div style="background: #28a745; color: white; padding: 10px; border-radius: 8px; flex: 1; text-align: center;">→ B</div>
+                                <div style="background: #ffc107; color: white; padding: 10px; border-radius: 8px; flex: 1; text-align: center;">→ C</div>
+                                <div style="background: #2196F3; color: white; padding: 10px; border-radius: 8px; flex: 1; text-align: center;">→ D</div>
+                            </div>
+                        </div>
+                        <p style="text-align: center; margin-top: 10px; font-size: 0.9em;">Camino depende de condiciones</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. Conceptos -->
+            <h2 id="conceptos">2. 🧠 ¿Qué son Workflows Condicionales?</h2>
+
+            <p>
+                Los <strong>Workflows Condicionales</strong> son flujos de trabajo donde la ruta de ejecución
+                se determina <strong>dinámicamente en runtime</strong> basándose en:
+            </p>
+
+            <div class="component-grid">
+                <div class="component-card">
+                    <h4>🎯 Condiciones Estáticas</h4>
+                    <p>Decisiones basadas en reglas predefinidas</p>
+                    <ul>
+                        <li>If/else hardcodeado</li>
+                        <li>Switch case</li>
+                        <li>Thresholds numéricos</li>
+                    </ul>
+                    <p><strong>Ejemplo:</strong> Si error_count > 3, usar fallback</p>
+                </div>
+
+                <div class="component-card">
+                    <h4>🤖 Decisiones del Agente</h4>
+                    <p>El agente analiza y decide la ruta</p>
+                    <ul>
+                        <li>Clasificación de consultas</li>
+                        <li>Scoring de complejidad</li>
+                        <li>Análisis de sentimiento</li>
+                    </ul>
+                    <p><strong>Ejemplo:</strong> Agente clasifica query como "técnico" o "general"</p>
+                </div>
+
+                <div class="component-card">
+                    <h4>📊 Resultados Previos</h4>
+                    <p>Decisiones basadas en outputs anteriores</p>
+                    <ul>
+                        <li>Validación de calidad</li>
+                        <li>Retry logic</li>
+                        <li>Error handling</li>
+                    </ul>
+                    <p><strong>Ejemplo:</strong> Si validación falla, reintentar hasta 3 veces</p>
+                </div>
+            </div>
+
+            <div class="warning-box">
+                <strong>⚠️ Diferencia Clave:</strong>
+                <ul>
+                    <li><strong>Workflows Secuenciales:</strong> A → B → C (siempre el mismo camino)</li>
+                    <li><strong>Workflows Paralelos:</strong> A → [B,C,D] → E (caminos paralelos fijos)</li>
+                    <li><strong>Workflows Condicionales:</strong> A → (if X: B, elif Y: C, else: D) (camino dinámico)</li>
+                </ul>
+            </div>
+
+            <!-- 3. Patrones -->
+            <h2 id="patrones">3. 🎯 Tres Patrones Principales</h2>
+
+            <p>El script demuestra <strong>3 patrones fundamentales</strong> de workflows condicionales:</p>
+
+            <div class="pattern-comparison">
+                <div class="component-card">
+                    <h4>1️⃣ Clasificador + Routing</h4>
+                    <p><strong>Patrón:</strong> If/Else básico</p>
+                    <p><strong>Flujo:</strong></p>
+                    <div style="text-align: center; margin: 10px 0; font-family: monospace; font-size: 0.9em;">
+                        Query → Classifier<br>
+                        ↓<br>
+                        if "technical": → Tech Handler<br>
+                        elif "creative": → Creative Handler<br>
+                        else: → General Handler
+                    </div>
+                    <p><strong>Uso:</strong> Routing de consultas por categoría</p>
+                </div>
+
+                <div class="component-card">
+                    <h4>2️⃣ Validador + Retry Logic</h4>
+                    <p><strong>Patrón:</strong> Loop con validación</p>
+                    <p><strong>Flujo:</strong></p>
+                    <div style="text-align: center; margin: 10px 0; font-family: monospace; font-size: 0.9em;">
+                        Generator → Validator<br>
+                        ↓<br>
+                        if valid: → Output<br>
+                        elif attempt < 3: → Improver → Validator (loop)<br>
+                        else: → Output (failed)
+                    </div>
+                    <p><strong>Uso:</strong> Validación de calidad con retry</p>
+                </div>
+
+                <div class="component-card">
+                    <h4>3️⃣ Routing por Complejidad</h4>
+                    <p><strong>Patrón:</strong> Escalamiento adaptativo</p>
+                    <p><strong>Flujo:</strong></p>
+                    <div style="text-align: center; margin: 10px 0; font-family: monospace; font-size: 0.9em;">
+                        Query → Router (scoring)<br>
+                        ↓<br>
+                        if complexity ≤ 3: → Simple Agent<br>
+                        elif complexity ≤ 7: → Standard Agent<br>
+                        else: → Expert Agent
+                    </div>
+                    <p><strong>Uso:</strong> Optimizar recursos por complejidad</p>
+                </div>
+            </div>
+
+            <!-- 4. Patrón 1: Clasificador -->
+            <h2 id="clasificador">4. 🎯 Patrón 1: Clasificador + Routing (If/Else)</h2>
+
+            <div class="diagram-container">
+                <div class="diagram-title">📋 Flujo del Clasificador</div>
+                <div style="display: flex; flex-direction: column; align-items: center; gap: 20px;">
+                    <div class="flow-box">
+                        <strong>👤 Usuario</strong><br>
+                        <small>"Explica qué es una función lambda en Python"</small>
+                    </div>
+
+                    <span class="arrow-down">↓</span>
+
+                    <div class="flow-box decision">
+                        <strong>🔍</strong><br>
+                        <strong>CLASSIFIER</strong><br>
+                        <small>Analiza categoría</small>
+                    </div>
+
+                    <span class="arrow-down">↓</span>
+
+                    <div style="display: flex; gap: 20px; flex-wrap: wrap; justify-content: center;">
+                        <div>
+                            <div style="text-align: center; margin-bottom: 10px; color: #28a745; font-weight: bold;">
+                                if "technical"
+                            </div>
+                            <div class="flow-box handler" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%);">
+                                <strong>💻 Technical</strong><br>
+                                <small>Handler</small>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div style="text-align: center; margin-bottom: 10px; color: #f857a6; font-weight: bold;">
+                                elif "creative"
+                            </div>
+                            <div class="flow-box handler" style="background: linear-gradient(135deg, #f857a6 0%, #ff6b9d 100%);">
+                                <strong>🎨 Creative</strong><br>
+                                <small>Handler</small>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div style="text-align: center; margin-bottom: 10px; color: #2196F3; font-weight: bold;">
+                                else
+                            </div>
+                            <div class="flow-box handler" style="background: linear-gradient(135deg, #2196F3 0%, #21cbf3 100%);">
+                                <strong>📚 General</strong><br>
+                                <small>Handler</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <span class="arrow-down">↓</span>
+
+                    <div class="flow-box" style="background: #d4edda;">
+                        <strong>📤 Output</strong><br>
+                        <small>Respuesta especializada</small>
+                    </div>
+                </div>
+            </div>
+
+            <h3>4.1. Implementación del Clasificador</h3>
+
+            <div class="code-block"><code>def create_classifier_executor(classifier_agent):
+    &quot;&quot;&quot;Executor que clasifica y decide la ruta&quot;&quot;&quot;
+    @executor(id=&quot;Classifier&quot;)
+    async def classifier(query: str, ctx: WorkflowContext[str]) -&gt; None:
+        print(f&quot;[CLASSIFIER] 🔍 Clasificando: {query}&quot;)
+
+        # El agente clasifica la consulta
+        classification_prompt = f&quot;&quot;&quot;
+Clasifica en UNA de estas categorías:
+- &quot;technical&quot; - Pregunta técnica
+- &quot;general&quot; - Pregunta general
+- &quot;creative&quot; - Solicitud creativa
+
+Consulta: {query}
+Responde SOLO con: technical, general, o creative
+&quot;&quot;&quot;
+        response = await classifier_agent.run(classification_prompt)
+        category = str(response).strip().lower()
+
+        print(f&quot;[CLASSIFIER] ✅ Categoría: {category}&quot;)
+
+        # ROUTING CONDICIONAL
+        if &quot;technical&quot; in category or &quot;tech&quot; in category:
+            print(f&quot;[CLASSIFIER] → Ruta: Technical Handler&quot;)
+            await ctx.send_message_to(&quot;TechnicalHandler&quot;, query)
+        elif &quot;creative&quot; in category:
+            print(f&quot;[CLASSIFIER] → Ruta: Creative Handler&quot;)
+            await ctx.send_message_to(&quot;CreativeHandler&quot;, query)
+        else:
+            print(f&quot;[CLASSIFIER] → Ruta: General Handler&quot;)
+            await ctx.send_message_to(&quot;GeneralHandler&quot;, query)
+
+    return classifier
+</code></div>
+
+            <div class="info-box">
+                <strong>💡 Clave del Patrón:</strong>
+                <ul>
+                    <li>🔍 <span class="highlight">send_message_to(executor_id, data)</span> permite routing dinámico</li>
+                    <li>🎯 El agente analiza el contenido y toma la decisión</li>
+                    <li>🔀 Diferentes executors manejan diferentes categorías</li>
+                    <li>✅ Especialización: cada handler es experto en su dominio</li>
+                </ul>
+            </div>
+
+            <!-- 5. Patrón 2: Validador -->
+            <h2 id="validador">5. 🔄 Patrón 2: Validador + Retry Logic (Loop)</h2>
+
+            <div class="diagram-container">
+                <div class="diagram-title">🔄 Flujo con Validación y Retry</div>
+                <div style="display: flex; flex-direction: column; align-items: center; gap: 20px;">
+                    <div class="flow-box">
+                        <strong>📝 Generator</strong><br>
+                        <small>Genera contenido</small>
+                    </div>
+
+                    <span class="arrow-down">↓</span>
+
+                    <div class="flow-box validator">
+                        <strong>🔍 Validator</strong><br>
+                        <small>Valida calidad</small>
+                    </div>
+
+                    <span class="arrow-down">↓</span>
+
+                    <div class="flow-box decision">
+                        <strong>❓</strong><br>
+                        <strong>¿VÁLIDO?</strong>
+                    </div>
+
+                    <div style="display: flex; gap: 40px; width: 100%; justify-content: center; margin-top: 20px;">
+                        <!-- Ruta SI -->
+                        <div style="text-align: center;">
+                            <div style="color: #28a745; font-weight: bold; margin-bottom: 10px;">✅ SÍ</div>
+                            <span class="arrow-down" style="color: #28a745;">↓</span>
+                            <div class="flow-box" style="background: #d4edda; border-color: #28a745;">
+                                <strong>📤 Output</strong><br>
+                                <small>Contenido válido</small>
+                            </div>
+                        </div>
+
+                        <!-- Ruta NO -->
+                        <div style="text-align: center;">
+                            <div style="color: #dc3545; font-weight: bold; margin-bottom: 10px;">❌ NO</div>
+                            <span class="arrow-down" style="color: #dc3545;">↓</span>
+                            <div class="flow-box decision" style="background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%); width: 120px; height: 120px;">
+                                <strong>🔢</strong><br>
+                                <strong>Intento < 3?</strong>
+                            </div>
+                            <div style="display: flex; gap: 20px; margin-top: 20px;">
+                                <div>
+                                    <div style="color: #28a745; font-weight: bold; margin-bottom: 5px; font-size: 0.9em;">SÍ</div>
+                                    <span style="font-size: 1.5em; color: #28a745;">↓</span>
+                                    <div class="flow-box" style="background: #667eea; color: white; padding: 10px;">
+                                        <strong>🔧 Improver</strong>
+                                    </div>
+                                    <div style="margin-top: 10px; font-size: 2em; color: #667eea;">↻</div>
+                                    <div style="font-size: 0.8em; color: #667eea;">Loop → Validator</div>
+                                </div>
+                                <div>
+                                    <div style="color: #dc3545; font-weight: bold; margin-bottom: 5px; font-size: 0.9em;">NO</div>
+                                    <span style="font-size: 1.5em; color: #dc3545;">↓</span>
+                                    <div class="flow-box" style="background: #dc3545; color: white; padding: 10px;">
+                                        <strong>⚠️ Failed</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <h3>5.1. Implementación del Validador con Retry</h3>
+
+            <div class="code-block"><code>def create_validator_executor(validator_agent):
+    &quot;&quot;&quot;Executor que valida y decide si retry o terminar&quot;&quot;&quot;
+    @executor(id=&quot;Validator&quot;)
+    async def validator(data: dict, ctx: WorkflowContext[dict]) -&gt; None:
+        content = data[&quot;content&quot;]
+        query = data[&quot;query&quot;]
+        attempt = data.get(&quot;attempt&quot;, 1)
+
+        print(f&quot;[VALIDATOR] 🔍 Validando (Intento #{attempt})...&quot;)
+
+        # Validación (ejemplo simple: longitud mínima)
+        is_valid = len(content) &gt; 50
+
+        if is_valid:
+            # ✅ VÁLIDO: Terminar con éxito
+            print(f&quot;[VALIDATOR] ✅ Contenido válido!&quot;)
+            await ctx.send_message_to(&quot;Finalizer&quot;, content)
+        else:
+            # ❌ INVÁLIDO: Decidir retry o fallar
+            print(f&quot;[VALIDATOR] ❌ Contenido inválido (muy corto)&quot;)
+
+            if attempt &lt; 3:
+                # 🔄 RETRY: Enviar a mejorar
+                print(f&quot;[VALIDATOR] 🔄 Reintentando (Intento {attempt + 1}/3)&quot;)
+                await ctx.send_message_to(&quot;Improver&quot;, {
+                    &quot;content&quot;: content,
+                    &quot;query&quot;: query,
+                    &quot;attempt&quot;: attempt + 1
+                })
+            else:
+                # ⚠️ MAX INTENTOS: Fallar
+                print(f&quot;[VALIDATOR] ⚠️ Máximo de intentos alcanzado&quot;)
+                await ctx.send_message_to(&quot;Finalizer&quot;, f&quot;[FAILED] {content}&quot;)
+
+    return validator
+</code></div>
+
+            <div class="success-box">
+                <strong>✅ Ventajas del Retry Logic:</strong>
+                <ul>
+                    <li>🔄 <strong>Auto-corrección:</strong> Intenta mejorar resultados subóptimos</li>
+                    <li>🎯 <strong>Calidad garantizada:</strong> No acepta contenido de baja calidad</li>
+                    <li>⚠️ <strong>Fail-safe:</strong> Evita loops infinitos con límite de intentos</li>
+                    <li>📊 <strong>Métricas:</strong> Trackear cuántos retries se necesitan</li>
+                </ul>
+            </div>
+
+            <!-- 6. Patrón 3: Complejidad -->
+            <h2 id="complejidad">6. 🎓 Patrón 3: Routing por Complejidad (Escalamiento)</h2>
+
+            <div class="diagram-container">
+                <div class="diagram-title">📊 Routing basado en Scoring de Complejidad</div>
+                <div style="display: flex; flex-direction: column; align-items: center; gap: 20px;">
+                    <div class="flow-box">
+                        <strong>👤 Usuario Query</strong>
+                    </div>
+
+                    <span class="arrow-down">↓</span>
+
+                    <div class="flow-box decision">
+                        <strong>📊</strong><br>
+                        <strong>COMPLEXITY</strong><br>
+                        <strong>ROUTER</strong><br>
+                        <small>Score 1-10</small>
+                    </div>
+
+                    <span class="arrow-down">↓</span>
+
+                    <div style="display: flex; gap: 20px; flex-wrap: wrap; justify-content: center;">
+                        <div style="text-align: center;">
+                            <div style="background: #28a745; color: white; padding: 10px; border-radius: 8px; margin-bottom: 10px;">
+                                <strong>Score 1-3</strong><br>
+                                <small>Simple</small>
+                            </div>
+                            <span class="arrow-down" style="color: #28a745;">↓</span>
+                            <div class="flow-box handler" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%);">
+                                <strong>⚡ Simple</strong><br>
+                                <strong>Agent</strong><br>
+                                <small>Respuestas rápidas</small>
+                            </div>
+                        </div>
+
+                        <div style="text-align: center;">
+                            <div style="background: #ffc107; color: white; padding: 10px; border-radius: 8px; margin-bottom: 10px;">
+                                <strong>Score 4-7</strong><br>
+                                <small>Moderado</small>
+                            </div>
+                            <span class="arrow-down" style="color: #ffc107;">↓</span>
+                            <div class="flow-box handler" style="background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);">
+                                <strong>📖 Standard</strong><br>
+                                <strong>Agent</strong><br>
+                                <small>Respuestas detalladas</small>
+                            </div>
+                        </div>
+
+                        <div style="text-align: center;">
+                            <div style="background: #dc3545; color: white; padding: 10px; border-radius: 8px; margin-bottom: 10px;">
+                                <strong>Score 8-10</strong><br>
+                                <small>Complejo</small>
+                            </div>
+                            <span class="arrow-down" style="color: #dc3545;">↓</span>
+                            <div class="flow-box handler" style="background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);">
+                                <strong>🎓 Expert</strong><br>
+                                <strong>Agent</strong><br>
+                                <small>Análisis profundo</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <h3>6.1. Implementación del Router por Complejidad</h3>
+
+            <div class="code-block"><code>def create_complexity_router_executor(router_agent):
+    &quot;&quot;&quot;Router que evalúa complejidad y escala apropiadamente&quot;&quot;&quot;
+    @executor(id=&quot;ComplexityRouter&quot;)
+    async def complexity_router(query: str, ctx: WorkflowContext[str]) -&gt; None:
+        print(f&quot;[COMPLEXITY ROUTER] 🎯 Evaluando complejidad...&quot;)
+
+        # Evaluar complejidad con el agente
+        complexity_prompt = f&quot;&quot;&quot;
+Evalúa la complejidad de esta consulta en una escala de 1-10:
+1-3: Simple (hechos básicos, preguntas directas)
+4-7: Media (requiere análisis o explicación)
+8-10: Alta (requiere razonamiento profundo)
+
+Consulta: {query}
+
+Responde SOLO con un número del 1 al 10.
+&quot;&quot;&quot;
+        response = await router_agent.run(complexity_prompt)
+
+        # Extraer número
+        try:
+            complexity = int(''.join(filter(str.isdigit, str(response)))[:2])
+        except:
+            complexity = 5  # Default moderado
+
+        print(f&quot;[COMPLEXITY ROUTER] 📊 Complejidad: {complexity}/10&quot;)
+
+        # ROUTING BASADO EN SCORE
+        if complexity &lt;= 3:
+            print(f&quot;[COMPLEXITY ROUTER] → Simple Agent (rápido)&quot;)
+            await ctx.send_message_to(&quot;SimpleAgent&quot;, query)
+        elif complexity &lt;= 7:
+            print(f&quot;[COMPLEXITY ROUTER] → Standard Agent&quot;)
+            await ctx.send_message_to(&quot;StandardAgent&quot;, query)
+        else:
+            print(f&quot;[COMPLEXITY ROUTER] → Expert Agent (profundo)&quot;)
+            await ctx.send_message_to(&quot;ExpertAgent&quot;, query)
+
+    return complexity_router
+</code></div>
+
+            <div class="info-box">
+                <strong>💡 Beneficios del Routing por Complejidad:</strong>
+                <ul>
+                    <li>⚡ <strong>Optimización de recursos:</strong> Queries simples → agente rápido/barato</li>
+                    <li>🎯 <strong>Calidad apropiada:</strong> Queries complejas → agente experto/caro</li>
+                    <li>💰 <strong>Control de costos:</strong> No usar modelo grande para preguntas triviales</li>
+                    <li>⏱️ <strong>Latencia optimizada:</strong> Respuestas rápidas donde sea posible</li>
+                </ul>
+            </div>
+
+            <!-- 7. Implementación -->
+            <h2 id="implementacion">7. 🚀 Implementación con send_message_to()</h2>
+
+            <p>
+                La clave de los workflows condicionales es el método <span class="highlight">send_message_to()</span>
+                del contexto del workflow, que permite <strong>routing dinámico</strong> a ejecutores específicos.
+            </p>
+
+            <div class="code-block"><code># Dentro de un executor
+async def my_executor(data: str, ctx: WorkflowContext[str]) -&gt; None:
+    # Analizar y tomar decisión
+    if condition_A:
+        # Enviar a ExecutorA
+        await ctx.send_message_to(&quot;ExecutorA&quot;, data)
+    elif condition_B:
+        # Enviar a ExecutorB
+        await ctx.send_message_to(&quot;ExecutorB&quot;, data)
+    else:
+        # Producir output final
+        await ctx.yield_output(data)
+</code></div>
+
+            <h3>7.1. Métodos del Workflow Context</h3>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Método</th>
+                        <th>Propósito</th>
+                        <th>Uso</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span class="highlight">send_message_to(id, data)</span></td>
+                        <td>Enviar a executor específico</td>
+                        <td>Routing condicional</td>
+                    </tr>
+                    <tr>
+                        <td><span class="highlight">send_message(data)</span></td>
+                        <td>Enviar al siguiente executor</td>
+                        <td>Workflows secuenciales</td>
+                    </tr>
+                    <tr>
+                        <td><span class="highlight">yield_output(data)</span></td>
+                        <td>Producir output final</td>
+                        <td>Terminar workflow</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>7.2. Construcción del Workflow</h3>
+
+            <div class="code-block"><code># Crear executors
+classifier_exec = create_classifier_executor(classifier_agent)
+technical_exec = create_technical_handler_executor(technical_agent)
+creative_exec = create_creative_handler_executor(creative_agent)
+general_exec = create_general_handler_executor(general_agent)
+
+# Construir workflow
+workflow = (
+    WorkflowBuilder()
+    .set_start_executor(classifier_exec)
+    # Agregar TODAS las rutas posibles
+    .add_edge(classifier_exec, technical_exec)
+    .add_edge(classifier_exec, creative_exec)
+    .add_edge(classifier_exec, general_exec)
+    .build()
+)
+
+# El routing real se decide en runtime dentro del executor
+</code></div>
+
+            <div class="warning-box">
+                <strong>⚠️ Importante:</strong>
+                <ul>
+                    <li>Debes agregar <span class="highlight">.add_edge()</span> para TODAS las rutas posibles</li>
+                    <li>Esto define la <strong>topología</strong> del workflow (qué conexiones existen)</li>
+                    <li>El <strong>routing real</strong> se decide en runtime con <span class="highlight">send_message_to()</span></li>
+                    <li>El framework valida que el executor_id destino exista</li>
+                </ul>
+            </div>
+
+            <!-- 8. Mejores Prácticas -->
+            <h2 id="mejores-practicas">8. ✨ Mejores Prácticas</h2>
+
+            <h3>8.1. Cuándo Usar Cada Patrón</h3>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Patrón</th>
+                        <th>Cuándo Usar</th>
+                        <th>Casos de Uso</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Clasificador + Routing</strong></td>
+                        <td>Cuando tienes categorías distintas</td>
+                        <td>
+                            • Routing de tickets de soporte<br>
+                            • Clasificación de consultas<br>
+                            • Content moderation
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Validador + Retry</strong></td>
+                        <td>Cuando necesitas garantizar calidad</td>
+                        <td>
+                            • Generación de código<br>
+                            • Escritura creativa<br>
+                            • Data validation
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Routing por Complejidad</strong></td>
+                        <td>Cuando quieres optimizar recursos</td>
+                        <td>
+                            • Control de costos<br>
+                            • Escalamiento adaptativo<br>
+                            • Performance optimization
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>8.2. Evitar Loops Infinitos</h3>
+
+            <div class="warning-box">
+                <strong>⚠️ Peligro: Loops Infinitos</strong>
+                <p>Los workflows condicionales con retry logic pueden crear loops infinitos. Prevención:</p>
+                <ul>
+                    <li>✅ <strong>Límite de intentos:</strong> <code>if attempt < MAX_ATTEMPTS</code></li>
+                    <li>✅ <strong>Timeout global:</strong> Limitar tiempo total de ejecución</li>
+                    <li>✅ <strong>Condición de salida:</strong> Siempre tener una ruta que termina</li>
+                    <li>✅ <strong>Tracking de estado:</strong> Contar iteraciones en el data</li>
+                </ul>
+            </div>
+
+            <h3>8.3. Testing de Workflows Condicionales</h3>
+
+            <div class="success-box">
+                <strong>✅ Estrategia de Testing:</strong>
+                <ol>
+                    <li><strong>Test todas las rutas:</strong> Cada if/elif/else debe tener un test</li>
+                    <li><strong>Test edge cases:</strong> Límites de retry, timeouts, valores extremos</li>
+                    <li><strong>Mock del agente:</strong> Controlar las decisiones para testing determinístico</li>
+                    <li><strong>Integration tests:</strong> Ejecutar workflow completo con casos reales</li>
+                </ol>
+            </div>
+
+            <!-- Resumen Final -->
+            <h2>🎯 Resumen Final</h2>
+
+            <div class="success-box">
+                <h3 style="margin-top: 0;">Conceptos Clave Aprendidos:</h3>
+                <ol>
+                    <li><strong>Workflows Condicionales</strong> permiten routing dinámico basado en condiciones</li>
+                    <li><strong>3 patrones:</strong> Clasificador (if/else), Validador (retry loop), Complejidad (scoring)</li>
+                    <li><strong>send_message_to(id, data)</strong> es la clave para routing dinámico</li>
+                    <li><strong>Agentes toman decisiones</strong> de routing analizando contenido</li>
+                    <li><strong>Retry logic</strong> permite auto-corrección con límites de seguridad</li>
+                    <li><strong>Optimización de recursos</strong> con routing por complejidad</li>
+                    <li><strong>Prevención de loops</strong> con contadores de intentos</li>
+                </ol>
+            </div>
+
+            <div class="info-box">
+                <h3 style="margin-top: 0;">Próximos Pasos Sugeridos:</h3>
+                <ul>
+                    <li>🔀 Combinar con <strong>workflows paralelos</strong> (fan-out condicional)</li>
+                    <li>👥 Implementar <strong>Group Chat</strong> con selección dinámica de speakers</li>
+                    <li>🎯 Crear <strong>Supervisor Pattern</strong> que decide qué workers usar</li>
+                    <li>📊 Agregar <strong>métricas</strong> para analizar qué rutas se usan más</li>
+                    <li>🔄 Implementar <strong>fallbacks</strong> automáticos en caso de error</li>
+                    <li>🎨 Crear <strong>A/B testing</strong> con routing aleatorio</li>
+                </ul>
+            </div>
+
+            <!-- Tabla de Referencia -->
+            <h2>📚 Referencia Rápida</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Concepto</th>
+                        <th>Código</th>
+                        <th>Descripción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Routing condicional</strong></td>
+                        <td><code>await ctx.send_message_to("ExecutorID", data)</code></td>
+                        <td>Enviar a executor específico</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Terminar workflow</strong></td>
+                        <td><code>await ctx.yield_output(result)</code></td>
+                        <td>Producir output final</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Límite de retry</strong></td>
+                        <td><code>if attempt < MAX_ATTEMPTS:</code></td>
+                        <td>Prevenir loops infinitos</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Agregar rutas</strong></td>
+                        <td><code>.add_edge(source, target)</code></td>
+                        <td>Definir topología</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Pasar estado</strong></td>
+                        <td><code>{"data": x, "attempt": n}</code></td>
+                        <td>Dict con metadata</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="warning-box" style="margin-top: 30px;">
+                <strong>⚠️ Recordatorio Final:</strong>
+                <p style="font-size: 1.1em;">
+                    Los workflows condicionales son poderosos pero aumentan la complejidad. Úsalos cuando realmente
+                    necesites comportamiento adaptativo. Para flujos simples, secuenciales o paralelos son más fáciles
+                    de entender y mantener.
+                </p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <h3>🔀 Documentación de Workflows Condicionales</h3>
+            <p>Script: <strong>019_conditional_workflows.py</strong></p>
+            <p>Microsoft Agent Framework + Azure AI Foundry</p>
+            <p>3 Patrones | If/Else | Retry Logic | Dynamic Routing</p>
+            <p style="margin-top: 15px; opacity: 0.8;">
+                Generado automáticamente | © 2025
+            </p>
+        </div>
+    </div>
+</body>
+</html>

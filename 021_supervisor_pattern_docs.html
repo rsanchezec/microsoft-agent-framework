@@ -1,0 +1,1893 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>021 - Supervisor Pattern | Microsoft Agent Framework</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #1a1a1a;
+            background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        header p {
+            font-size: 1.2em;
+            opacity: 0.95;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        h2 {
+            color: #ff6b35;
+            font-size: 2em;
+            margin: 30px 0 20px 0;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #f7931e;
+        }
+
+        h3 {
+            color: #e65100;
+            font-size: 1.5em;
+            margin: 25px 0 15px 0;
+        }
+
+        h4 {
+            color: #d84315;
+            font-size: 1.2em;
+            margin: 20px 0 10px 0;
+        }
+
+        p {
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+
+        .toc {
+            background: #fff3e0;
+            border-left: 4px solid #ff6b35;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+
+        .toc h3 {
+            margin-top: 0;
+            color: #ff6b35;
+        }
+
+        .toc ul {
+            list-style-position: inside;
+            margin-left: 20px;
+        }
+
+        .toc li {
+            margin: 8px 0;
+        }
+
+        .toc a {
+            color: #e65100;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .toc a:hover {
+            color: #f7931e;
+            text-decoration: underline;
+        }
+
+        code {
+            background: #fff3e0;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.9em;
+            color: #e65100;
+        }
+
+        pre {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 20px 0;
+            border-left: 4px solid #f7931e;
+        }
+
+        pre code {
+            background: transparent;
+            color: inherit;
+            padding: 0;
+        }
+
+        .diagram {
+            background: #fff3e0;
+            border: 2px solid #f7931e;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+            font-family: monospace;
+            white-space: pre;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        th {
+            background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        tr:nth-child(even) {
+            background: #fff3e0;
+        }
+
+        tr:hover {
+            background: #ffe0b2;
+            transition: background 0.3s;
+        }
+
+        .info-box {
+            background: #fff3e0;
+            border-left: 5px solid #ff6b35;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+
+        .info-box.warning {
+            background: #fff9e6;
+            border-left-color: #ffa726;
+        }
+
+        .info-box.success {
+            background: #e8f5e9;
+            border-left-color: #66bb6a;
+        }
+
+        .info-box.danger {
+            background: #ffebee;
+            border-left-color: #ef5350;
+        }
+
+        .info-box strong {
+            color: #ff6b35;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .info-box.warning strong {
+            color: #f57c00;
+        }
+
+        .info-box.success strong {
+            color: #388e3c;
+        }
+
+        .info-box.danger strong {
+            color: #c62828;
+        }
+
+        ul, ol {
+            margin-left: 30px;
+            margin-bottom: 15px;
+        }
+
+        li {
+            margin: 8px 0;
+        }
+
+        .highlight {
+            background: linear-gradient(120deg, #f7931e 0%, #ff6b35 100%);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
+        footer {
+            background: #d84315;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            margin-top: 40px;
+        }
+
+        .badge {
+            display: inline-block;
+            background: #ff6b35;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            margin-right: 5px;
+            font-weight: 600;
+        }
+
+        .badge.pattern {
+            background: #f7931e;
+            color: white;
+        }
+
+        .badge.component {
+            background: #ff8a50;
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 1.8em;
+            }
+
+            .content {
+                padding: 20px;
+            }
+
+            table {
+                font-size: 0.9em;
+            }
+        }
+
+        .flow-diagram {
+            background: white;
+            border: 2px solid #f7931e;
+            border-radius: 10px;
+            padding: 30px;
+            margin: 25px 0;
+            box-shadow: 0 4px 15px rgba(255, 107, 53, 0.15);
+        }
+
+        .flow-step {
+            background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            text-align: center;
+            font-weight: 600;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+        }
+
+        .flow-arrow {
+            text-align: center;
+            color: #ff6b35;
+            font-size: 1.5em;
+            margin: 5px 0;
+        }
+
+        .code-comment {
+            color: #6a9955;
+        }
+
+        .code-keyword {
+            color: #569cd6;
+        }
+
+        .code-string {
+            color: #ce9178;
+        }
+
+        .code-function {
+            color: #dcdcaa;
+        }
+
+        .section-number {
+            display: inline-block;
+            background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 35px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .hierarchy-box {
+            background: #fff3e0;
+            border: 2px solid #ff6b35;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            text-align: center;
+        }
+
+        .level-1 { background: #ff6b35; color: white; }
+        .level-2 { background: #f7931e; color: white; }
+        .level-3 { background: #ffb74d; color: white; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>👔 Supervisor Pattern</h1>
+            <p>Arquitectura Jerárquica Multi-Agente | Microsoft Agent Framework</p>
+            <p style="font-size: 0.9em; margin-top: 10px; opacity: 0.9;">Script: 021_supervisor_pattern.py</p>
+        </header>
+
+        <div class="content">
+            <!-- Table of Contents -->
+            <div class="toc">
+                <h3>📑 Tabla de Contenidos</h3>
+                <ul>
+                    <li><a href="#introduccion">1. Introducción al Supervisor Pattern</a></li>
+                    <li><a href="#conceptos">2. Conceptos Fundamentales</a></li>
+                    <li><a href="#patron1">3. Patrón 1: Basic Supervisor</a></li>
+                    <li><a href="#patron2">4. Patrón 2: Hierarchical Supervisor</a></li>
+                    <li><a href="#patron3">5. Patrón 3: Parallel Delegation</a></li>
+                    <li><a href="#closures">6. Closure Pattern (Tools Wrapper)</a></li>
+                    <li><a href="#supervisor-vs-groupchat">7. Supervisor vs Group Chat</a></li>
+                    <li><a href="#arquitecturas">8. Arquitecturas y Variantes</a></li>
+                    <li><a href="#implementacion">9. Implementación Paso a Paso</a></li>
+                    <li><a href="#comparacion">10. Comparación de Patrones</a></li>
+                    <li><a href="#casos-uso">11. Casos de Uso</a></li>
+                    <li><a href="#mejores-practicas">12. Mejores Prácticas</a></li>
+                    <li><a href="#referencia">13. Referencia Rápida</a></li>
+                </ul>
+            </div>
+
+            <!-- Section 1: Introduction -->
+            <section id="introduccion">
+                <h2><span class="section-number">1</span>Introducción al Supervisor Pattern</h2>
+
+                <p>
+                    <strong>Supervisor Pattern</strong> es una arquitectura jerárquica donde un agente "supervisor"
+                    coordina múltiples agentes especializados (workers) para completar tareas complejas.
+                </p>
+
+                <div class="info-box">
+                    <strong>💡 ¿Qué es el Supervisor Pattern?</strong>
+                    El Supervisor Pattern es una arquitectura de orquestación donde un agente central (supervisor)
+                    toma decisiones sobre qué agentes especializados (workers) deben ejecutar sub-tareas, y luego
+                    sintetiza sus resultados en una respuesta coherente.
+                </div>
+
+                <h3>🎯 Características Principales</h3>
+                <ul>
+                    <li><strong>Jerarquía Clara:</strong> Supervisor en la cima, workers especializados debajo</li>
+                    <li><strong>Delegación Inteligente:</strong> Supervisor decide qué worker usar</li>
+                    <li><strong>Síntesis de Resultados:</strong> Combina outputs de múltiples workers</li>
+                    <li><strong>Separación de Responsabilidades:</strong> Cada worker tiene expertise específico</li>
+                    <li><strong>Escalabilidad:</strong> Fácil agregar nuevos workers especializados</li>
+                    <li><strong>Closure Pattern:</strong> Workers expuestos como tools vía closures</li>
+                </ul>
+
+                <h3>🏗️ Arquitectura General</h3>
+                <div class="diagram">
+                        [User]
+                          ↓
+                    [Supervisor Agent]
+                    (Analiza tarea y delega)
+                      ↙    ↓    ↘
+                 [Worker A] [Worker B] [Worker C]
+                 (Research) (Analysis)  (Writing)
+                      ↘    ↓    ↙
+                    [Supervisor]
+                 (Sintetiza resultados)
+                          ↓
+                       [User]
+                </div>
+
+                <h3>🔑 Componentes Clave</h3>
+                <table>
+                    <tr>
+                        <th>Componente</th>
+                        <th>Rol</th>
+                        <th>Responsabilidad</th>
+                    </tr>
+                    <tr>
+                        <td><strong>Supervisor Agent</strong></td>
+                        <td>Coordinador</td>
+                        <td>Analiza tarea, delega a workers, sintetiza resultados</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Worker Agents</strong></td>
+                        <td>Especialistas</td>
+                        <td>Ejecutan sub-tareas en su dominio de expertise</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Closure Functions</strong></td>
+                        <td>Wrappers</td>
+                        <td>Exponen workers como tools para el supervisor</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Tools Parameter</strong></td>
+                        <td>Interface</td>
+                        <td>Lista de funciones disponibles para supervisor</td>
+                    </tr>
+                </table>
+
+                <div class="flow-diagram">
+                    <h4 style="text-align: center; color: #ff6b35; margin-bottom: 20px;">🔄 Flujo de Ejecución</h4>
+                    <div class="flow-step">Usuario proporciona tarea compleja</div>
+                    <div class="flow-arrow">↓</div>
+                    <div class="flow-step">Supervisor analiza la tarea</div>
+                    <div class="flow-arrow">↓</div>
+                    <div class="flow-step">Supervisor identifica workers necesarios</div>
+                    <div class="flow-arrow">↓</div>
+                    <div class="flow-step">Supervisor delega sub-tareas a workers (vía tools)</div>
+                    <div class="flow-arrow">↓</div>
+                    <div class="flow-step">Workers ejecutan y retornan resultados</div>
+                    <div class="flow-arrow">↓</div>
+                    <div class="flow-step">Supervisor sintetiza resultados en respuesta coherente</div>
+                    <div class="flow-arrow">↓</div>
+                    <div class="flow-step">Usuario recibe respuesta final</div>
+                </div>
+            </section>
+
+            <!-- Section 2: Fundamental Concepts -->
+            <section id="conceptos">
+                <h2><span class="section-number">2</span>Conceptos Fundamentales</h2>
+
+                <h3>🧩 El Patrón de Closures</h3>
+                <p>
+                    El patrón clave del Supervisor es usar <strong>closures</strong> (funciones que capturan variables
+                    de su scope externo) para exponer workers como tools del supervisor.
+                </p>
+
+                <pre><code><span class="code-comment"># 1. Crear worker agent</span>
+research_agent = client.create_agent(
+    instructions=<span class="code-string">"Eres un investigador experto."</span>,
+    name=<span class="code-string">"researcher"</span>
+)
+
+<span class="code-comment"># 2. Crear closure que captura el worker</span>
+<span class="code-keyword">async def</span> <span class="code-function">delegate_research</span>(topic: str) -> str:
+    <span class="code-string">"""Delega investigación de un tema."""</span>
+    response = <span class="code-keyword">await</span> research_agent.run(<span class="code-string">f"Investiga: {topic}"</span>)
+    <span class="code-keyword">return</span> response.text
+
+<span class="code-comment"># 3. Supervisor recibe el closure como tool</span>
+supervisor_agent = client.create_agent(
+    instructions=<span class="code-string">"Eres un supervisor que coordina especialistas."</span>,
+    name=<span class="code-string">"supervisor"</span>,
+    tools=[delegate_research]  <span class="code-comment"># ← Closure como tool</span>
+)
+
+<span class="code-comment"># 4. Supervisor puede llamar al worker vía tool</span>
+result = <span class="code-keyword">await</span> supervisor_agent.run(<span class="code-string">"Investiga las tendencias de IA"</span>)
+<span class="code-comment"># Internamente, supervisor llama delegate_research("tendencias de IA")</span></code></pre>
+
+                <div class="info-box">
+                    <strong>💡 ¿Por qué Closures?</strong>
+                    Los closures permiten que el supervisor "vea" a los workers como herramientas (tools) sin necesidad
+                    de que el supervisor tenga acceso directo a las instancias de los workers. Es un patrón de encapsulación.
+                </div>
+
+                <h3>🔄 Flujo de Delegación</h3>
+                <table>
+                    <tr>
+                        <th>Paso</th>
+                        <th>Actor</th>
+                        <th>Acción</th>
+                    </tr>
+                    <tr>
+                        <td><strong>1</strong></td>
+                        <td>Usuario</td>
+                        <td>Proporciona tarea al supervisor</td>
+                    </tr>
+                    <tr>
+                        <td><strong>2</strong></td>
+                        <td>Supervisor</td>
+                        <td>Analiza tarea y decide qué tool usar</td>
+                    </tr>
+                    <tr>
+                        <td><strong>3</strong></td>
+                        <td>Framework</td>
+                        <td>Ejecuta closure (tool function)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>4</strong></td>
+                        <td>Closure</td>
+                        <td>Llama al worker agent capturado</td>
+                    </tr>
+                    <tr>
+                        <td><strong>5</strong></td>
+                        <td>Worker</td>
+                        <td>Ejecuta sub-tarea y retorna resultado</td>
+                    </tr>
+                    <tr>
+                        <td><strong>6</strong></td>
+                        <td>Closure</td>
+                        <td>Retorna resultado al framework</td>
+                    </tr>
+                    <tr>
+                        <td><strong>7</strong></td>
+                        <td>Supervisor</td>
+                        <td>Recibe resultado y puede delegar más o sintetizar</td>
+                    </tr>
+                    <tr>
+                        <td><strong>8</strong></td>
+                        <td>Supervisor</td>
+                        <td>Retorna respuesta final al usuario</td>
+                    </tr>
+                </table>
+
+                <h3>🎭 Roles y Responsabilidades</h3>
+
+                <h4>Supervisor Agent</h4>
+                <ul>
+                    <li>Analiza la tarea del usuario</li>
+                    <li>Decide qué worker(s) consultar</li>
+                    <li>Llama a workers vía tools (closures)</li>
+                    <li>Sintetiza resultados de múltiples workers</li>
+                    <li>Retorna respuesta coherente al usuario</li>
+                </ul>
+
+                <h4>Worker Agents</h4>
+                <ul>
+                    <li>Especialistas en un dominio específico</li>
+                    <li>Ejecutan sub-tareas cuando son llamados</li>
+                    <li>No tienen conocimiento del supervisor</li>
+                    <li>No conversan entre sí</li>
+                    <li>Retornan resultados al closure que los llama</li>
+                </ul>
+
+                <h4>Closure Functions</h4>
+                <ul>
+                    <li>Capturan workers en su scope</li>
+                    <li>Actúan como interface entre supervisor y workers</li>
+                    <li>Proporcionan docstrings que guían al supervisor</li>
+                    <li>Formatean inputs/outputs si es necesario</li>
+                    <li>Pueden agregar logging o telemetría</li>
+                </ul>
+
+                <div class="info-box warning">
+                    <strong>⚠️ Importante: Docstrings en Closures</strong>
+                    Los docstrings de los closures son <strong>cruciales</strong>. El supervisor los usa para entender
+                    cuándo y cómo usar cada tool. Deben describir claramente:
+                    <ul style="margin-top: 10px;">
+                        <li>Qué hace el worker</li>
+                        <li>Cuándo usarlo</li>
+                        <li>Qué parámetros acepta</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Section 3: Pattern 1 - Basic Supervisor -->
+            <section id="patron1">
+                <h2><span class="section-number">3</span>Patrón 1: Basic Supervisor</h2>
+
+                <p>
+                    <span class="badge pattern">Patrón Básico</span>
+                    El patrón <strong>Basic Supervisor</strong> tiene un solo supervisor que coordina N workers especializados.
+                </p>
+
+                <h3>🏗️ Arquitectura</h3>
+                <div class="diagram">
+                    [User]
+                      ↓
+                [Supervisor]
+                "Coordinador central"
+                  ↙  ↓  ↘
+             [Research] [Analysis] [Writing]
+             "Workers especializados"
+                  ↘  ↓  ↙
+                [Supervisor]
+                "Sintetiza resultados"
+                      ↓
+                   [User]
+                </div>
+
+                <h3>🎯 Características</h3>
+                <ul>
+                    <li><strong>Jerarquía Plana:</strong> 1 nivel (supervisor → workers)</li>
+                    <li><strong>Delegación Selectiva:</strong> Supervisor elige qué workers usar</li>
+                    <li><strong>Secuencial o Paralelo:</strong> Puede llamar workers en secuencia o paralelo</li>
+                    <li><strong>Síntesis:</strong> Combina resultados de múltiples workers</li>
+                </ul>
+
+                <h3>💻 Implementación Completa</h3>
+
+                <h4>Paso 1: Crear Workers</h4>
+                <pre><code><span class="code-comment"># Crear 3 workers especializados</span>
+research_agent = client.create_agent(
+    instructions=<span class="code-string">"Eres un investigador experto. Recopilas hechos y datos."</span>,
+    name=<span class="code-string">"research_worker"</span>
+)
+
+analysis_agent = client.create_agent(
+    instructions=<span class="code-string">"Eres un analista experto. Analizas datos y encuentras insights."</span>,
+    name=<span class="code-string">"analysis_worker"</span>
+)
+
+writing_agent = client.create_agent(
+    instructions=<span class="code-string">"Eres un escritor experto. Conviertes información técnica en contenido claro."</span>,
+    name=<span class="code-string">"writing_worker"</span>
+)</code></pre>
+
+                <h4>Paso 2: Crear Closures</h4>
+                <pre><code><span class="code-comment"># Crear closures que capturan los workers</span>
+<span class="code-keyword">async def</span> <span class="code-function">delegate_research</span>(topic: str) -> str:
+    <span class="code-string">"""Delega investigación de un tema. Usa cuando necesites hechos o datos."""</span>
+    <span class="code-function">print</span>(<span class="code-string">f"[Supervisor → Research]: Investigando '{topic}'"</span>)
+    response = <span class="code-keyword">await</span> research_agent.run(<span class="code-string">f"Investiga y recopila datos sobre: {topic}"</span>)
+    <span class="code-keyword">return</span> response.text
+
+<span class="code-keyword">async def</span> <span class="code-function">delegate_analysis</span>(data: str) -> str:
+    <span class="code-string">"""Delega análisis de datos. Usa cuando necesites identificar patrones o insights."""</span>
+    <span class="code-function">print</span>(<span class="code-string">f"[Supervisor → Analysis]: Analizando datos"</span>)
+    response = <span class="code-keyword">await</span> analysis_agent.run(<span class="code-string">f"Analiza estos datos y encuentra insights: {data}"</span>)
+    <span class="code-keyword">return</span> response.text
+
+<span class="code-keyword">async def</span> <span class="code-function">delegate_writing</span>(content: str) -> str:
+    <span class="code-string">"""Delega escritura. Usa cuando necesites crear un artículo o resumen."""</span>
+    <span class="code-function">print</span>(<span class="code-string">f"[Supervisor → Writing]: Escribiendo contenido"</span>)
+    response = <span class="code-keyword">await</span> writing_agent.run(<span class="code-string">f"Escribe un artículo claro basado en: {content}"</span>)
+    <span class="code-keyword">return</span> response.text</code></pre>
+
+                <h4>Paso 3: Crear Supervisor</h4>
+                <pre><code><span class="code-comment"># Crear supervisor con acceso a los workers vía tools</span>
+supervisor_agent = client.create_agent(
+    instructions=<span class="code-string">"""Eres un supervisor inteligente que coordina un equipo de especialistas.
+
+Analiza la tarea del usuario y delega apropiadamente:
+- delegate_research: Para investigar temas y recopilar datos
+- delegate_analysis: Para analizar datos y encontrar insights
+- delegate_writing: Para escribir contenido claro
+
+Puedes usar múltiples especialistas en secuencia. Por ejemplo:
+1. Research para obtener datos
+2. Analysis para analizarlos
+3. Writing para crear el artículo final
+
+Sintetiza los resultados de tus especialistas en una respuesta coherente."""</span>,
+    name=<span class="code-string">"supervisor"</span>,
+    tools=[delegate_research, delegate_analysis, delegate_writing]  <span class="code-comment"># ← Closures</span>
+)</code></pre>
+
+                <h4>Paso 4: Ejecutar Tarea</h4>
+                <pre><code><span class="code-comment"># Ejecutar tarea compleja que requiere múltiples especialistas</span>
+task = <span class="code-string">"Crea un artículo sobre las tendencias de inteligencia artificial en 2024"</span>
+
+result = <span class="code-keyword">await</span> supervisor_agent.run(task)
+
+<span class="code-function">print</span>(result.text)
+
+<span class="code-comment"># El supervisor internamente:</span>
+<span class="code-comment"># 1. Llama delegate_research("tendencias de IA en 2024")</span>
+<span class="code-comment"># 2. Llama delegate_analysis(resultado_research)</span>
+<span class="code-comment"># 3. Llama delegate_writing(resultado_analysis)</span>
+<span class="code-comment"># 4. Sintetiza todo en la respuesta final</span></code></pre>
+
+                <div class="info-box success">
+                    <strong>✅ Ventajas del Basic Supervisor</strong>
+                    <ul>
+                        <li>Simple de implementar y entender</li>
+                        <li>Clara separación de responsabilidades</li>
+                        <li>Fácil agregar nuevos workers</li>
+                        <li>Supervisor decide la estrategia dinámicamente</li>
+                    </ul>
+                </div>
+
+                <h3>📋 Casos de Uso</h3>
+                <ul>
+                    <li>Asistente multi-capacidad (code, data, design)</li>
+                    <li>Pipeline de contenido (research → analyze → write)</li>
+                    <li>Evaluación multi-aspecto (security, performance, cost)</li>
+                    <li>Workflow adaptativo según tarea</li>
+                </ul>
+            </section>
+
+            <!-- Section 4: Pattern 2 - Hierarchical -->
+            <section id="patron2">
+                <h2><span class="section-number">4</span>Patrón 2: Hierarchical Supervisor</h2>
+
+                <p>
+                    <span class="badge pattern">Patrón Jerárquico</span>
+                    El patrón <strong>Hierarchical Supervisor</strong> implementa múltiples niveles de supervisión,
+                    similar a una organización empresarial.
+                </p>
+
+                <h3>🏢 Arquitectura Multi-Nivel</h3>
+                <div class="diagram">
+                            [User]
+                              ↓
+                      [Chief Supervisor]
+                        "Nivel 1: CEO"
+                          ↙       ↘
+                [Tech Supervisor]  [Content Supervisor]
+                    "Nivel 2: Managers"
+                     ↙  ↘              ↙  ↘
+              [Backend][Frontend]  [Writer][Editor]
+                  "Nivel 3: Workers"
+                </div>
+
+                <h3>📊 Niveles de la Jerarquía</h3>
+                <table>
+                    <tr>
+                        <th>Nivel</th>
+                        <th>Rol</th>
+                        <th>Responsabilidad</th>
+                        <th>Delega a</th>
+                    </tr>
+                    <tr>
+                        <td class="level-1"><strong>1 - Chief</strong></td>
+                        <td>CEO / Director</td>
+                        <td>Estrategia global, delega a departamentos</td>
+                        <td>Sub-supervisores (Nivel 2)</td>
+                    </tr>
+                    <tr>
+                        <td class="level-2"><strong>2 - Sub-supervisores</strong></td>
+                        <td>Managers / Jefes</td>
+                        <td>Coordinación departamental</td>
+                        <td>Workers (Nivel 3)</td>
+                    </tr>
+                    <tr>
+                        <td class="level-3"><strong>3 - Workers</strong></td>
+                        <td>Especialistas</td>
+                        <td>Ejecución de tareas específicas</td>
+                        <td>-</td>
+                    </tr>
+                </table>
+
+                <h3>💻 Implementación por Niveles</h3>
+
+                <h4>Nivel 3: Workers (Bottom Layer)</h4>
+                <pre><code><span class="code-comment"># Workers especializados en tecnología</span>
+backend_agent = client.create_agent(
+    instructions=<span class="code-string">"Eres un desarrollador backend experto en Python, APIs y bases de datos."</span>,
+    name=<span class="code-string">"backend_dev"</span>
+)
+
+frontend_agent = client.create_agent(
+    instructions=<span class="code-string">"Eres un desarrollador frontend experto en React, UI/UX."</span>,
+    name=<span class="code-string">"frontend_dev"</span>
+)
+
+<span class="code-comment"># Workers especializados en contenido</span>
+writer_agent = client.create_agent(
+    instructions=<span class="code-string">"Eres un escritor técnico que crea documentación clara."</span>,
+    name=<span class="code-string">"tech_writer"</span>
+)
+
+editor_agent = client.create_agent(
+    instructions=<span class="code-string">"Eres un editor que revisa y mejora la calidad del contenido."</span>,
+    name=<span class="code-string">"content_editor"</span>
+)</code></pre>
+
+                <h4>Nivel 2: Sub-Supervisores (Middle Layer)</h4>
+                <pre><code><span class="code-comment"># Closures para workers de tecnología</span>
+<span class="code-keyword">async def</span> <span class="code-function">ask_backend</span>(task: str) -> str:
+    <span class="code-string">"""Consulta al backend developer."""</span>
+    response = <span class="code-keyword">await</span> backend_agent.run(task)
+    <span class="code-keyword">return</span> response.text
+
+<span class="code-keyword">async def</span> <span class="code-function">ask_frontend</span>(task: str) -> str:
+    <span class="code-string">"""Consulta al frontend developer."""</span>
+    response = <span class="code-keyword">await</span> frontend_agent.run(task)
+    <span class="code-keyword">return</span> response.text
+
+<span class="code-comment"># Crear Tech Supervisor</span>
+tech_supervisor = client.create_agent(
+    instructions=<span class="code-string">"""Eres el Technical Supervisor. Coordinas desarrollo backend y frontend.
+Delega tareas técnicas apropiadamente y sintetiza respuestas."""</span>,
+    name=<span class="code-string">"tech_supervisor"</span>,
+    tools=[ask_backend, ask_frontend]
+)
+
+<span class="code-comment"># Closures para workers de contenido</span>
+<span class="code-keyword">async def</span> <span class="code-function">ask_writer</span>(task: str) -> str:
+    <span class="code-string">"""Consulta al technical writer."""</span>
+    response = <span class="code-keyword">await</span> writer_agent.run(task)
+    <span class="code-keyword">return</span> response.text
+
+<span class="code-keyword">async def</span> <span class="code-function">ask_editor</span>(task: str) -> str:
+    <span class="code-string">"""Consulta al content editor."""</span>
+    response = <span class="code-keyword">await</span> editor_agent.run(task)
+    <span class="code-keyword">return</span> response.text
+
+<span class="code-comment"># Crear Content Supervisor</span>
+content_supervisor = client.create_agent(
+    instructions=<span class="code-string">"""Eres el Content Supervisor. Coordinas escritura y edición de contenido.
+Delega tareas de contenido apropiadamente y sintetiza respuestas."""</span>,
+    name=<span class="code-string">"content_supervisor"</span>,
+    tools=[ask_writer, ask_editor]
+)</code></pre>
+
+                <h4>Nivel 1: Chief Supervisor (Top Layer)</h4>
+                <pre><code><span class="code-comment"># Closures para sub-supervisores</span>
+<span class="code-keyword">async def</span> <span class="code-function">delegate_to_tech</span>(task: str) -> str:
+    <span class="code-string">"""Delega tareas técnicas (desarrollo, arquitectura) al Tech Supervisor."""</span>
+    response = <span class="code-keyword">await</span> tech_supervisor.run(task)
+    <span class="code-keyword">return</span> response.text
+
+<span class="code-keyword">async def</span> <span class="code-function">delegate_to_content</span>(task: str) -> str:
+    <span class="code-string">"""Delega tareas de contenido (escritura, documentación) al Content Supervisor."""</span>
+    response = <span class="code-keyword">await</span> content_supervisor.run(task)
+    <span class="code-keyword">return</span> response.text
+
+<span class="code-comment"># Crear Chief Supervisor</span>
+chief_supervisor = client.create_agent(
+    instructions=<span class="code-string">"""Eres el Chief Supervisor que coordina todo el proyecto.
+
+Analiza la tarea y delega a los supervisores apropiados:
+- delegate_to_tech: Para tareas de desarrollo, arquitectura técnica
+- delegate_to_content: Para tareas de documentación, escritura
+
+Sintetiza los resultados de ambos departamentos en una respuesta coherente."""</span>,
+    name=<span class="code-string">"chief_supervisor"</span>,
+    tools=[delegate_to_tech, delegate_to_content]
+)</code></pre>
+
+                <h4>Ejecución</h4>
+                <pre><code><span class="code-comment"># Tarea que requiere ambos departamentos</span>
+task = <span class="code-string">"Crea una aplicación web de blog y documenta su arquitectura"</span>
+
+result = <span class="code-keyword">await</span> chief_supervisor.run(task)
+
+<span class="code-comment"># Flujo de ejecución:</span>
+<span class="code-comment"># Chief → Tech Supervisor → Backend/Frontend</span>
+<span class="code-comment"># Chief → Content Supervisor → Writer/Editor</span>
+<span class="code-comment"># Chief sintetiza resultados de ambos departamentos</span></code></pre>
+
+                <div class="info-box success">
+                    <strong>✅ Ventajas de la Jerarquía</strong>
+                    <ul>
+                        <li>Organización clara tipo empresa</li>
+                        <li>Escalabilidad a muchos workers</li>
+                        <li>Separación de departamentos/dominios</li>
+                        <li>Sub-supervisores manejan complejidad local</li>
+                        <li>Chief solo ve alto nivel</li>
+                    </ul>
+                </div>
+
+                <h3>📋 Casos de Uso</h3>
+                <ul>
+                    <li>Simulación de organización empresarial</li>
+                    <li>Proyectos multi-departamento (tech, legal, finance)</li>
+                    <li>Sistemas complejos con muchos especialistas (10+)</li>
+                    <li>Workflows con sub-workflows</li>
+                </ul>
+            </section>
+
+            <!-- Section 5: Pattern 3 - Parallel Delegation -->
+            <section id="patron3">
+                <h2><span class="section-number">5</span>Patrón 3: Parallel Delegation</h2>
+
+                <p>
+                    <span class="badge pattern">Patrón Paralelo</span>
+                    El patrón <strong>Parallel Delegation</strong> permite al supervisor consultar múltiples expertos
+                    simultáneamente y sintetizar sus perspectivas.
+                </p>
+
+                <h3>🎯 Arquitectura</h3>
+                <div class="diagram">
+                      [Supervisor]
+                  "Consulta a todos"
+                    ↙  ↓  ↓  ↘
+            [Security] [Performance] [UX] [Cost]
+            "Ejecutan en paralelo (o secuencial)"
+                    ↘  ↓  ↓  ↙
+                  [Supervisor]
+              "Sintetiza perspectivas"
+                        ↓
+                     [User]
+                </div>
+
+                <h3>🎯 Características</h3>
+                <ul>
+                    <li><strong>Múltiples Perspectivas:</strong> Evalúa desde diferentes ángulos</li>
+                    <li><strong>Síntesis Balanceada:</strong> Combina opiniones de todos los expertos</li>
+                    <li><strong>Evaluación Completa:</strong> No se pierde ninguna dimensión</li>
+                    <li><strong>Ejecución:</strong> Puede ser paralela (asyncio) o secuencial</li>
+                </ul>
+
+                <h3>💻 Implementación</h3>
+
+                <h4>Crear 4 Expertos con Perspectivas Diferentes</h4>
+                <pre><code><span class="code-comment"># 4 expertos especializados</span>
+security_agent = client.create_agent(
+    instructions=<span class="code-string">"Eres un experto en seguridad. Evalúas riesgos y vulnerabilidades."</span>,
+    name=<span class="code-string">"security_expert"</span>
+)
+
+performance_agent = client.create_agent(
+    instructions=<span class="code-string">"Eres un experto en rendimiento. Analizas optimización y escalabilidad."</span>,
+    name=<span class="code-string">"performance_expert"</span>
+)
+
+ux_agent = client.create_agent(
+    instructions=<span class="code-string">"Eres un experto en UX. Evalúas usabilidad y experiencia de usuario."</span>,
+    name=<span class="code-string">"ux_expert"</span>
+)
+
+cost_agent = client.create_agent(
+    instructions=<span class="code-string">"Eres un experto en costos. Analizas presupuestos y ROI."</span>,
+    name=<span class="code-string">"cost_expert"</span>
+)</code></pre>
+
+                <h4>Crear Closures de Consulta</h4>
+                <pre><code><span class="code-keyword">async def</span> <span class="code-function">consult_security</span>(question: str) -> str:
+    <span class="code-string">"""Consulta al experto en seguridad."""</span>
+    response = <span class="code-keyword">await</span> security_agent.run(question)
+    <span class="code-keyword">return</span> <span class="code-string">f"SEGURIDAD: {response.text}"</span>
+
+<span class="code-keyword">async def</span> <span class="code-function">consult_performance</span>(question: str) -> str:
+    <span class="code-string">"""Consulta al experto en rendimiento."""</span>
+    response = <span class="code-keyword">await</span> performance_agent.run(question)
+    <span class="code-keyword">return</span> <span class="code-string">f"RENDIMIENTO: {response.text}"</span>
+
+<span class="code-keyword">async def</span> <span class="code-function">consult_ux</span>(question: str) -> str:
+    <span class="code-string">"""Consulta al experto en UX."""</span>
+    response = <span class="code-keyword">await</span> ux_agent.run(question)
+    <span class="code-keyword">return</span> <span class="code-string">f"UX: {response.text}"</span>
+
+<span class="code-keyword">async def</span> <span class="code-function">consult_cost</span>(question: str) -> str:
+    <span class="code-string">"""Consulta al experto en costos."""</span>
+    response = <span class="code-keyword">await</span> cost_agent.run(question)
+    <span class="code-keyword">return</span> <span class="code-string">f"COSTOS: {response.text}"</span></code></pre>
+
+                <h4>Crear Supervisor de Evaluación</h4>
+                <pre><code>supervisor = client.create_agent(
+    instructions=<span class="code-string">"""Eres un supervisor que evalúa propuestas consultando múltiples expertos.
+
+Tienes acceso a 4 especialistas:
+- consult_security: Evalúa riesgos y vulnerabilidades
+- consult_performance: Analiza rendimiento y escalabilidad
+- consult_ux: Evalúa experiencia de usuario
+- consult_cost: Analiza presupuesto y ROI
+
+Para evaluaciones completas, consulta a TODOS los expertos y sintetiza sus
+opiniones en una recomendación final balanceada."""</span>,
+    name=<span class="code-string">"evaluation_supervisor"</span>,
+    tools=[consult_security, consult_performance, consult_ux, consult_cost]
+)</code></pre>
+
+                <h4>Ejecutar Evaluación Multi-Experto</h4>
+                <pre><code>task = <span class="code-string">"Evalúa la propuesta de migrar nuestra aplicación a la nube (AWS)"</span>
+
+result = <span class="code-keyword">await</span> supervisor.run(task)
+
+<span class="code-comment"># El supervisor internamente:</span>
+<span class="code-comment"># 1. Llama consult_security("migración a AWS")</span>
+<span class="code-comment"># 2. Llama consult_performance("migración a AWS")</span>
+<span class="code-comment"># 3. Llama consult_ux("migración a AWS")</span>
+<span class="code-comment"># 4. Llama consult_cost("migración a AWS")</span>
+<span class="code-comment"># 5. Sintetiza las 4 perspectivas en una recomendación balanceada</span>
+
+<span class="code-function">print</span>(result.text)</code></pre>
+
+                <div class="info-box success">
+                    <strong>✅ Ventajas de Parallel Delegation</strong>
+                    <ul>
+                        <li>Evaluación completa desde múltiples ángulos</li>
+                        <li>Síntesis balanceada de diferentes perspectivas</li>
+                        <li>No se pierde ninguna dimensión importante</li>
+                        <li>Ideal para decisiones complejas</li>
+                    </ul>
+                </div>
+
+                <h3>📋 Casos de Uso</h3>
+                <ul>
+                    <li>Evaluación de propuestas (security, cost, UX, performance)</li>
+                    <li>Análisis de riesgos multi-dimensional</li>
+                    <li>Code review por múltiples aspectos</li>
+                    <li>Decisiones de arquitectura (consultar múltiples arquitectos)</li>
+                    <li>Evaluación de candidatos (múltiples entrevistadores)</li>
+                </ul>
+
+                <div class="info-box">
+                    <strong>💡 Nota sobre Paralelismo</strong>
+                    Aunque se llama "Parallel Delegation", la ejecución real depende del framework.
+                    El supervisor puede llamar a los expertos secuencialmente (uno tras otro) o en paralelo
+                    con <code>asyncio.gather()</code>. El patrón es el mismo: consultar múltiples y sintetizar.
+                </div>
+            </section>
+
+            <!-- Section 6: Closures Deep Dive -->
+            <section id="closures">
+                <h2><span class="section-number">6</span>Closure Pattern (Tools Wrapper)</h2>
+
+                <p>
+                    El patrón de <strong>Closures</strong> es el mecanismo clave que permite al supervisor acceder
+                    a los workers como tools.
+                </p>
+
+                <h3>🧩 ¿Qué es un Closure?</h3>
+                <p>
+                    Un closure es una función que "captura" variables de su scope externo, permitiendo acceder a
+                    esas variables incluso después de que el scope original haya terminado.
+                </p>
+
+                <pre><code><span class="code-comment"># Ejemplo básico de closure</span>
+<span class="code-keyword">def</span> <span class="code-function">make_multiplier</span>(factor):
+    <span class="code-comment"># Función interna que captura 'factor'</span>
+    <span class="code-keyword">def</span> <span class="code-function">multiply</span>(x):
+        <span class="code-keyword">return</span> x * factor  <span class="code-comment"># ← 'factor' es capturado</span>
+    <span class="code-keyword">return</span> multiply
+
+times_two = make_multiplier(2)
+times_three = make_multiplier(3)
+
+<span class="code-function">print</span>(times_two(5))    <span class="code-comment"># 10</span>
+<span class="code-function">print</span>(times_three(5))  <span class="code-comment"># 15</span></code></pre>
+
+                <h3>🔧 Closures en Supervisor Pattern</h3>
+                <pre><code><span class="code-comment"># 1. Worker existe en el scope</span>
+research_agent = client.create_agent(...)
+
+<span class="code-comment"># 2. Closure captura el worker</span>
+<span class="code-keyword">async def</span> <span class="code-function">delegate_research</span>(topic: str) -> str:
+    <span class="code-string">"""Tool function que el supervisor puede llamar."""</span>
+    <span class="code-comment"># 'research_agent' es capturado del scope externo</span>
+    response = <span class="code-keyword">await</span> research_agent.run(<span class="code-string">f"Investiga: {topic}"</span>)
+    <span class="code-keyword">return</span> response.text
+
+<span class="code-comment"># 3. Supervisor recibe el closure como tool</span>
+supervisor = client.create_agent(
+    ...,
+    tools=[delegate_research]  <span class="code-comment"># ← El closure lleva consigo 'research_agent'</span>
+)
+
+<span class="code-comment"># 4. Cuando supervisor llama la tool, el closure tiene acceso al worker</span>
+result = <span class="code-keyword">await</span> supervisor.run(<span class="code-string">"Investiga IA"</span>)
+<span class="code-comment"># Internamente: delegate_research("IA") → research_agent.run(...)</span></code></pre>
+
+                <h3>📝 Anatomía de un Closure para Supervisor</h3>
+                <pre><code><span class="code-keyword">async def</span> <span class="code-function">delegate_worker</span>(param: str) -> str:
+    <span class="code-string">"""
+    Docstring CRÍTICO: El supervisor lo usa para decidir cuándo llamar esta tool.
+
+    Debe describir:
+    - Qué hace el worker
+    - Cuándo usar esta tool
+    - Qué parámetros acepta
+
+    Ejemplo: "Delega investigación de un tema. Usa cuando necesites hechos o datos."
+    """</span>
+    <span class="code-comment"># 1. (Opcional) Logging para debugging</span>
+    <span class="code-function">print</span>(<span class="code-string">f"[Supervisor → Worker]: {param}"</span>)
+
+    <span class="code-comment"># 2. Llamar al worker capturado</span>
+    response = <span class="code-keyword">await</span> worker_agent.run(<span class="code-string">f"Tu prompt: {param}"</span>)
+
+    <span class="code-comment"># 3. (Opcional) Formatear o procesar resultado</span>
+    formatted_result = <span class="code-string">f"WORKER: {response.text}"</span>
+
+    <span class="code-comment"># 4. (Opcional) Más logging</span>
+    <span class="code-function">print</span>(<span class="code-string">f"[Worker → Supervisor]: Completado"</span>)
+
+    <span class="code-comment"># 5. Retornar resultado</span>
+    <span class="code-keyword">return</span> formatted_result</code></pre>
+
+                <h3>⚙️ Variantes del Patrón</h3>
+
+                <h4>1. Closure Simple (Básico)</h4>
+                <pre><code><span class="code-keyword">async def</span> <span class="code-function">ask_expert</span>(question: str) -> str:
+    response = <span class="code-keyword">await</span> expert_agent.run(question)
+    <span class="code-keyword">return</span> response.text</code></pre>
+
+                <h4>2. Closure con Formato Personalizado</h4>
+                <pre><code><span class="code-keyword">async def</span> <span class="code-function">ask_expert</span>(question: str) -> str:
+    response = <span class="code-keyword">await</span> expert_agent.run(question)
+    <span class="code-keyword">return</span> <span class="code-string">f"[EXPERT] {response.text}"</span></code></pre>
+
+                <h4>3. Closure con Validación</h4>
+                <pre><code><span class="code-keyword">async def</span> <span class="code-function">ask_expert</span>(question: str) -> str:
+    <span class="code-keyword">if</span> <span class="code-keyword">not</span> question <span class="code-keyword">or</span> <span class="code-function">len</span>(question) < 5:
+        <span class="code-keyword">return</span> <span class="code-string">"[ERROR] Pregunta inválida"</span>
+    response = <span class="code-keyword">await</span> expert_agent.run(question)
+    <span class="code-keyword">return</span> response.text</code></pre>
+
+                <h4>4. Closure con Telemetría</h4>
+                <pre><code><span class="code-keyword">async def</span> <span class="code-function">ask_expert</span>(question: str) -> str:
+    start = time.time()
+    response = <span class="code-keyword">await</span> expert_agent.run(question)
+    elapsed = time.time() - start
+
+    logger.info(<span class="code-string">f"Worker 'expert' ejecutó en {elapsed:.2f}s"</span>)
+
+    <span class="code-keyword">return</span> response.text</code></pre>
+
+                <h4>5. Closure con Retry Logic</h4>
+                <pre><code><span class="code-keyword">async def</span> <span class="code-function">ask_expert</span>(question: str) -> str:
+    <span class="code-keyword">for</span> attempt <span class="code-keyword">in</span> <span class="code-function">range</span>(3):
+        <span class="code-keyword">try</span>:
+            response = <span class="code-keyword">await</span> expert_agent.run(question)
+            <span class="code-keyword">return</span> response.text
+        <span class="code-keyword">except</span> <span class="code-function">Exception</span> <span class="code-keyword">as</span> e:
+            <span class="code-keyword">if</span> attempt == 2:
+                <span class="code-keyword">return</span> <span class="code-string">f"[ERROR] Failed after 3 attempts: {e}"</span>
+            <span class="code-keyword">await</span> asyncio.sleep(1)</code></pre>
+
+                <div class="info-box warning">
+                    <strong>⚠️ Importante: Scope y Lifecycle</strong>
+                    Los closures capturan referencias a los agents. Asegúrate de que:
+                    <ul style="margin-top: 10px;">
+                        <li>Los agents no se cierren antes de que el supervisor termine</li>
+                        <li>Mantengas referencias a todos los clients para cleanup</li>
+                        <li>Los agents estén inicializados antes de crear los closures</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Section 7: Supervisor vs Group Chat -->
+            <section id="supervisor-vs-groupchat">
+                <h2><span class="section-number">7</span>Supervisor vs Group Chat</h2>
+
+                <p>
+                    Ambos patrones orquestan múltiples agentes, pero con filosofías diferentes.
+                </p>
+
+                <h3>🔄 Comparación Visual</h3>
+                <table>
+                    <tr>
+                        <th>Aspecto</th>
+                        <th>Supervisor Pattern</th>
+                        <th>Group Chat Pattern</th>
+                    </tr>
+                    <tr>
+                        <td><strong>Arquitectura</strong></td>
+                        <td>Jerárquica (supervisor → workers)</td>
+                        <td>Peer-to-peer (agentes al mismo nivel)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Orquestación</strong></td>
+                        <td>Supervisor toma decisiones centralizadas</td>
+                        <td>Manager externo decide turnos</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Comunicación</strong></td>
+                        <td>Workers NO conversan entre sí</td>
+                        <td>Agentes pueden responder a otros agentes</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Delegación</strong></td>
+                        <td>Supervisor delega sub-tareas específicas</td>
+                        <td>Selector decide quién habla, pero no delega</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Síntesis</strong></td>
+                        <td>Supervisor sintetiza resultados de workers</td>
+                        <td>No hay síntesis central (conversación fluye)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Visibilidad</strong></td>
+                        <td>Workers solo ven su sub-tarea</td>
+                        <td>Agentes ven historial completo</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Implementación</strong></td>
+                        <td>Closures como tools</td>
+                        <td>GroupChatBuilder con selector</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Ideal para</strong></td>
+                        <td>Delegación, síntesis multi-fuente</td>
+                        <td>Debate, colaboración, brainstorming</td>
+                    </tr>
+                </table>
+
+                <h3>🎯 Diagrama Comparativo</h3>
+                <div class="diagram">
+<strong>SUPERVISOR PATTERN:</strong>
+                [User]
+                  ↓
+            [Supervisor]
+         (Decide y delega)
+            ↙  ↓  ↘
+         [A] [B] [C]
+    (No conversan entre sí)
+            ↘  ↓  ↙
+            [Supervisor]
+         (Sintetiza)
+                  ↓
+               [User]
+
+<strong>GROUP CHAT PATTERN:</strong>
+                [User]
+                  ↓
+             [Manager]
+         (Decide quién habla)
+                  ↓
+              [A habla]
+                  ↓
+             [Manager]
+         (Decide siguiente)
+                  ↓
+         [B responde a A]
+                  ↓
+             [Manager]
+                  ↓
+         [C responde a B]
+              (etc.)
+                </div>
+
+                <h3>✅ Cuándo Usar Cada Uno</h3>
+
+                <h4>Usar Supervisor Pattern cuando:</h4>
+                <ul>
+                    <li>Necesitas delegar sub-tareas dinámicamente</li>
+                    <li>Quieres sintetizar perspectivas diferentes</li>
+                    <li>Tienes jerarquía organizacional clara</li>
+                    <li>Workers son independientes (no necesitan conversar)</li>
+                    <li>Necesitas control centralizado de decisiones</li>
+                </ul>
+
+                <h4>Usar Group Chat Pattern cuando:</h4>
+                <ul>
+                    <li>Quieres que agentes colaboren y respondan entre sí</li>
+                    <li>Necesitas debate o múltiples perspectivas conversacionales</li>
+                    <li>Agentes deben ver el historial completo</li>
+                    <li>Estructura peer-to-peer es más natural</li>
+                    <li>No necesitas síntesis centralizada</li>
+                </ul>
+
+                <div class="info-box">
+                    <strong>💡 Híbrido: ¿Se pueden combinar?</strong>
+                    Sí! Puedes tener un supervisor que use Group Chat internamente, o un Group Chat donde
+                    uno de los participantes es un supervisor con sus propios workers. Son composibles.
+                </div>
+            </section>
+
+            <!-- Section 8: Architectures -->
+            <section id="arquitecturas">
+                <h2><span class="section-number">8</span>Arquitecturas y Variantes</h2>
+
+                <h3>1️⃣ Flat Architecture (1 nivel)</h3>
+                <div class="hierarchy-box level-1">
+                    <strong>[Supervisor]</strong>
+                </div>
+                <div style="text-align: center; margin: 10px 0;">↓ ↓ ↓</div>
+                <div style="display: flex; justify-content: space-around;">
+                    <div class="hierarchy-box level-3">Worker A</div>
+                    <div class="hierarchy-box level-3">Worker B</div>
+                    <div class="hierarchy-box level-3">Worker C</div>
+                </div>
+                <p style="margin-top: 15px;"><strong>Uso:</strong> Simple, pocos workers (2-5), sin sub-dominios complejos</p>
+
+                <h3>2️⃣ Hierarchical Architecture (Multi-nivel)</h3>
+                <div class="hierarchy-box level-1">
+                    <strong>[Chief Supervisor]</strong>
+                </div>
+                <div style="text-align: center; margin: 10px 0;">↓ ↓</div>
+                <div style="display: flex; justify-content: space-around; margin-bottom: 10px;">
+                    <div class="hierarchy-box level-2">Sub-Supervisor 1</div>
+                    <div class="hierarchy-box level-2">Sub-Supervisor 2</div>
+                </div>
+                <div style="text-align: center; margin: 10px 0;">↓ ↓ ↓ ↓</div>
+                <div style="display: flex; justify-content: space-around;">
+                    <div class="hierarchy-box level-3">W1</div>
+                    <div class="hierarchy-box level-3">W2</div>
+                    <div class="hierarchy-box level-3">W3</div>
+                    <div class="hierarchy-box level-3">W4</div>
+                </div>
+                <p style="margin-top: 15px;"><strong>Uso:</strong> Muchos workers (6+), múltiples departamentos/dominios</p>
+
+                <h3>3️⃣ Sequential Workflow</h3>
+                <div class="diagram">
+            [Supervisor]
+                  ↓
+        "Paso 1: Research"
+              [Worker A]
+                  ↓
+        "Paso 2: Analysis"
+              [Worker B]
+                  ↓
+        "Paso 3: Writing"
+              [Worker C]
+                  ↓
+            [Supervisor]
+          "Resultado final"
+                </div>
+                <p><strong>Uso:</strong> Pipeline con pasos obligatorios en orden</p>
+
+                <h3>4️⃣ Parallel Evaluation</h3>
+                <div class="diagram">
+            [Supervisor]
+        "Consulta a todos"
+            ↙ ↓ ↓ ↘
+        [A] [B] [C] [D]
+    "Ejecutan en paralelo"
+            ↘ ↓ ↓ ↙
+            [Supervisor]
+      "Sintetiza perspectivas"
+                </div>
+                <p><strong>Uso:</strong> Evaluación multi-dimensional, síntesis de opiniones</p>
+
+                <h3>5️⃣ Hybrid: Supervisor + Group Chat</h3>
+                <div class="diagram">
+            [Supervisor]
+                  ↓
+        "Delega a Group Chat"
+                  ↓
+         [GroupChatWorkflow]
+           ↙  ↓  ↘
+         [A] [B] [C]
+      "Debate entre sí"
+           ↘  ↓  ↙
+                  ↓
+            [Supervisor]
+      "Recibe conclusión"
+                </div>
+                <p><strong>Uso:</strong> Combinación de delegación y colaboración</p>
+
+                <h3>📊 Tabla de Decisión de Arquitectura</h3>
+                <table>
+                    <tr>
+                        <th>Número de Agents</th>
+                        <th>Complejidad</th>
+                        <th>Arquitectura Recomendada</th>
+                    </tr>
+                    <tr>
+                        <td>2-5</td>
+                        <td>Baja</td>
+                        <td>Flat (1 nivel)</td>
+                    </tr>
+                    <tr>
+                        <td>6-10</td>
+                        <td>Media</td>
+                        <td>Flat o Hierarchical (2 niveles)</td>
+                    </tr>
+                    <tr>
+                        <td>10+</td>
+                        <td>Alta</td>
+                        <td>Hierarchical (3+ niveles)</td>
+                    </tr>
+                    <tr>
+                        <td>Cualquier</td>
+                        <td>Pipeline obligatorio</td>
+                        <td>Sequential Workflow</td>
+                    </tr>
+                    <tr>
+                        <td>3-6</td>
+                        <td>Evaluación multi-aspecto</td>
+                        <td>Parallel Evaluation</td>
+                    </tr>
+                </table>
+            </section>
+
+            <!-- Section 9: Implementation Guide -->
+            <section id="implementacion">
+                <h2><span class="section-number">9</span>Implementación Paso a Paso</h2>
+
+                <h3>🚀 Guía Completa para Implementar Supervisor Pattern</h3>
+
+                <h4>Paso 1: Setup e Imports</h4>
+                <pre><code><span class="code-keyword">import</span> os
+<span class="code-keyword">from</span> dotenv <span class="code-keyword">import</span> load_dotenv
+<span class="code-keyword">import</span> asyncio
+<span class="code-keyword">from</span> agent_framework_azure_ai <span class="code-keyword">import</span> AzureAIAgentClient
+<span class="code-keyword">from</span> azure.identity.aio <span class="code-keyword">import</span> DefaultAzureCredential
+<span class="code-keyword">from</span> typing <span class="code-keyword">import</span> Optional
+
+load_dotenv()</code></pre>
+
+                <h4>Paso 2: Planificar Jerarquía</h4>
+                <pre><code><span class="code-comment"># Definir roles y responsabilidades</span>
+<span class="code-string">"""
+DISEÑO:
+- Supervisor: Coordina 3 workers
+- Worker 1 (Research): Investiga temas
+- Worker 2 (Analysis): Analiza datos
+- Worker 3 (Writing): Escribe contenido
+
+FLUJO:
+User → Supervisor → (Research → Analysis → Writing) → Supervisor → User
+"""</span></code></pre>
+
+                <h4>Paso 3: Crear Workers</h4>
+                <pre><code><span class="code-keyword">async def</span> <span class="code-function">create_workers</span>(credential):
+    <span class="code-string">"""Crear todos los workers y sus clients."""</span>
+    clients = []
+
+    <span class="code-comment"># Worker 1: Research</span>
+    research_client = AzureAIAgentClient(
+        async_credential=credential,
+        should_cleanup_agent=True
+    )
+    research_agent = research_client.create_agent(
+        instructions=<span class="code-string">"Eres un investigador experto."</span>,
+        name=<span class="code-string">"research_worker"</span>
+    )
+    <span class="code-keyword">await</span> research_agent.run(<span class="code-string">"Hola"</span>)  <span class="code-comment"># Warm-up</span>
+    clients.append(research_client)
+
+    <span class="code-comment"># Worker 2: Analysis</span>
+    analysis_client = AzureAIAgentClient(
+        async_credential=credential,
+        should_cleanup_agent=True
+    )
+    analysis_agent = analysis_client.create_agent(
+        instructions=<span class="code-string">"Eres un analista experto."</span>,
+        name=<span class="code-string">"analysis_worker"</span>
+    )
+    <span class="code-keyword">await</span> analysis_agent.run(<span class="code-string">"Hola"</span>)
+    clients.append(analysis_client)
+
+    <span class="code-comment"># Worker 3: Writing</span>
+    writing_client = AzureAIAgentClient(
+        async_credential=credential,
+        should_cleanup_agent=True
+    )
+    writing_agent = writing_client.create_agent(
+        instructions=<span class="code-string">"Eres un escritor experto."</span>,
+        name=<span class="code-string">"writing_worker"</span>
+    )
+    <span class="code-keyword">await</span> writing_agent.run(<span class="code-string">"Hola"</span>)
+    clients.append(writing_client)
+
+    <span class="code-keyword">return</span> clients, research_agent, analysis_agent, writing_agent</code></pre>
+
+                <h4>Paso 4: Crear Closures</h4>
+                <pre><code><span class="code-keyword">def</span> <span class="code-function">create_closures</span>(research_agent, analysis_agent, writing_agent):
+    <span class="code-string">"""Crear closures que capturan los workers."""</span>
+
+    <span class="code-keyword">async def</span> <span class="code-function">delegate_research</span>(topic: str) -> str:
+        <span class="code-string">"""Delega investigación. Usa para recopilar hechos y datos."""</span>
+        response = <span class="code-keyword">await</span> research_agent.run(<span class="code-string">f"Investiga: {topic}"</span>)
+        <span class="code-keyword">return</span> response.text
+
+    <span class="code-keyword">async def</span> <span class="code-function">delegate_analysis</span>(data: str) -> str:
+        <span class="code-string">"""Delega análisis. Usa para encontrar patterns e insights."""</span>
+        response = <span class="code-keyword">await</span> analysis_agent.run(<span class="code-string">f"Analiza: {data}"</span>)
+        <span class="code-keyword">return</span> response.text
+
+    <span class="code-keyword">async def</span> <span class="code-function">delegate_writing</span>(content: str) -> str:
+        <span class="code-string">"""Delega escritura. Usa para crear contenido claro."""</span>
+        response = <span class="code-keyword">await</span> writing_agent.run(<span class="code-string">f"Escribe sobre: {content}"</span>)
+        <span class="code-keyword">return</span> response.text
+
+    <span class="code-keyword">return</span> [delegate_research, delegate_analysis, delegate_writing]</code></pre>
+
+                <h4>Paso 5: Crear Supervisor</h4>
+                <pre><code><span class="code-keyword">async def</span> <span class="code-function">create_supervisor</span>(credential, tools):
+    <span class="code-string">"""Crear supervisor con acceso a los workers vía tools."""</span>
+
+    supervisor_client = AzureAIAgentClient(
+        async_credential=credential,
+        should_cleanup_agent=True
+    )
+
+    supervisor_agent = supervisor_client.create_agent(
+        instructions=<span class="code-string">"""Eres un supervisor que coordina especialistas.
+
+Tienes acceso a:
+- delegate_research: Para investigar temas
+- delegate_analysis: Para analizar datos
+- delegate_writing: Para escribir contenido
+
+Analiza la tarea y delega apropiadamente. Puedes usar múltiples workers
+en secuencia. Sintetiza sus resultados en una respuesta coherente."""</span>,
+        name=<span class="code-string">"supervisor"</span>,
+        tools=tools
+    )
+
+    <span class="code-keyword">await</span> supervisor_agent.run(<span class="code-string">"Hola"</span>)
+
+    <span class="code-keyword">return</span> supervisor_client, supervisor_agent</code></pre>
+
+                <h4>Paso 6: Ejecutar y Cleanup</h4>
+                <pre><code><span class="code-keyword">async def</span> <span class="code-function">main</span>():
+    <span class="code-keyword">async with</span> DefaultAzureCredential() <span class="code-keyword">as</span> credential:
+        clients = []
+
+        <span class="code-keyword">try</span>:
+            <span class="code-comment"># Crear workers</span>
+            worker_clients, research, analysis, writing = <span class="code-keyword">await</span> create_workers(credential)
+            clients.extend(worker_clients)
+
+            <span class="code-comment"># Crear closures</span>
+            tools = create_closures(research, analysis, writing)
+
+            <span class="code-comment"># Crear supervisor</span>
+            supervisor_client, supervisor = <span class="code-keyword">await</span> create_supervisor(credential, tools)
+            clients.append(supervisor_client)
+
+            <span class="code-comment"># Ejecutar tarea</span>
+            task = <span class="code-string">"Crea un artículo sobre tendencias de IA en 2024"</span>
+            result = <span class="code-keyword">await</span> supervisor.run(task)
+
+            <span class="code-function">print</span>(result.text)
+
+        <span class="code-keyword">finally</span>:
+            <span class="code-comment"># Cleanup: cerrar todos los clients</span>
+            <span class="code-keyword">for</span> client <span class="code-keyword">in</span> clients:
+                <span class="code-keyword">await</span> client.__aexit__(None, None, None)
+
+<span class="code-keyword">if</span> __name__ == <span class="code-string">"__main__"</span>:
+    asyncio.run(main())</code></pre>
+
+                <div class="info-box success">
+                    <strong>✅ Checklist de Implementación</strong>
+                    <ul>
+                        <li>☑️ Workers creados con instrucciones claras</li>
+                        <li>☑️ Closures con docstrings descriptivos</li>
+                        <li>☑️ Supervisor con instrucciones que describen cuándo usar cada tool</li>
+                        <li>☑️ Todos los clients rastreados para cleanup</li>
+                        <li>☑️ Warm-up de todos los agents</li>
+                        <li>☑️ Try/finally para garantizar cierre</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Section 10: Pattern Comparison -->
+            <section id="comparacion">
+                <h2><span class="section-number">10</span>Comparación de Patrones</h2>
+
+                <table>
+                    <tr>
+                        <th>Aspecto</th>
+                        <th>Basic Supervisor</th>
+                        <th>Hierarchical</th>
+                        <th>Parallel Delegation</th>
+                    </tr>
+                    <tr>
+                        <td><strong>Niveles</strong></td>
+                        <td>1 (flat)</td>
+                        <td>2-3+ (multi-nivel)</td>
+                        <td>1 (flat)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Número de Agents</strong></td>
+                        <td>1 supervisor + 2-5 workers</td>
+                        <td>1 chief + N subs + M workers</td>
+                        <td>1 supervisor + 3-6 expertos</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Complejidad</strong></td>
+                        <td>⭐ Baja</td>
+                        <td>⭐⭐⭐ Alta</td>
+                        <td>⭐⭐ Media</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Delegación</strong></td>
+                        <td>Selectiva (1-3 workers)</td>
+                        <td>Multinivel (dept → team → worker)</td>
+                        <td>Consulta a todos</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Síntesis</strong></td>
+                        <td>Supervisor combina resultados</td>
+                        <td>Múltiples síntesis (cada nivel)</td>
+                        <td>Supervisor sintetiza perspectivas</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Uso típico</strong></td>
+                        <td>Pipeline research-analyze-write</td>
+                        <td>Simulación de organización</td>
+                        <td>Evaluación multi-dimensional</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Escalabilidad</strong></td>
+                        <td>Hasta ~5 workers</td>
+                        <td>Decenas de workers</td>
+                        <td>Hasta ~6 expertos</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Mejor para</strong></td>
+                        <td>Tareas simples multi-especialidad</td>
+                        <td>Organizaciones complejas</td>
+                        <td>Decisiones complejas</td>
+                    </tr>
+                </table>
+            </section>
+
+            <!-- Section 11: Use Cases -->
+            <section id="casos-uso">
+                <h2><span class="section-number">11</span>Casos de Uso</h2>
+
+                <h3>🏢 Por Industria</h3>
+
+                <h4>Tecnología / Software</h4>
+                <ul>
+                    <li>Supervisor delega a: Backend, Frontend, DevOps, QA</li>
+                    <li>Code review multi-aspecto: Security, Performance, Maintainability</li>
+                    <li>Arquitectura: Design specialist, Database specialist, Security specialist</li>
+                </ul>
+
+                <h4>Finanzas</h4>
+                <ul>
+                    <li>Análisis de inversión: Research, Risk analysis, Valuation, Market timing</li>
+                    <li>Compliance: Legal expert, Tax expert, Regulatory expert</li>
+                    <li>Portfolio management: Equities specialist, Bonds specialist, Alternatives specialist</li>
+                </ul>
+
+                <h4>Healthcare</h4>
+                <ul>
+                    <li>Diagnóstico multi-especialidad: Cardiologist, Neurologist, Radiologist</li>
+                    <li>Treatment planning: Surgeon, Pharmacist, Physical therapist</li>
+                    <li>Research: Clinical research, Lab analysis, Statistical analysis</li>
+                </ul>
+
+                <h4>Legal</h4>
+                <ul>
+                    <li>Contract review: Corporate lawyer, IP lawyer, Tax lawyer</li>
+                    <li>Due diligence: Legal expert, Financial expert, Technical expert</li>
+                    <li>Litigation strategy: Trial lawyer, Research specialist, Expert witness coordinator</li>
+                </ul>
+
+                <h4>Marketing</h4>
+                <ul>
+                    <li>Campaign planning: Creative, Analytics, Media buying, SEO</li>
+                    <li>Content creation: Writer, Designer, Video producer, SEO specialist</li>
+                    <li>Multi-channel: Social media, Email, Content, PPC</li>
+                </ul>
+
+                <h3>🎯 Por Tipo de Tarea</h3>
+
+                <h4>Investigación y Análisis</h4>
+                <ul>
+                    <li>Research → Analysis → Synthesis (Basic Supervisor)</li>
+                    <li>Multi-source research: Web, Papers, Database, Interviews (Parallel)</li>
+                    <li>Competitive analysis: Market research, Product analysis, Financial analysis</li>
+                </ul>
+
+                <h4>Creación de Contenido</h4>
+                <ul>
+                    <li>Research → Outline → Draft → Edit → Publish (Sequential)</li>
+                    <li>Multi-format: Article writer, Video script, Social posts (Parallel)</li>
+                    <li>Localization: English writer, Spanish translator, Cultural adapter</li>
+                </ul>
+
+                <h4>Evaluación y Decisiones</h4>
+                <ul>
+                    <li>Multi-criteria decision: Cost, Risk, Benefit, Timeline (Parallel)</li>
+                    <li>Vendor evaluation: Technical fit, Pricing, Support, Scalability</li>
+                    <li>Proposal review: Technical review, Legal review, Financial review</li>
+                </ul>
+
+                <h4>Desarrollo de Software</h4>
+                <ul>
+                    <li>Feature development: Requirements → Design → Implementation → Test</li>
+                    <li>Bug fixing: Reproduce → Diagnose → Fix → Verify (Sequential)</li>
+                    <li>Code review: Security, Performance, Style, Tests (Parallel)</li>
+                </ul>
+            </section>
+
+            <!-- Section 12: Best Practices -->
+            <section id="mejores-practicas">
+                <h2><span class="section-number">12</span>Mejores Prácticas</h2>
+
+                <h3>✅ DO: Haz Esto</h3>
+                <div class="info-box success">
+                    <ul>
+                        <li><strong>Docstrings descriptivos en closures:</strong> El supervisor los lee para decidir</li>
+                        <li><strong>Instrucciones claras del supervisor:</strong> Describa cuándo usar cada worker</li>
+                        <li><strong>Mantener lista de clients:</strong> Para cleanup correcto</li>
+                        <li><strong>Warm-up de todos los agents:</strong> Verificar que están listos</li>
+                        <li><strong>Logging en closures:</strong> Para debugging y observabilidad</li>
+                        <li><strong>Validación en closures:</strong> Verificar inputs antes de delegarli><strong>Formatear outputs:</strong> Prefijos como "[WORKER]: ..." ayudan al supervisor</li>
+                    </ul>
+                </div>
+
+                <h3>❌ DON'T: Evita Esto</h3>
+                <div class="info-box danger">
+                    <ul>
+                        <li><strong>No cerrar clients antes de terminar:</strong> Workers se vuelven inaccesibles</li>
+                        <li><strong>Closures sin docstrings:</strong> Supervisor no sabe cuándo usarlos</li>
+                        <li><strong>Instrucciones ambiguas:</strong> "Usa workers apropiados" es muy vago</li>
+                        <li><strong>Demasiados workers (10+) sin jerarquía:</strong> Supervisor se confunde</li>
+                        <li><strong>Workers que conversan entre sí:</strong> Rompe el patrón supervisor</li>
+                        <li><strong>No considerar límites de tokens:</strong> Sintetizar 10 resultados largos puede exceder</li>
+                    </ul>
+                </div>
+
+                <h3>🔧 Optimizaciones</h3>
+
+                <h4>Caching de Workers</h4>
+                <pre><code><span class="code-comment"># Cache resultados si la misma pregunta se hace múltiples veces</span>
+_cache = {}
+
+<span class="code-keyword">async def</span> <span class="code-function">delegate_research_cached</span>(topic: str) -> str:
+    <span class="code-keyword">if</span> topic <span class="code-keyword">in</span> _cache:
+        <span class="code-keyword">return</span> _cache[topic]
+
+    response = <span class="code-keyword">await</span> research_agent.run(<span class="code-string">f"Investiga: {topic}"</span>)
+    _cache[topic] = response.text
+    <span class="code-keyword">return</span> response.text</code></pre>
+
+                <h4>Paralelismo Real con asyncio.gather</h4>
+                <pre><code><span class="code-comment"># Modificar supervisor para llamar workers en paralelo</span>
+<span class="code-keyword">import</span> asyncio
+
+<span class="code-comment"># En el closure del supervisor, si sabes que necesitas múltiples workers:</span>
+results = <span class="code-keyword">await</span> asyncio.gather(
+    delegate_research(<span class="code-string">"topic"</span>),
+    delegate_analysis(<span class="code-string">"data"</span>),
+    delegate_writing(<span class="code-string">"content"</span>)
+)
+
+<span class="code-comment"># Ahora 'results' tiene [research_result, analysis_result, writing_result]</span></code></pre>
+
+                <h4>Rate Limiting</h4>
+                <pre><code><span class="code-keyword">import</span> asyncio
+<span class="code-keyword">from</span> asyncio <span class="code-keyword">import</span> Semaphore
+
+<span class="code-comment"># Limitar cuántos workers pueden ejecutar simultáneamente</span>
+semaphore = Semaphore(3)  <span class="code-comment"># Max 3 concurrentes</span>
+
+<span class="code-keyword">async def</span> <span class="code-function">delegate_with_limit</span>(topic: str) -> str:
+    <span class="code-keyword">async with</span> semaphore:
+        response = <span class="code-keyword">await</span> worker_agent.run(topic)
+        <span class="code-keyword">return</span> response.text</code></pre>
+
+                <h3>📊 Monitoreo y Telemetría</h3>
+                <pre><code><span class="code-keyword">import</span> time
+
+metrics = {
+    <span class="code-string">"worker_calls"</span>: {},
+    <span class="code-string">"total_time"</span>: {}
+}
+
+<span class="code-keyword">async def</span> <span class="code-function">delegate_monitored</span>(topic: str) -> str:
+    worker_name = <span class="code-string">"research_worker"</span>
+    metrics[<span class="code-string">"worker_calls"</span>][worker_name] = metrics[<span class="code-string">"worker_calls"</span>].get(worker_name, 0) + 1
+
+    start = time.time()
+    response = <span class="code-keyword">await</span> research_agent.run(topic)
+    elapsed = time.time() - start
+
+    metrics[<span class="code-string">"total_time"</span>][worker_name] = metrics[<span class="code-string">"total_time"</span>].get(worker_name, 0) + elapsed
+
+    <span class="code-keyword">return</span> response.text</code></pre>
+
+                <h3>⚠️ Manejo de Errores</h3>
+                <pre><code><span class="code-keyword">async def</span> <span class="code-function">delegate_with_error_handling</span>(topic: str) -> str:
+    <span class="code-keyword">try</span>:
+        response = <span class="code-keyword">await</span> worker_agent.run(topic)
+        <span class="code-keyword">return</span> response.text
+    <span class="code-keyword">except</span> <span class="code-function">Exception</span> <span class="code-keyword">as</span> e:
+        <span class="code-comment"># Log error</span>
+        logger.error(<span class="code-string">f"Worker failed: {e}"</span>)
+
+        <span class="code-comment"># Retornar mensaje de error al supervisor</span>
+        <span class="code-keyword">return</span> <span class="code-string">f"[ERROR] Worker no disponible: {str(e)}"</span></code></pre>
+            </section>
+
+            <!-- Section 13: Quick Reference -->
+            <section id="referencia">
+                <h2><span class="section-number">13</span>Referencia Rápida</h2>
+
+                <h3>📦 Estructura Básica</h3>
+                <pre><code><span class="code-comment"># 1. Crear workers</span>
+worker_agent = client.create_agent(instructions=<span class="code-string">"..."</span>, name=<span class="code-string">"worker"</span>)
+
+<span class="code-comment"># 2. Crear closure</span>
+<span class="code-keyword">async def</span> <span class="code-function">delegate_worker</span>(task: str) -> str:
+    <span class="code-string">"""Docstring que describe cuándo usar este worker."""</span>
+    response = <span class="code-keyword">await</span> worker_agent.run(task)
+    <span class="code-keyword">return</span> response.text
+
+<span class="code-comment"># 3. Crear supervisor</span>
+supervisor = client.create_agent(
+    instructions=<span class="code-string">"Coordina workers. Usa delegate_worker para..."</span>,
+    name=<span class="code-string">"supervisor"</span>,
+    tools=[delegate_worker]
+)
+
+<span class="code-comment"># 4. Ejecutar</span>
+result = <span class="code-keyword">await</span> supervisor.run(<span class="code-string">"Tu tarea"</span>)</code></pre>
+
+                <h3>🔑 Componentes Clave</h3>
+                <table>
+                    <tr>
+                        <th>Componente</th>
+                        <th>Propósito</th>
+                        <th>Ejemplo</th>
+                    </tr>
+                    <tr>
+                        <td><strong>Worker Agent</strong></td>
+                        <td>Especialista en un dominio</td>
+                        <td><code>research_agent = client.create_agent(...)</code></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Closure</strong></td>
+                        <td>Wrapper del worker como tool</td>
+                        <td><code>async def delegate_research(...): ...</code></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Supervisor Agent</strong></td>
+                        <td>Coordinador con tools</td>
+                        <td><code>supervisor = create_agent(..., tools=[...])</code></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Tools Parameter</strong></td>
+                        <td>Lista de closures</td>
+                        <td><code>tools=[delegate1, delegate2]</code></td>
+                    </tr>
+                </table>
+
+                <h3>📝 Snippets Útiles</h3>
+
+                <h4>Helper para crear agent</h4>
+                <pre><code><span class="code-keyword">async def</span> <span class="code-function">create_agent</span>(credential, instructions, name, tools=None):
+    client = AzureAIAgentClient(async_credential=credential)
+    params = {<span class="code-string">"instructions"</span>: instructions, <span class="code-string">"name"</span>: name}
+    <span class="code-keyword">if</span> tools:
+        params[<span class="code-string">"tools"</span>] = tools
+    agent = client.create_agent(**params)
+    <span class="code-keyword">await</span> agent.run(<span class="code-string">"Hola"</span>)
+    <span class="code-keyword">return</span> client, agent</code></pre>
+
+                <h4>Closure template</h4>
+                <pre><code><span class="code-keyword">async def</span> <span class="code-function">delegate_WORKER_NAME</span>(param: str) -> str:
+    <span class="code-string">"""
+    [Descripción de qué hace el worker]
+
+    Usa cuando: [Cuándo el supervisor debe llamar esto]
+    """</span>
+    <span class="code-function">print</span>(<span class="code-string">f"[Supervisor → Worker]: {param}"</span>)
+    response = <span class="code-keyword">await</span> WORKER_AGENT.run(<span class="code-string">f"Tu prompt: {param}"</span>)
+    <span class="code-function">print</span>(<span class="code-string">f"[Worker → Supervisor]: Done"</span>)
+    <span class="code-keyword">return</span> response.text</code></pre>
+
+                <h4>Cleanup pattern</h4>
+                <pre><code><span class="code-keyword">async with</span> DefaultAzureCredential() <span class="code-keyword">as</span> credential:
+    clients = []
+    <span class="code-keyword">try</span>:
+        <span class="code-comment"># ... crear agents y agregar clients a lista ...</span>
+        <span class="code-comment"># ... ejecutar workflow ...</span>
+    <span class="code-keyword">finally</span>:
+        <span class="code-keyword">for</span> client <span class="code-keyword">in</span> clients:
+            <span class="code-keyword">await</span> client.__aexit__(None, None, None)</code></pre>
+
+                <h3>🔗 Resources</h3>
+                <ul>
+                    <li><strong>Script Fuente:</strong> <code>021_supervisor_pattern.py</code></li>
+                    <li><strong>CLAUDE.md:</strong> Documentación completa del proyecto</li>
+                    <li><strong>Patrones Relacionados:</strong>
+                        <ul>
+                            <li>019_conditional_workflows.py - Workflows condicionales</li>
+                            <li>020_group_chat_workflow.py - Group Chat pattern</li>
+                        </ul>
+                    </li>
+                </ul>
+            </section>
+        </div>
+
+        <footer>
+            <p><strong>Microsoft Agent Framework</strong> - Supervisor Pattern</p>
+            <p>Script: 021_supervisor_pattern.py | Documentación generada: 2025-12-02</p>
+        </footer>
+    </div>
+</body>
+</html>
