@@ -1,0 +1,1200 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patrones de Ejecución de Workflows - Guía Genérica</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        h2 {
+            color: #667eea;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            font-size: 2em;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        h3 {
+            color: #764ba2;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+
+        h4 {
+            color: #555;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+
+        p {
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+
+        .highlight-box {
+            background: #f0f4ff;
+            border-left: 5px solid #667eea;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+
+        .warning-box {
+            background: #fff9e6;
+            border-left: 5px solid #ffc107;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+
+        .pattern-card {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 25px;
+            margin: 20px 0;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .pattern-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        .pattern-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .pattern-icon {
+            font-size: 3em;
+            margin-right: 15px;
+        }
+
+        .pattern-title {
+            flex: 1;
+        }
+
+        .pattern-percentage {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .code-block {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.5;
+            white-space: pre-wrap;
+        }
+
+        .code-block pre {
+            margin: 0;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .code-block .comment {
+            color: #6a9955;
+        }
+
+        .code-block .keyword {
+            color: #569cd6;
+        }
+
+        .code-block .string {
+            color: #ce9178;
+        }
+
+        .code-block .function {
+            color: #dcdcaa;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: bold;
+        }
+
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+
+        .decision-tree {
+            background: #fff9e6;
+            border: 2px solid #ffc107;
+            border-radius: 10px;
+            padding: 25px;
+            margin: 25px 0;
+        }
+
+        .decision-step {
+            margin: 15px 0;
+            padding-left: 30px;
+            position: relative;
+        }
+
+        .decision-step::before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: #ffc107;
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+
+        .pros-cons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .pros, .cons {
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        .pros {
+            background: #e8f5e9;
+            border-left: 5px solid #4caf50;
+        }
+
+        .cons {
+            background: #ffebee;
+            border-left: 5px solid #f44336;
+        }
+
+        .pros h4, .cons h4 {
+            margin-top: 0;
+        }
+
+        ul {
+            margin-left: 20px;
+            margin-bottom: 15px;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        .architecture-diagram {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 30px;
+            margin: 25px 0;
+            text-align: center;
+            font-family: monospace;
+            line-height: 2;
+        }
+
+        .flow-arrow {
+            color: #667eea;
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: bold;
+            margin: 5px;
+        }
+
+        .badge-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .badge-success {
+            background: #4caf50;
+            color: white;
+        }
+
+        .badge-warning {
+            background: #ff9800;
+            color: white;
+        }
+
+        .badge-info {
+            background: #2196F3;
+            color: white;
+        }
+
+        .workflow-types {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .workflow-type-card {
+            background: #f5f5f5;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            border-radius: 5px;
+        }
+
+        .workflow-type-card h4 {
+            margin-top: 0;
+            color: #667eea;
+        }
+
+        footer {
+            background: #333;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            margin-top: 40px;
+        }
+
+        @media (max-width: 768px) {
+            .pros-cons {
+                grid-template-columns: 1fr;
+            }
+
+            .workflow-types {
+                grid-template-columns: 1fr;
+            }
+
+            header h1 {
+                font-size: 1.8em;
+            }
+
+            .content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>⚙️ Patrones de Ejecución de Workflows</h1>
+            <p>Guía Genérica - Aplicable a Cualquier Tipo de Workflow</p>
+        </header>
+
+        <div class="content">
+            <!-- Introducción -->
+            <section id="introduccion">
+                <h2>📚 Concepto Fundamental</h2>
+
+                <div class="highlight-box">
+                    <h3 style="margin-top: 0;">🎯 ¿Qué es un Workflow?</h3>
+                    <p>
+                        Un <strong>workflow</strong> es <strong>código que orquesta uno o más agentes de IA</strong> para completar una tarea.
+                        Puede ser simple (un solo agente) o complejo (múltiples agentes trabajando juntos).
+                    </p>
+                </div>
+
+                <div class="warning-box">
+                    <h3 style="margin-top: 0;">⚠️ Aclaración Importante</h3>
+                    <p>
+                        Un workflow <strong>NO se ejecuta solo automáticamente</strong> como un "trabajo programado" en Windows Task Scheduler o Cron.
+                    </p>
+                    <p>
+                        Es simplemente <strong>código Python reutilizable</strong> que <strong>TÚ decides CUÁNDO y CÓMO ejecutar</strong> según tu necesidad de negocio.
+                    </p>
+                </div>
+
+                <h3>🔄 Tipos de Workflows (Todos usan los mismos patrones de ejecución)</h3>
+                <div class="workflow-types">
+                    <div class="workflow-type-card">
+                        <h4>📝 Secuencial</h4>
+                        <p>Agentes ejecutan uno tras otro (A → B → C)</p>
+                        <code style="font-size: 0.8em;">012/013_sequential_workflow.py</code>
+                    </div>
+                    <div class="workflow-type-card">
+                        <h4>⚡ Paralelo</h4>
+                        <p>Múltiples agentes ejecutan simultáneamente</p>
+                        <code style="font-size: 0.8em;">014_parallel-workflow.py</code>
+                    </div>
+                    <div class="workflow-type-card">
+                        <h4>🔀 Condicional</h4>
+                        <p>Rutas dinámicas según condiciones (if/else)</p>
+                        <code style="font-size: 0.8em;">019_conditional_workflows.py</code>
+                    </div>
+                    <div class="workflow-type-card">
+                        <h4>👥 Group Chat</h4>
+                        <p>Múltiples agentes conversan entre sí</p>
+                        <code style="font-size: 0.8em;">020_group_chat_workflow.py</code>
+                    </div>
+                    <div class="workflow-type-card">
+                        <h4>🎯 Supervisor</h4>
+                        <p>Un supervisor delega a agentes especializados</p>
+                        <code style="font-size: 0.8em;">021_supervisor_pattern.py</code>
+                    </div>
+                    <div class="workflow-type-card">
+                        <h4>🤖 Agente Simple</h4>
+                        <p>Un solo agente sin orquestación compleja</p>
+                        <code style="font-size: 0.8em;">001-004_*agent.py</code>
+                    </div>
+                </div>
+
+                <div class="highlight-box">
+                    <h4>💡 Punto Clave</h4>
+                    <p>
+                        <strong>TODOS estos tipos de workflows</strong> se pueden ejecutar usando los mismos 3 patrones de ejecución
+                        que veremos a continuación. El tipo de workflow (secuencial, paralelo, etc.) es <strong>independiente</strong>
+                        de cómo y cuándo lo ejecutas.
+                    </p>
+                </div>
+            </section>
+
+            <!-- Los 3 Patrones de Ejecución -->
+            <section id="patrones">
+                <h2>🎨 Los 3 Patrones de Ejecución</h2>
+                <p>
+                    Independientemente del tipo de workflow que tengas (secuencial, paralelo, supervisor, etc.),
+                    hay <strong>3 formas principales</strong> de ejecutarlo en producción:
+                </p>
+
+                <div class="architecture-diagram">
+                    <h4>El Mismo Workflow, Diferentes Formas de Ejecutarlo:</h4>
+                    <div style="font-size: 1em; text-align: left; line-height: 1.8;">
+                        <strong>TU WORKFLOW (cualquier tipo)</strong><br>
+                        <span style="margin-left: 40px;">↓ Puede ser ejecutado por...</span><br>
+                        <br>
+                        <strong>🌐 1. On-Demand (80%):</strong> Usuario hace click → Workflow se ejecuta<br>
+                        <strong>⏰ 2. Calendizado (15%):</strong> Cada día/hora → Workflow se ejecuta automáticamente<br>
+                        <strong>⚡ 3. Event-Driven (5%):</strong> Archivo subido/Email llega → Workflow se ejecuta
+                    </div>
+                </div>
+
+                <!-- Patrón 1: On-Demand -->
+                <div class="pattern-card">
+                    <div class="pattern-header">
+                        <div class="pattern-icon">🌐</div>
+                        <div class="pattern-title">
+                            <h3 style="margin: 0;">Patrón 1: On-Demand (API/Web App)</h3>
+                            <p style="margin: 5px 0; color: #666;">El workflow se ejecuta cuando alguien lo solicita</p>
+                        </div>
+                        <div class="pattern-percentage">80%</div>
+                    </div>
+
+                    <h4>¿Qué significa "On-Demand"?</h4>
+                    <p>
+                        El workflow está integrado en una <strong>API REST</strong>, <strong>aplicación web</strong>, o <strong>chatbot</strong>.
+                        Se ejecuta <strong>en el momento</strong> que un usuario hace una solicitud (click en botón, llamada a API, mensaje en chat).
+                    </p>
+
+                    <h4>¿Cuándo usar este patrón?</h4>
+                    <ul>
+                        <li>✅ Aplicaciones web interactivas donde usuarios piden algo bajo demanda</li>
+                        <li>✅ APIs que exponen funcionalidad a clientes externos</li>
+                        <li>✅ Chatbots y asistentes conversacionales</li>
+                        <li>✅ Herramientas SaaS donde el usuario inicia la acción</li>
+                        <li>✅ Cualquier caso donde el usuario espera una respuesta inmediata</li>
+                    </ul>
+
+                    <h4>Ejemplos Genéricos (Aplicables a CUALQUIER tipo de workflow):</h4>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Tipo de Workflow</th>
+                                <th>Ejemplo On-Demand</th>
+                                <th>Trigger del Usuario</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Secuencial</strong></td>
+                                <td>Usuario pide analizar documento → Workflow lo lee → Extrae info → Genera resumen</td>
+                                <td>Click en "Analizar"</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Paralelo</strong></td>
+                                <td>Usuario pide plan de viaje → Workflow consulta (clima + hoteles + vuelos en paralelo) → Combina</td>
+                                <td>Click en "Generar Plan"</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Condicional</strong></td>
+                                <td>Usuario hace pregunta → Workflow clasifica (técnica/general/creativa) → Ruta apropiada</td>
+                                <td>Envía mensaje en chat</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Supervisor</strong></td>
+                                <td>Usuario pide crear campaña marketing → Supervisor delega (research/copy/design) → Síntesis</td>
+                                <td>Click en "Crear Campaña"</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Group Chat</strong></td>
+                                <td>Usuario pide opiniones sobre proyecto → Panel de expertos debate → Retorna consenso</td>
+                                <td>Click en "Consultar Expertos"</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Agente Simple</strong></td>
+                                <td>Usuario hace pregunta → Un solo agente responde</td>
+                                <td>Envía pregunta</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h4>Arquitectura Genérica:</h4>
+                    <div class="architecture-diagram">
+                        <div style="font-size: 1.1em;">
+                            <strong>[Usuario en Frontend]</strong><br>
+                            <span class="flow-arrow">↓</span> Click en botón / Llamada API<br>
+                            <strong>[Backend/API recibe request]</strong><br>
+                            <span class="flow-arrow">↓</span> Ejecuta workflow (cualquier tipo)<br>
+                            <strong>[Workflow procesa]</strong><br>
+                            <span class="flow-arrow">↓</span> Retorna resultado<br>
+                            <strong>[Usuario ve resultado en pantalla]</strong>
+                        </div>
+                    </div>
+
+                    <h4>Código Genérico (FastAPI):</h4>
+                    <div class="code-block"><pre><span class="comment"># api.py - Aplica a CUALQUIER tipo de workflow</span>
+<span class="keyword">from</span> fastapi <span class="keyword">import</span> FastAPI
+<span class="keyword">from</span> pydantic <span class="keyword">import</span> BaseModel
+
+app = <span class="function">FastAPI</span>()
+
+<span class="keyword">class</span> <span class="function">WorkflowRequest</span>(BaseModel):
+    input_data: str  <span class="comment"># Puede ser query, documento, imagen, etc.</span>
+
+<span class="keyword">@app.post</span>(<span class="string">"/execute-workflow"</span>)
+<span class="keyword">async def</span> <span class="function">execute_workflow</span>(request: WorkflowRequest):
+    <span class="comment">"""
+    Este endpoint ejecuta TU workflow cuando el usuario lo llama.
+    Funciona igual para workflows secuenciales, paralelos, supervisor, etc.
+    """</span>
+
+    <span class="comment"># Construir TU workflow (puede ser cualquier tipo)</span>
+    workflow = <span class="function">build_your_workflow</span>()  <span class="comment"># Secuencial, paralelo, etc.</span>
+
+    <span class="comment"># Ejecutar workflow con input del usuario</span>
+    result = <span class="keyword">await</span> workflow.<span class="function">run</span>(request.input_data)
+
+    <span class="comment"># Retornar resultado al usuario</span>
+    <span class="keyword">return</span> {
+        <span class="string">"status"</span>: <span class="string">"success"</span>,
+        <span class="string">"result"</span>: result
+    }
+
+<span class="comment"># Usuario llama: POST /execute-workflow {"input_data": "..."}</span>
+<span class="comment"># Workflow se ejecuta EN ESE MOMENTO</span>
+<span class="comment"># Usuario obtiene respuesta inmediata</span></pre>
+                    </div>
+
+                    <div class="pros-cons">
+                        <div class="pros">
+                            <h4>✅ Ventajas</h4>
+                            <ul>
+                                <li>Usuario obtiene feedback inmediato</li>
+                                <li>Interactivo y responsive</li>
+                                <li>Solo usa recursos cuando hay demanda real</li>
+                                <li>Fácil de escalar (más usuarios = más instancias)</li>
+                                <li>Funciona para CUALQUIER tipo de workflow</li>
+                            </ul>
+                        </div>
+                        <div class="cons">
+                            <h4>⚠️ Consideraciones</h4>
+                            <ul>
+                                <li>Usuario debe esperar (workflows pueden tardar)</li>
+                                <li>Necesitas manejar timeouts largos</li>
+                                <li>Picos de tráfico pueden causar delays</li>
+                                <li>Costos variables según volumen de uso</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <span class="badge badge-primary">Más Común</span>
+                    <span class="badge badge-success">Interactivo</span>
+                    <span class="badge badge-info">Cualquier Workflow</span>
+                </div>
+
+                <!-- Patrón 2: Calendizado -->
+                <div class="pattern-card">
+                    <div class="pattern-header">
+                        <div class="pattern-icon">⏰</div>
+                        <div class="pattern-title">
+                            <h3 style="margin: 0;">Patrón 2: Calendizado (Scheduled/Cron)</h3>
+                            <p style="margin: 5px 0; color: #666;">El workflow se ejecuta automáticamente en horarios específicos</p>
+                        </div>
+                        <div class="pattern-percentage">15%</div>
+                    </div>
+
+                    <h4>¿Qué significa "Calendizado"?</h4>
+                    <p>
+                        El workflow se ejecuta <strong>automáticamente</strong> según un horario definido (cada día, cada hora, cada lunes, etc.)
+                        usando un <strong>Timer Trigger</strong> (Azure Functions, AWS Lambda, Cron, GitHub Actions, etc.).
+                        <strong>No requiere intervención humana.</strong>
+                    </p>
+
+                    <h4>¿Cuándo usar este patrón?</h4>
+                    <ul>
+                        <li>✅ Reportes periódicos (diarios, semanales, mensuales)</li>
+                        <li>✅ Tareas de mantenimiento automáticas</li>
+                        <li>✅ Sincronización de datos entre sistemas</li>
+                        <li>✅ Análisis batch de datos acumulados</li>
+                        <li>✅ Notificaciones programadas</li>
+                        <li>✅ Cualquier tarea repetitiva que no depende de usuario</li>
+                    </ul>
+
+                    <h4>Ejemplos Genéricos (Aplicables a CUALQUIER tipo de workflow):</h4>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Tipo de Workflow</th>
+                                <th>Ejemplo Calendizado</th>
+                                <th>Horario</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Secuencial</strong></td>
+                                <td>Cada día: Obtener datos de ventas → Analizar → Generar reporte → Enviar email</td>
+                                <td>Todos los días 8 AM</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Paralelo</strong></td>
+                                <td>Cada hora: Consultar (API1 + API2 + API3 en paralelo) → Consolidar métricas</td>
+                                <td>Cada hora en punto</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Condicional</strong></td>
+                                <td>Cada noche: Revisar logs → Si error crítico: escalar urgente, sino: reporte estándar</td>
+                                <td>Todos los días 2 AM</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Supervisor</strong></td>
+                                <td>Cada lunes: Supervisor delega (análisis semanal a múltiples expertos) → Síntesis ejecutiva</td>
+                                <td>Lunes 9 AM</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Group Chat</strong></td>
+                                <td>Cada semana: Panel de expertos analiza tendencias del mercado → Genera predicciones</td>
+                                <td>Viernes 5 PM</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Agente Simple</strong></td>
+                                <td>Cada 15 min: Agente revisa base de datos → Envía alertas si encuentra anomalías</td>
+                                <td>*/15 * * * *</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h4>Arquitectura Genérica:</h4>
+                    <div class="architecture-diagram">
+                        <div style="font-size: 1.1em;">
+                            <strong>[Timer Trigger]</strong> (Azure Functions, Cron, etc.)<br>
+                            <span class="flow-arrow">↓</span> Se dispara automáticamente en horario<br>
+                            <strong>[Función scheduled se ejecuta]</strong><br>
+                            <span class="flow-arrow">↓</span> Ejecuta workflow (cualquier tipo)<br>
+                            <strong>[Workflow procesa]</strong><br>
+                            <span class="flow-arrow">↓</span> Guarda resultado / Envía notificación<br>
+                            <strong>[Nadie está esperando activamente]</strong>
+                        </div>
+                    </div>
+
+                    <h4>Código Genérico (Azure Functions):</h4>
+                    <div class="code-block"><pre><span class="comment"># azure_function.py - Aplica a CUALQUIER tipo de workflow</span>
+<span class="keyword">import</span> azure.functions <span class="keyword">as</span> func
+<span class="keyword">from</span> datetime <span class="keyword">import</span> datetime
+
+app = <span class="function">func.FunctionApp</span>()
+
+<span class="keyword">@app.schedule</span>(
+    schedule=<span class="string">"0 0 8 * * *"</span>,  <span class="comment"># Cron: Todos los días a las 8 AM</span>
+    arg_name=<span class="string">"mytimer"</span>,
+    run_on_startup=<span class="keyword">False</span>
+)
+<span class="keyword">async def</span> <span class="function">scheduled_workflow</span>(mytimer: func.TimerRequest):
+    <span class="comment">"""
+    Se ejecuta AUTOMÁTICAMENTE todos los días a las 8 AM.
+    Funciona con workflows secuenciales, paralelos, supervisor, etc.
+    """</span>
+
+    <span class="function">print</span>(<span class="string">f"Ejecutando workflow programado: {datetime.now()}"</span>)
+
+    <span class="comment"># Construir TU workflow (cualquier tipo)</span>
+    workflow = <span class="function">build_your_workflow</span>()  <span class="comment"># Secuencial, paralelo, etc.</span>
+
+    <span class="comment"># Ejecutar workflow con input predefinido o datos del día</span>
+    today = datetime.<span class="function">now</span>().<span class="function">strftime</span>(<span class="string">"%Y-%m-%d"</span>)
+    result = <span class="keyword">await</span> workflow.<span class="function">run</span>(<span class="string">f"Tarea diaria para {today}"</span>)
+
+    <span class="comment"># Guardar resultado y/o enviar notificación</span>
+    <span class="function">save_to_database</span>(result)
+    <span class="function">send_email</span>(to=<span class="string">"team@empresa.com"</span>, body=result)
+
+    <span class="function">print</span>(<span class="string">"Workflow completado y enviado"</span>)
+
+<span class="comment"># NO necesitas llamar esta función, Azure Functions la ejecuta automáticamente</span></pre>
+                    </div>
+
+                    <h4>Sintaxis de Schedule (Cron):</h4>
+                    <table>
+                        <tr>
+                            <th>Frecuencia</th>
+                            <th>Cron Expression</th>
+                            <th>Descripción</th>
+                        </tr>
+                        <tr>
+                            <td>Cada 15 minutos</td>
+                            <td><code>0 */15 * * * *</code></td>
+                            <td>Ejecuta 4 veces por hora</td>
+                        </tr>
+                        <tr>
+                            <td>Cada hora</td>
+                            <td><code>0 0 * * * *</code></td>
+                            <td>En el minuto 0 de cada hora</td>
+                        </tr>
+                        <tr>
+                            <td>Todos los días 8 AM</td>
+                            <td><code>0 0 8 * * *</code></td>
+                            <td>Reporte matutino diario</td>
+                        </tr>
+                        <tr>
+                            <td>Lunes a Viernes 9 AM</td>
+                            <td><code>0 0 9 * * 1-5</code></td>
+                            <td>Solo días laborales</td>
+                        </tr>
+                        <tr>
+                            <td>Cada lunes 9 AM</td>
+                            <td><code>0 0 9 * * 1</code></td>
+                            <td>Reporte semanal</td>
+                        </tr>
+                        <tr>
+                            <td>Primer día del mes 10 AM</td>
+                            <td><code>0 0 10 1 * *</code></td>
+                            <td>Reporte mensual</td>
+                        </tr>
+                    </table>
+
+                    <div class="pros-cons">
+                        <div class="pros">
+                            <h4>✅ Ventajas</h4>
+                            <ul>
+                                <li>Totalmente automático, cero intervención humana</li>
+                                <li>Consistente y predecible</li>
+                                <li>Ideal para tareas repetitivas</li>
+                                <li>Puede ejecutarse en horarios de bajo costo/tráfico</li>
+                                <li>Funciona con CUALQUIER tipo de workflow</li>
+                            </ul>
+                        </div>
+                        <div class="cons">
+                            <h4>⚠️ Consideraciones</h4>
+                            <ul>
+                                <li>Usa recursos aunque no haya datos nuevos</li>
+                                <li>Errores pueden pasar desapercibidos sin monitoreo</li>
+                                <li>Necesitas alertas para detectar fallos</li>
+                                <li>Infraestructura debe estar siempre disponible</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <span class="badge badge-warning">Automatización Total</span>
+                    <span class="badge badge-info">Tareas Periódicas</span>
+                    <span class="badge badge-success">Cualquier Workflow</span>
+                </div>
+
+                <!-- Patrón 3: Event-Driven -->
+                <div class="pattern-card">
+                    <div class="pattern-header">
+                        <div class="pattern-icon">⚡</div>
+                        <div class="pattern-title">
+                            <h3 style="margin: 0;">Patrón 3: Event-Driven (Basado en Eventos)</h3>
+                            <p style="margin: 5px 0; color: #666;">El workflow se ejecuta cuando ocurre un evento específico</p>
+                        </div>
+                        <div class="pattern-percentage">5%</div>
+                    </div>
+
+                    <h4>¿Qué significa "Event-Driven"?</h4>
+                    <p>
+                        El workflow se ejecuta <strong>automáticamente cuando ocurre un evento</strong> en el sistema
+                        (archivo subido, email recibido, mensaje en cola, cambio en base de datos, webhook llamado, etc.).
+                        Es <strong>reactivo</strong>, no programado.
+                    </p>
+
+                    <h4>¿Cuándo usar este patrón?</h4>
+                    <ul>
+                        <li>✅ Procesamiento de archivos subidos por usuarios</li>
+                        <li>✅ Respuesta a mensajes/emails entrantes</li>
+                        <li>✅ Reacción a cambios en base de datos</li>
+                        <li>✅ Procesamiento de colas de mensajes (queues)</li>
+                        <li>✅ Webhooks de servicios externos (GitHub, Stripe, etc.)</li>
+                        <li>✅ Arquitecturas event-driven complejas</li>
+                    </ul>
+
+                    <h4>Ejemplos Genéricos (Aplicables a CUALQUIER tipo de workflow):</h4>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Tipo de Workflow</th>
+                                <th>Ejemplo Event-Driven</th>
+                                <th>Trigger/Evento</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Secuencial</strong></td>
+                                <td>Usuario sube PDF → Extraer texto → Resumir → Guardar resumen junto al PDF</td>
+                                <td>Blob trigger (archivo subido)</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Paralelo</strong></td>
+                                <td>Imagen subida → (Detectar objetos + Extraer texto + Clasificar) en paralelo → Metadata</td>
+                                <td>Blob trigger (imagen subida)</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Condicional</strong></td>
+                                <td>Email llega → Clasificar urgencia → Si alta: escalar inmediato, sino: crear ticket normal</td>
+                                <td>Queue trigger (email en cola)</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Supervisor</strong></td>
+                                <td>Formulario enviado → Supervisor delega validación a múltiples expertos → Aprueba/Rechaza</td>
+                                <td>HTTP trigger (webhook)</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Group Chat</strong></td>
+                                <td>Nueva issue en GitHub → Panel de expertos analiza y propone solución → Comenta en issue</td>
+                                <td>Webhook trigger (GitHub)</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Agente Simple</strong></td>
+                                <td>Mensaje en Slack → Agente responde automáticamente</td>
+                                <td>Webhook trigger (Slack)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h4>Arquitectura Genérica:</h4>
+                    <div class="architecture-diagram">
+                        <div style="font-size: 1.1em;">
+                            <strong>[Evento Ocurre]</strong> (archivo subido, mensaje recibido, etc.)<br>
+                            <span class="flow-arrow">↓</span> Sistema detecta evento automáticamente<br>
+                            <strong>[Event Trigger dispara función]</strong><br>
+                            <span class="flow-arrow">↓</span> Ejecuta workflow (cualquier tipo)<br>
+                            <strong>[Workflow procesa el evento]</strong><br>
+                            <span class="flow-arrow">↓</span> Guarda resultado / Notifica usuario
+                        </div>
+                    </div>
+
+                    <h4>Código Genérico (Azure Blob Trigger):</h4>
+                    <div class="code-block"><pre><span class="comment"># azure_function.py - Aplica a CUALQUIER tipo de workflow</span>
+<span class="keyword">import</span> azure.functions <span class="keyword">as</span> func
+
+app = <span class="function">func.FunctionApp</span>()
+
+<span class="keyword">@app.blob_trigger</span>(
+    arg_name=<span class="string">"myblob"</span>,
+    path=<span class="string">"uploads/{name}"</span>,  <span class="comment"># Monitorea carpeta /uploads</span>
+    connection=<span class="string">"AzureWebJobsStorage"</span>
+)
+<span class="keyword">async def</span> <span class="function">process_uploaded_file</span>(myblob: func.InputStream):
+    <span class="comment">"""
+    Se ejecuta AUTOMÁTICAMENTE cuando se sube un archivo.
+    Funciona con workflows secuenciales, paralelos, supervisor, etc.
+    """</span>
+
+    filename = myblob.name
+    content = myblob.<span class="function">read</span>()  <span class="comment"># Leer contenido del archivo</span>
+
+    <span class="function">print</span>(<span class="string">f"Archivo detectado: {filename}"</span>)
+
+    <span class="comment"># Construir TU workflow (cualquier tipo)</span>
+    workflow = <span class="function">build_your_workflow</span>()  <span class="comment"># Secuencial, paralelo, etc.</span>
+
+    <span class="comment"># Ejecutar workflow con el contenido del archivo</span>
+    result = <span class="keyword">await</span> workflow.<span class="function">run</span>(content)
+
+    <span class="comment"># Guardar resultado junto al archivo original</span>
+    <span class="function">save_result</span>(filename, result)
+
+    <span class="comment"># Notificar al usuario que subió el archivo</span>
+    <span class="function">send_notification</span>(<span class="string">f"Archivo {filename} procesado correctamente"</span>)
+
+<span class="comment"># NO necesitas llamar esta función, se ejecuta automáticamente al subir archivo</span></pre>
+                    </div>
+
+                    <h4>Tipos de Triggers/Eventos Comunes:</h4>
+                    <table>
+                        <tr>
+                            <th>Tipo de Evento</th>
+                            <th>Tecnología</th>
+                            <th>Caso de Uso</th>
+                        </tr>
+                        <tr>
+                            <td><strong>Blob/Storage</strong></td>
+                            <td>Azure Blob Trigger, AWS S3 Event</td>
+                            <td>Archivo subido/modificado → Procesar automáticamente</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Queue/Message</strong></td>
+                            <td>Azure Queue, AWS SQS, RabbitMQ</td>
+                            <td>Mensaje en cola → Procesar tarea asíncrona</td>
+                        </tr>
+                        <tr>
+                            <td><strong>HTTP/Webhook</strong></td>
+                            <td>HTTP Trigger</td>
+                            <td>Servicio externo llama webhook → Reaccionar</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Database</strong></td>
+                            <td>Cosmos DB Trigger, DynamoDB Streams</td>
+                            <td>Cambio en BD → Sincronizar o reaccionar</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Event Grid</strong></td>
+                            <td>Azure Event Grid</td>
+                            <td>Evento custom → Arquitecturas event-driven complejas</td>
+                        </tr>
+                    </table>
+
+                    <div class="pros-cons">
+                        <div class="pros">
+                            <h4>✅ Ventajas</h4>
+                            <ul>
+                                <li>Respuesta inmediata a eventos del sistema</li>
+                                <li>Altamente escalable (procesa múltiples eventos en paralelo)</li>
+                                <li>Usa recursos solo cuando hay eventos</li>
+                                <li>Desacoplamiento de sistemas (loose coupling)</li>
+                                <li>Funciona con CUALQUIER tipo de workflow</li>
+                            </ul>
+                        </div>
+                        <div class="cons">
+                            <h4>⚠️ Consideraciones</h4>
+                            <ul>
+                                <li>Más complejo de configurar e integrar</li>
+                                <li>Debugging puede ser difícil (eventos asíncronos)</li>
+                                <li>Necesitas manejar reintentos y dead letter queues</li>
+                                <li>Monitoreo crítico para detectar eventos perdidos</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <span class="badge badge-warning">Avanzado</span>
+                    <span class="badge badge-info">Reactivo</span>
+                    <span class="badge badge-success">Cualquier Workflow</span>
+                </div>
+            </section>
+
+            <!-- Tabla Comparativa -->
+            <section id="comparacion">
+                <h2>📊 Comparación de los 3 Patrones</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Aspecto</th>
+                            <th>On-Demand (80%)</th>
+                            <th>Calendizado (15%)</th>
+                            <th>Event-Driven (5%)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>¿Cuándo se ejecuta?</strong></td>
+                            <td>Cuando alguien lo solicita</td>
+                            <td>Horarios específicos automáticamente</td>
+                            <td>Cuando ocurre un evento</td>
+                        </tr>
+                        <tr>
+                            <td><strong>¿Quién/Qué lo dispara?</strong></td>
+                            <td>Usuario activo</td>
+                            <td>Timer/Reloj del sistema</td>
+                            <td>Evento del sistema</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Ejemplo</strong></td>
+                            <td>API REST / Click en botón</td>
+                            <td>Todos los días 8 AM</td>
+                            <td>Archivo subido → Procesar</td>
+                        </tr>
+                        <tr>
+                            <td><strong>¿Usuario espera resultado?</strong></td>
+                            <td>✅ Sí (respuesta en tiempo real)</td>
+                            <td>❌ No (se envía por email/notificación)</td>
+                            <td>❌ No (proceso asíncrono)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Frecuencia</strong></td>
+                            <td>Variable (según demanda)</td>
+                            <td>Fija y predecible</td>
+                            <td>Variable (según eventos)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Costo</strong></td>
+                            <td>Variable (paga por uso)</td>
+                            <td>Fijo (corre siempre)</td>
+                            <td>Variable (paga por evento)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Complejidad setup</strong></td>
+                            <td>⭐ Fácil</td>
+                            <td>⭐⭐ Media</td>
+                            <td>⭐⭐⭐ Alta</td>
+                        </tr>
+                        <tr>
+                            <td><strong>¿Aplica a todos los workflows?</strong></td>
+                            <td>✅ Sí</td>
+                            <td>✅ Sí</td>
+                            <td>✅ Sí</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Tecnologías comunes</strong></td>
+                            <td>FastAPI, Flask, Express.js</td>
+                            <td>Azure Functions, AWS Lambda, Cron</td>
+                            <td>Blob Trigger, Queue Trigger, Webhooks</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- Árbol de Decisión -->
+            <section id="decision">
+                <h2>🎯 ¿Cuál Patrón Debo Usar?</h2>
+                <div class="decision-tree">
+                    <h3>🌳 Árbol de Decisión Universal</h3>
+                    <p><em>(Aplica a workflows secuenciales, paralelos, supervisor, group chat, condicionales, etc.)</em></p>
+
+                    <div class="decision-step">
+                        <strong>Pregunta 1: ¿Un usuario/cliente necesita el resultado AHORA (en tiempo real)?</strong>
+                        <ul>
+                            <li><strong>SÍ</strong> → Usa <span class="badge badge-primary">On-Demand (API/Web App)</span></li>
+                            <li><strong>NO</strong> → Continúa a Pregunta 2 ↓</li>
+                        </ul>
+                    </div>
+
+                    <div class="decision-step">
+                        <strong>Pregunta 2: ¿La tarea debe ejecutarse en horarios específicos (cada día/hora/semana)?</strong>
+                        <ul>
+                            <li><strong>SÍ</strong> → Usa <span class="badge badge-warning">Calendizado (Scheduled)</span></li>
+                            <li><strong>NO</strong> → Continúa a Pregunta 3 ↓</li>
+                        </ul>
+                    </div>
+
+                    <div class="decision-step">
+                        <strong>Pregunta 3: ¿La tarea debe ejecutarse cuando algo pasa en el sistema (archivo subido, email recibido, etc.)?</strong>
+                        <ul>
+                            <li><strong>SÍ</strong> → Usa <span class="badge badge-info">Event-Driven</span></li>
+                            <li><strong>NO</strong> → Probablemente necesites <span class="badge badge-primary">On-Demand</span> o revisa tu caso de uso</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h3>💡 Ejemplos Rápidos por Industria (Independiente del tipo de workflow)</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Industria</th>
+                            <th>Caso de Uso</th>
+                            <th>Patrón Recomendado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>E-commerce</strong></td>
+                            <td>Usuario genera descripción de producto (cualquier workflow)</td>
+                            <td><span class="badge badge-primary">On-Demand</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Finanzas</strong></td>
+                            <td>Reporte diario de mercados (cualquier workflow)</td>
+                            <td><span class="badge badge-warning">Calendizado</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Legal</strong></td>
+                            <td>Analizar contrato cuando se sube (cualquier workflow)</td>
+                            <td><span class="badge badge-info">Event-Driven</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Marketing</strong></td>
+                            <td>Crear campaña cuando usuario lo pide (cualquier workflow)</td>
+                            <td><span class="badge badge-primary">On-Demand</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>HR</strong></td>
+                            <td>Screening automático de CV al recibirlo (cualquier workflow)</td>
+                            <td><span class="badge badge-info">Event-Driven</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Ventas</strong></td>
+                            <td>Análisis semanal de KPIs (cualquier workflow)</td>
+                            <td><span class="badge badge-warning">Calendizado</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Soporte</strong></td>
+                            <td>Chatbot responde consultas (cualquier workflow)</td>
+                            <td><span class="badge badge-primary">On-Demand</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- Resumen Final -->
+            <section id="resumen">
+                <h2>📝 Resumen Ejecutivo</h2>
+
+                <div class="highlight-box">
+                    <h3>🎯 Concepto Clave Final</h3>
+                    <p style="font-size: 1.1em;">
+                        <strong>El TIPO de workflow (secuencial, paralelo, supervisor, etc.) es INDEPENDIENTE del PATRÓN DE EJECUCIÓN (on-demand, calendizado, event-driven).</strong>
+                    </p>
+                    <p>
+                        Puedes tener un workflow paralelo ejecutándose on-demand en una API, o un workflow secuencial calendizado para reportes diarios,
+                        o un supervisor event-driven que procesa archivos subidos. <strong>Son conceptos ortogonales.</strong>
+                    </p>
+                </div>
+
+                <div class="architecture-diagram">
+                    <h4>Matriz de Posibilidades:</h4>
+                    <div style="font-size: 0.9em; text-align: left;">
+                        <strong>Tipo de Workflow</strong> (qué hace) vs <strong>Patrón de Ejecución</strong> (cuándo se ejecuta)<br>
+                        <br>
+                        <table style="margin: 0;">
+                            <tr>
+                                <th></th>
+                                <th>On-Demand</th>
+                                <th>Calendizado</th>
+                                <th>Event-Driven</th>
+                            </tr>
+                            <tr>
+                                <td><strong>Secuencial</strong></td>
+                                <td>✅</td>
+                                <td>✅</td>
+                                <td>✅</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Paralelo</strong></td>
+                                <td>✅</td>
+                                <td>✅</td>
+                                <td>✅</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Condicional</strong></td>
+                                <td>✅</td>
+                                <td>✅</td>
+                                <td>✅</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Supervisor</strong></td>
+                                <td>✅</td>
+                                <td>✅</td>
+                                <td>✅</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Group Chat</strong></td>
+                                <td>✅</td>
+                                <td>✅</td>
+                                <td>✅</td>
+                            </tr>
+                        </table>
+                        <br>
+                        <strong>TODAS las combinaciones son válidas</strong>
+                    </div>
+                </div>
+
+                <h3>📊 Distribución Típica en Producción</h3>
+                <ul>
+                    <li><strong>80% - On-Demand:</strong> La mayoría de workflows se integran en APIs/Web Apps para interacción con usuarios</li>
+                    <li><strong>15% - Calendizado:</strong> Reportes automáticos y tareas periódicas que no dependen de usuarios</li>
+                    <li><strong>5% - Event-Driven:</strong> Casos especializados de procesamiento automático reactivo</li>
+                </ul>
+
+                <h3>🚀 Próximos Pasos</h3>
+                <ol>
+                    <li><strong>Define tu caso de uso:</strong> ¿Qué debe hacer tu workflow?</li>
+                    <li><strong>Elige el TIPO de workflow:</strong> ¿Secuencial? ¿Paralelo? ¿Supervisor? etc.</li>
+                    <li><strong>Decide el PATRÓN DE EJECUCIÓN:</strong> ¿Cuándo debe ejecutarse?
+                        <ul>
+                            <li>Usuario lo pide → On-Demand</li>
+                            <li>Horarios fijos → Calendizado</li>
+                            <li>Cuando ocurre evento → Event-Driven</li>
+                        </ul>
+                    </li>
+                    <li><strong>Implementa usando el código genérico de esta guía</strong></li>
+                    <li><strong>Adapta a tu infraestructura específica</strong> (Azure, AWS, GCP, on-premise)</li>
+                    <li><strong>Monitorea y optimiza en producción</strong></li>
+                </ol>
+
+                <div class="warning-box">
+                    <h4>⚠️ Recuerda</h4>
+                    <p>
+                        Los scripts de ejemplo en tu carpeta (012, 013, 014, 019, 020, 021) son código base reutilizable.
+                        <strong>NO se ejecutan solos.</strong> Tú decides cómo y cuándo ejecutarlos integrándolos en uno de los 3 patrones.
+                    </p>
+                </div>
+            </section>
+        </div>
+
+        <footer>
+            <p><strong>Microsoft Agent Framework - Guía Genérica de Patrones de Ejecución</strong></p>
+            <p>Aplicable a workflows secuenciales, paralelos, condicionales, supervisor, group chat, y agentes simples</p>
+            <p>Documento creado: Diciembre 2024 | Última actualización: 2024-12-05</p>
+        </footer>
+    </div>
+</body>
+</html>

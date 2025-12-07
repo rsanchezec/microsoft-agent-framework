@@ -110,6 +110,98 @@ result = await agent.run("¿Cuál es mi color favorito?", thread=thread)
 thread_id = thread.service_thread_id
 ```
 
+### 003b_persistentconversation_by_name.py
+**Propósito**: Usar el NOMBRE del agente en lugar del ID para conversaciones persistentes
+
+**Características**:
+- Busca un agente por nombre listando todos los agentes
+- Convierte automáticamente el nombre a ID
+- Mismo flujo de conversación que 003
+- Más legible que usar IDs hardcodeados
+
+**Código clave**:
+```python
+AGENT_NAME = "Joker"
+
+async with AzureAIAgentClient(async_credential=credential) as client:
+    # Buscar agente por nombre listando todos los agentes
+    agents_paged = client.agents_client.list_agents(limit=100)
+    agent_id = None
+
+    async for agent in agents_paged:
+        if agent.name == AGENT_NAME:
+            agent_id = agent.id
+            break
+
+    # Crear cliente con el ID obtenido
+    async with AzureAIAgentClient(
+        async_credential=credential,
+        agent_id=agent_id
+    ) as agent_client:
+        agent = agent_client.create_agent(...)
+        result = await agent.run("Tu pregunta", thread=thread)
+```
+
+### 003c_list_all_agents.py
+**Propósito**: Listar todos los agentes disponibles en Azure AI Foundry
+
+**Características**:
+- Descubre qué agentes tienes en tu proyecto
+- Muestra nombre, ID, tipo, modelo y fecha de creación de cada agente
+- Útil para explorar recursos existentes
+- Soporta paginación y ordenamiento
+
+**Código clave**:
+```python
+async with AzureAIAgentClient(async_credential=credential) as client:
+    agents_paged = client.agents_client.list_agents(
+        limit=100,
+        order="desc"
+    )
+
+    async for agent in agents_paged:
+        print(f"Nombre: {agent.name}, ID: {agent.id}")
+        print(f"Modelo: {agent.model}, Creado: {agent.created_at}")
+```
+
+### 003d_using_agent_helpers.py
+**Propósito**: Demostrar el uso del módulo `agent_helpers.py`
+
+**Características**:
+- Muestra todas las funciones helper disponibles
+- Búsqueda de agentes por nombre o patrón
+- Verificación de existencia de agentes
+- Ejemplo completo de flujo de trabajo
+
+**Código clave**:
+```python
+from agent_helpers import get_agent_id_by_name, agent_exists
+
+# Verificar si existe
+if await agent_exists(client, "MyAgent"):
+    agent_id = await get_agent_id_by_name(client, "MyAgent")
+```
+
+### agent_helpers.py
+**Propósito**: Módulo reutilizable con funciones helper para trabajar con agentes
+
+**Funciones disponibles**:
+- `get_agent_id_by_name(client, agent_name)` - Obtener ID por nombre
+- `list_all_agents(client, limit, order)` - Listar todos los agentes
+- `find_agents_by_pattern(client, pattern, case_sensitive)` - Buscar por patrón
+- `agent_exists(client, agent_name)` - Verificar existencia
+- `get_agent_info(client, agent_name)` - Información completa del agente
+
+**Código clave**:
+```python
+from agent_helpers import get_agent_id_by_name
+
+# Usar en cualquier script
+agent_id = await get_agent_id_by_name(client, "MyAgent")
+if agent_id:
+    # Usar el agent_id...
+```
+
 ### 004_continuethreadconversation.py
 **Propósito**: Continuar una conversación existente usando Thread ID
 
@@ -1207,6 +1299,69 @@ async for update in agent.run_stream("Tu pregunta aquí", thread=thread):
 print()  # Nueva línea al final
 ```
 
+### Patrón 6: Buscar Agente por Nombre (en lugar de ID)
+```python
+AGENT_NAME = "MyAgent"
+
+async with DefaultAzureCredential() as credential:
+    async with AzureAIAgentClient(async_credential=credential) as client:
+        # Buscar agente por nombre listando todos los agentes
+        agents_paged = client.agents_client.list_agents(limit=100)
+        agent_id = None
+
+        async for agent in agents_paged:
+            if agent.name == AGENT_NAME:
+                agent_id = agent.id
+                print(f"Encontrado: {agent.name} (ID: {agent_id})")
+                break
+
+        if not agent_id:
+            print(f"Agente '{AGENT_NAME}' no encontrado")
+            return
+
+        # Ahora usar el agent_id para crear el cliente
+        async with AzureAIAgentClient(
+            async_credential=credential,
+            agent_id=agent_id
+        ) as agent_client:
+            agent = agent_client.create_agent(...)
+            result = await agent.run("Tu pregunta")
+```
+
+### Patrón 7: Usar Agent Helpers (Recomendado)
+```python
+from agent_helpers import get_agent_id_by_name, agent_exists
+
+async with DefaultAzureCredential() as credential:
+    async with AzureAIAgentClient(async_credential=credential) as client:
+        # Verificar si el agente existe
+        if await agent_exists(client, "MyAgent"):
+            # Obtener el ID del agente
+            agent_id = await get_agent_id_by_name(client, "MyAgent")
+
+            # Usar el agente
+            async with AzureAIAgentClient(
+                async_credential=credential,
+                agent_id=agent_id
+            ) as agent_client:
+                agent = agent_client.create_agent(...)
+                result = await agent.run("Tu pregunta")
+        else:
+            print("El agente no existe")
+```
+
+### Patrón 8: Listar Todos los Agentes Disponibles
+```python
+async with DefaultAzureCredential() as credential:
+    async with AzureAIAgentClient(async_credential=credential) as client:
+        # Listar todos los agentes
+        agents_paged = client.agents_client.list_agents(limit=100, order="desc")
+
+        async for agent in agents_paged:
+            print(f"{agent.name}: {agent.id}")
+            print(f"  Modelo: {agent.model}, Creado: {agent.created_at}")
+```
+
 ---
 
 ## 🔄 Flujo de Trabajo Típico
@@ -1292,7 +1447,13 @@ print()  # Nueva línea al final
 - `001_createandrunanagent.py` - Crear agente básico
 - `002_reuseexistingagent.py` - Reutilizar agente existente
 - `003_persistentconversation.py` - Conversación con contexto
+- `003b_persistentconversation_by_name.py` - Conversación usando nombre de agente (en lugar de ID)
+- `003c_list_all_agents.py` - Listar todos los agentes disponibles
+- `003d_using_agent_helpers.py` - Demo del módulo agent_helpers.py
 - `004_continuethreadconversation.py` - Continuar conversación existente
+
+### Utilidades
+- `agent_helpers.py` - Módulo con funciones helper (búsqueda por nombre, verificación, etc.)
 
 ### Herramientas y MCP
 - `015_agent_with_mcp_tools.py` - Agentes usando HostedMCPTool (Model Context Protocol)
