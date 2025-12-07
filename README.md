@@ -13,6 +13,9 @@ Repositorio de aprendizaje del **Microsoft Agent Framework** usando **Azure AI F
   - [001: Crear y Ejecutar un Agente](#001_createandrunanagentpy)
   - [002: Reutilizar Agente Existente](#002_reuseexistingagentpy)
   - [003: Conversación Persistente](#003_persistentconversationpy)
+  - [003b: Conversación por Nombre de Agente](#003b_persistentconversation_by_namepy)
+  - [003c: Listar Todos los Agentes](#003c_list_all_agentspy)
+  - [003d: Uso de Agent Helpers](#003d_using_agent_helperspy)
   - [004: Continuar Conversación](#004_continuethreadconversationpy)
   - [005: Uso de Imágenes con Agentes](#005_usingimageswithanagentpy)
   - [008: Colaboración Multi-Agente](#008_multi_agent_collaboration_fixedpy)
@@ -29,6 +32,11 @@ Repositorio de aprendizaje del **Microsoft Agent Framework** usando **Azure AI F
   - [019: Workflows Condicionales](#019_conditional_workflowspy)
   - [020: Group Chat Workflows](#020_group_chat_workflowpy)
   - [021: Supervisor Pattern](#021_supervisor_patternpy)
+  - [022: Visualización y Debugging de Workflows](#022_workflow_visualization_debuggingpy)
+  - [agent_helpers: Utilidades para Gestión de Agentes](#agent_helperspy)
+- [DevUI para Debugging Interactivo](#-devui-para-debugging-interactivo)
+  - [Agentes para DevUI](#agentes-para-devui)
+  - [Workflows para DevUI](#workflows-para-devui)
 - [Conceptos Clave](#-conceptos-clave)
 - [Problemas Comunes](#-problemas-comunes-y-soluciones)
 - [Recursos Adicionales](#-recursos-adicionales)
@@ -464,6 +472,105 @@ await agent.run("¿Cómo me llamo?", thread=thread)  # "Juan"
 **⚠️ Puntos importantes:**
 - Siempre usar el mismo `thread` para mantener contexto
 - Guardar `thread.service_thread_id` para continuar después
+
+---
+
+### `003b_persistentconversation_by_name.py`
+
+**Objetivo:** Buscar y usar un agente por su nombre (en lugar de ID)
+
+**Conceptos:**
+- Buscar agente existente por nombre usando `agents_client.list_agents()`
+- Búsqueda manual iterando sobre todos los agentes
+- Mismo flujo de conversación que 003
+
+**Código clave:**
+```python
+AGENT_NAME = "Joker"
+
+async with AzureAIAgentClient(async_credential=credential) as client:
+    # Buscar agente por nombre
+    agents_paged = client.agents_client.list_agents(limit=100)
+    agent_id = None
+    async for agent in agents_paged:
+        if agent.name == AGENT_NAME:
+            agent_id = agent.id
+            break
+
+    if agent_id:
+        # Usar el agent_id encontrado
+        async with AzureAIAgentClient(
+            async_credential=credential,
+            agent_id=agent_id
+        ) as agent_client:
+            agent = agent_client.create_agent(...)
+            result = await agent.run("Tu pregunta", thread=thread)
+```
+
+**⚠️ Puntos importantes:**
+- Más legible que usar IDs hardcodeados
+- Requiere búsqueda manual (no hay API directa por nombre)
+- Útil cuando tienes muchos agentes y prefieres referirlos por nombre
+
+---
+
+### `003c_list_all_agents.py`
+
+**Objetivo:** Listar todos los agentes disponibles en Azure AI Foundry
+
+**Conceptos:**
+- Descubrir qué agentes existen en tu proyecto
+- API de listado: `agents_client.list_agents()`
+- Información de cada agente: nombre, ID, modelo, fecha de creación
+
+**Código clave:**
+```python
+async with AzureAIAgentClient(async_credential=credential) as client:
+    # Listar todos los agentes
+    agents_paged = client.agents_client.list_agents(
+        limit=100,
+        order="desc"
+    )
+
+    async for agent in agents_paged:
+        print(f"Nombre:  {agent.name}")
+        print(f"ID:      {agent.id}")
+        print(f"Modelo:  {agent.model}")
+        print(f"Creado:  {agent.created_at}")
+```
+
+**⚠️ Puntos importantes:**
+- Útil para explorar recursos existentes
+- Soporta paginación con `limit` y `order`
+- Muestra información básica de cada agente
+
+---
+
+### `003d_using_agent_helpers.py`
+
+**Objetivo:** Demostrar el uso del módulo `agent_helpers.py`
+
+**Conceptos:**
+- Funciones helper reutilizables para gestión de agentes
+- Búsqueda por nombre, patrón, verificación de existencia
+- Código más limpio y mantenible
+
+**Código clave:**
+```python
+from agent_helpers import get_agent_id_by_name, agent_exists
+
+async with AzureAIAgentClient(async_credential=credential) as client:
+    # Verificar si existe
+    if await agent_exists(client, "MyAgent"):
+        # Obtener ID por nombre
+        agent_id = await get_agent_id_by_name(client, "MyAgent")
+        # Usar el agente...
+```
+
+**⚠️ Puntos importantes:**
+- Simplifica operaciones comunes con agentes
+- Ver `agent_helpers.py` para todas las funciones disponibles
+- Reutilizable en todos tus scripts
 
 ---
 
@@ -1903,6 +2010,356 @@ async def select_agent_by_task(task: str, available_agents: Dict[str, str]) -> s
 
 ---
 
+### `022_workflow_visualization_debugging.py`
+
+**Objetivo:** Visualización y debugging de workflows
+
+**Conceptos:**
+- WorkflowViz para generar diagramas de workflows
+- Múltiples formatos de salida: Mermaid, DOT, SVG, PNG, PDF
+- Event-based debugging con ExecutorInvokedEvent, ExecutorCompletedEvent
+- Inspección en tiempo real del flujo de ejecución
+
+**Código clave:**
+```python
+from agent_framework import WorkflowViz
+
+# Visualización de workflows
+viz = WorkflowViz(workflow)
+
+# Generar diagrama Mermaid
+mermaid_diagram = viz.to_mermaid()
+print(mermaid_diagram)
+
+# Generar diagrama DOT (Graphviz)
+dot_diagram = viz.to_digraph()
+
+# Exportar a formatos de imagen
+viz.export(format='svg', filename='workflow.svg')
+viz.save_png('workflow.png')
+viz.save_pdf('workflow.pdf')
+
+# Event-based debugging
+async for event in workflow.run_stream("input"):
+    if isinstance(event, ExecutorInvokedEvent):
+        print(f"[INVOKE] {event.executor_id}")
+    elif isinstance(event, ExecutorCompletedEvent):
+        print(f"[COMPLETE] {event.executor_id}")
+    elif isinstance(event, WorkflowOutputEvent):
+        print(f"[OUTPUT] {event.data}")
+```
+
+**Formatos de Salida:**
+- **Mermaid**: Diagramas de flujo para documentación
+- **DOT**: Formato Graphviz para visualización avanzada
+- **SVG**: Vector gráfico escalable
+- **PNG**: Imagen rasterizada
+- **PDF**: Documento imprimible
+
+**Eventos de Debugging:**
+- `ExecutorInvokedEvent`: Cuando un executor inicia
+- `ExecutorCompletedEvent`: Cuando un executor termina
+- `WorkflowOutputEvent`: Cuando se produce output final
+- `ExecutorErrorEvent`: Cuando hay un error
+
+**⚠️ Puntos importantes:**
+- Útil para debugging de workflows complejos
+- Visualización ayuda a entender flujos paralelos y condicionales
+- Events permiten tracking en tiempo real
+- Ver `WORKFLOW_VISUALIZATION_GUIDE.md` para más detalles
+
+---
+
+### `agent_helpers.py`
+
+**Objetivo:** Módulo de utilidades para gestión de agentes
+
+**Funciones Disponibles:**
+
+1. **`get_agent_id_by_name(client, agent_name)`**
+   - Obtiene el ID de un agente por su nombre
+   - Búsqueda manual iterando sobre todos los agentes
+   - Retorna `None` si no encuentra el agente
+
+2. **`list_all_agents(client, limit=100, order="desc")`**
+   - Lista todos los agentes del proyecto
+   - Retorna lista de objetos Agent
+   - Soporta paginación y ordenamiento
+
+3. **`find_agents_by_pattern(client, pattern, case_sensitive=False)`**
+   - Busca agentes cuyo nombre coincida con un patrón
+   - Soporta búsqueda case-insensitive
+   - Retorna lista de agentes que coinciden
+
+4. **`agent_exists(client, agent_name)`**
+   - Verifica si un agente existe por nombre
+   - Retorna `True` o `False`
+   - Útil antes de intentar usar un agente
+
+5. **`get_agent_info(client, agent_name)`**
+   - Obtiene información completa de un agente
+   - Retorna objeto Agent o `None`
+   - Incluye nombre, ID, modelo, fecha de creación
+
+**Código de ejemplo:**
+```python
+from agent_helpers import (
+    get_agent_id_by_name,
+    agent_exists,
+    find_agents_by_pattern,
+    get_agent_info
+)
+
+async with AzureAIAgentClient(async_credential=credential) as client:
+    # Verificar existencia
+    if await agent_exists(client, "MyAgent"):
+        # Obtener ID
+        agent_id = await get_agent_id_by_name(client, "MyAgent")
+
+        # Obtener info completa
+        agent_info = await get_agent_info(client, "MyAgent")
+        print(f"Modelo: {agent_info.model}")
+
+    # Buscar por patrón
+    agents = await find_agents_by_pattern(client, "Joker")
+    for agent in agents:
+        print(f"{agent.name}: {agent.id}")
+```
+
+**⚠️ Puntos importantes:**
+- Módulo reutilizable en todos tus proyectos
+- Simplifica operaciones comunes con agentes
+- Búsqueda manual necesaria (no hay API directa por nombre)
+- Ver script `003d_using_agent_helpers.py` para ejemplos completos
+
+---
+
+## 🎨 DevUI para Debugging Interactivo
+
+**DevUI** es una interfaz web de desarrollo que permite interactuar con agentes y workflows de forma visual e interactiva, facilitando el debugging y pruebas.
+
+### ¿Qué es DevUI?
+
+DevUI es un servidor web integrado en el Agent Framework que:
+- Proporciona una interfaz tipo chat para probar agentes
+- Permite ejecutar workflows visualmente
+- Soporta auto-descubrimiento de agentes y workflows
+- Incluye visualización de eventos en tiempo real
+- Compatible con OpenAI API (ChatGPT-compatible)
+
+### Instalación
+
+```bash
+pip install agent-framework-devui
+```
+
+### Conceptos Clave
+
+**Auto-Discovery:** DevUI escanea directorios buscando archivos que definen variables específicas:
+- `agent` en archivos `agent.py` → Carga agentes
+- `workflow` en archivos `workflow.py` → Carga workflows
+
+**Estructura de Directorios:**
+```
+proyecto/
+├── agents/              # Agentes individuales
+│   ├── agente1/
+│   │   └── agent.py    # Debe exportar variable 'agent'
+│   └── agente2/
+│       └── agent.py
+└── workflows/           # Workflows complejos
+    ├── workflow1/
+    │   └── workflow.py  # Debe exportar variable 'workflow'
+    └── workflow2/
+        └── workflow.py
+```
+
+---
+
+### Agentes para DevUI
+
+**Directorio:** `agents/`
+
+**Estructura:**
+```
+agents/
+├── simple_agent/
+│   └── agent.py          # Asistente general
+└── joker_agent/
+    └── agent.py          # Asistente de chistes
+```
+
+**Cómo Crear un Agente para DevUI:**
+
+```python
+# agents/mi_agente/agent.py
+from agent_framework_azure_ai import AzureAIAgentClient
+from azure.identity.aio import DefaultAzureCredential
+from agent_framework_devui import register_cleanup
+from dotenv import load_dotenv
+
+load_dotenv()
+
+credential = DefaultAzureCredential()
+client = AzureAIAgentClient(
+    async_credential=credential,
+    should_cleanup_agent=False
+)
+
+# IMPORTANTE: La variable DEBE llamarse 'agent'
+agent = client.create_agent(
+    instructions="Tu prompt aquí",
+    name="MiAgente"
+)
+
+# Registrar cleanup para evitar memory leaks
+register_cleanup(agent, credential.close)
+```
+
+**Uso:**
+```bash
+# Iniciar DevUI desde el directorio raíz
+devui ./agents
+
+# O desde la carpeta agents/
+cd agents
+devui
+
+# DevUI:
+# 1. Escanea subdirectorios buscando agent.py
+# 2. Carga todos los agentes
+# 3. Muestra dropdown para seleccionar agente
+# 4. Inicia servidor en http://localhost:8080
+# 5. Abre el navegador automáticamente
+```
+
+**Características:**
+- Interfaz tipo chat para conversación natural
+- Dropdown para cambiar entre agentes
+- Historial de conversación
+- Streaming de respuestas en tiempo real
+- Reinicio de conversación
+
+**Ver:** `agents/README.md` para más detalles
+
+---
+
+### Workflows para DevUI
+
+**Directorio:** `workflows/`
+
+**Estructura:**
+```
+workflows/
+└── travel_planner/
+    └── workflow.py       # Planificador de viajes
+```
+
+**Cómo Crear un Workflow para DevUI:**
+
+```python
+# workflows/mi_workflow/workflow.py
+from agent_framework_azure_ai import AzureAIAgentClient
+from azure.identity.aio import DefaultAzureCredential
+from agent_framework import WorkflowBuilder, WorkflowContext, executor
+from agent_framework_devui import register_cleanup
+from dotenv import load_dotenv
+
+load_dotenv()
+
+credential = DefaultAzureCredential()
+
+# Crear agentes
+client = AzureAIAgentClient(
+    async_credential=credential,
+    should_cleanup_agent=False
+)
+
+agent1 = client.create_agent(instructions="...", name="Agent1")
+agent2 = client.create_agent(instructions="...", name="Agent2")
+
+# Crear executors
+@executor(id="executor1")
+async def executor1_func(input: str, ctx: WorkflowContext[str]) -> None:
+    response = await agent1.run(input)
+    await ctx.send_message(str(response))
+
+@executor(id="executor2")
+async def executor2_func(input: str, ctx: WorkflowContext[str]) -> None:
+    response = await agent2.run(input)
+    await ctx.yield_output(str(response))
+
+# IMPORTANTE: La variable DEBE llamarse 'workflow'
+workflow = (
+    WorkflowBuilder()
+    .set_start_executor(executor1_func)
+    .add_edge(executor1_func, executor2_func)
+    .build()
+)
+
+register_cleanup(workflow, credential.close)
+```
+
+**Uso:**
+```bash
+# Iniciar DevUI desde el directorio raíz
+devui ./workflows
+
+# O desde la carpeta workflows/
+cd workflows
+devui
+```
+
+**Ejemplo Disponible: Travel Planner**
+
+Workflow paralelo con 5 agentes:
+```
+Input → LocationSelector
+        ↓ (fan-out - paralelo)
+        ├→ DestinationRecommender ┐
+        ├→ WeatherAgent            ├→ (fan-in - combina)
+        └→ CuisineExpert           ┘
+                ↓
+        ItineraryPlanner → Output
+```
+
+**Ver:** `workflows/README.md` para más detalles
+
+---
+
+### Diferencias: Agentes vs Workflows en DevUI
+
+| Aspecto | Agentes | Workflows |
+|---------|---------|-----------|
+| **Variable** | `agent` | `workflow` |
+| **Tipo** | ChatAgent | Workflow |
+| **Ejecución** | Respuesta única | Flujo multi-paso |
+| **Visualización** | Chat directo | Ejecución de executors |
+| **Uso** | Conversación simple | Orquestación compleja |
+| **Directorio** | `agents/` | `workflows/` |
+
+---
+
+### Tips para DevUI
+
+1. **Naming:** Usa nombres descriptivos para agentes y workflows
+2. **register_cleanup():** SIEMPRE registrar cleanup para evitar memory leaks
+3. **should_cleanup_agent=False:** Mantener agentes en Azure AI Foundry
+4. **Múltiples agentes:** DevUI carga TODOS los agentes y muestra dropdown
+5. **Múltiples workflows:** Similar a agentes, todos se cargan
+6. **Debugging:** DevUI es ideal para probar agentes antes de integrarlos
+
+---
+
+### Recursos DevUI
+
+- **Guía Completa:** `DEVUI_GUIDE.md`
+- **Ejemplos de Agentes:** `agents/` directory
+- **Ejemplos de Workflows:** `workflows/` directory
+- **Script Demo:** `023_devui_demo.py` (versión programática)
+
+---
+
 ## 🧠 Conceptos Clave
 
 ### 1. Cliente vs Agente
@@ -2420,11 +2877,17 @@ async with DefaultAzureCredential() as credential:
 MicrosoftAgentFramework/
 ├── .env                                          # Configuración (NO versionar)
 ├── README.md                                     # Este archivo
-├── CLAUDE.md                                     # Documentación técnica
+├── CLAUDE.md                                     # Documentación técnica detallada
 ├── WEBSOCKET_COMPARISON.md                       # Comparación WebSocket APIs
+├── DEVUI_GUIDE.md                                # Guía completa de DevUI
+├── WORKFLOW_VISUALIZATION_GUIDE.md               # Guía de visualización de workflows
+│
 ├── 001_createandrunanagent.py                    # Nivel 1: Crear agente
 ├── 002_reuseexistingagent.py                    # Nivel 1: Reutilizar agente
 ├── 003_persistentconversation.py                # Nivel 1: Conversación con contexto
+├── 003b_persistentconversation_by_name.py        # Nivel 1: Conversación por nombre
+├── 003c_list_all_agents.py                       # Nivel 1: Listar agentes
+├── 003d_using_agent_helpers.py                   # Nivel 1: Demo de agent_helpers
 ├── 004_continuethreadconversation.py            # Nivel 2: Continuar conversación
 ├── 005_usingimageswithanagent.py                # Nivel 2: Agentes con vision
 ├── 008_multi_agent_collaboration_fixed.py       # Nivel 3: Multi-agente
@@ -2433,7 +2896,32 @@ MicrosoftAgentFramework/
 ├── 011_assistant_websocket_agent_framework.py   # Nivel 3: API WebSocket con Agent Framework
 ├── 012_sequential_workflow.py                    # Nivel 3: Workflow secuencial (cierre automático)
 ├── 013_sequential_workflow.py                    # Nivel 3: Workflow secuencial (cierre manual)
+├── 014_parallel-workflow.py                      # Nivel 3: Workflow paralelo (fan-out/fan-in)
+├── 015_agent_with_mcp_tools.py                   # Nivel 4: MCP Tools (Model Context Protocol)
+├── 016_context_providers.py                      # Nivel 4: Context Providers
+├── 017_middleware.py                             # Nivel 4: Middleware
+├── 018_observability_telemetry.py                # Nivel 4: Observabilidad y telemetría
+├── 019_conditional_workflows.py                  # Nivel 4: Workflows condicionales
+├── 020_group_chat_workflow.py                    # Nivel 4: Group Chat
+├── 021_supervisor_pattern.py                     # Nivel 4: Supervisor Pattern
+├── 022_workflow_visualization_debugging.py       # Nivel 4: Visualización de workflows
+├── 023_devui_demo.py                             # DevUI demo (versión programática)
+│
+├── agent_helpers.py                              # Módulo de utilidades para agentes
 ├── assistant_websocket.py                        # API WebSocket con AIProjectClient
+│
+├── agents/                                        # Agentes para DevUI (auto-discovery)
+│   ├── README.md                                 # Documentación de agentes
+│   ├── simple_agent/
+│   │   └── agent.py                              # Asistente general
+│   └── joker_agent/
+│       └── agent.py                              # Asistente de chistes
+│
+├── workflows/                                     # Workflows para DevUI (auto-discovery)
+│   ├── README.md                                 # Documentación de workflows
+│   └── travel_planner/
+│       └── workflow.py                           # Planificador de viajes (paralelo)
+│
 └── images/
     └── nature.jpg                                # Imagen de ejemplo
 ```
@@ -2461,6 +2949,11 @@ MicrosoftAgentFramework/
 - **Vision Models:** Modelos con capacidad de procesar imágenes (GPT-4o)
 - **Context Providers:** Proveedores de contexto dinámico
 - **Middleware:** Interceptores de mensajes
+- **Workflows:** Orquestación de múltiples agentes (secuencial, paralelo, condicional)
+- **WorkflowViz:** Visualización de workflows en múltiples formatos
+- **DevUI:** Interfaz web para debugging interactivo de agentes y workflows
+- **MCP Tools:** Model Context Protocol para herramientas externas
+- **Observability:** Logging, métricas y telemetría para producción
 
 ### Próximos Temas Sugeridos
 
@@ -2476,8 +2969,11 @@ MicrosoftAgentFramework/
 10. ✅ **Middleware:** Interceptores (implementado en 017)
 11. ✅ **Group Chat:** Panel de expertos (implementado en 020)
 12. ✅ **Supervisor Pattern:** Orquestación avanzada (implementado en 021)
-13. **Error Handling:** Manejo robusto de errores
-14. **Advanced RAG:** Vector stores y semantic search
+13. ✅ **Workflow Visualization:** Diagramas y debugging (implementado en 022)
+14. ✅ **DevUI:** Debugging interactivo (implementado en agents/ y workflows/)
+15. ✅ **Agent Helpers:** Utilidades para gestión (implementado en agent_helpers.py)
+16. **Error Handling:** Manejo robusto de errores
+17. **Advanced RAG:** Vector stores y semantic search
 
 ---
 
@@ -2485,21 +2981,47 @@ MicrosoftAgentFramework/
 
 Este curso cubre los fundamentos y conceptos avanzados del Microsoft Agent Framework:
 
+**Fundamentos:**
 - ✅ Crear agentes persistentes
 - ✅ Gestionar conversaciones con contexto
-- ✅ Reutilizar agentes y conversaciones
+- ✅ Reutilizar agentes y conversaciones (por ID y por nombre)
+- ✅ Utilidades para gestión de agentes (agent_helpers.py)
 - ✅ Trabajar con imágenes (vision)
+
+**Colaboración Multi-Agente:**
 - ✅ Colaboración multi-agente
-- ✅ Herramientas personalizadas
 - ✅ Patrón supervisor-delegado
 - ✅ Agentes como herramientas de otros agentes
 - ✅ Closures y `functools.partial` para reutilización
-- ✅ APIs WebSocket para integración con aplicaciones web
-- ✅ Workflows secuenciales con `WorkflowBuilder`
+
+**Workflows:**
+- ✅ Workflows secuenciales (cierre automático y manual)
+- ✅ Workflows paralelos (fan-out/fan-in)
+- ✅ Workflows condicionales (routing dinámico)
+- ✅ Group chat workflows (panel de expertos)
+- ✅ Supervisor pattern avanzado
+- ✅ Visualización de workflows (Mermaid, DOT, SVG, PNG, PDF)
+- ✅ Event-based debugging
+
+**Herramientas y Extensibilidad:**
+- ✅ MCP Tools (Model Context Protocol)
+- ✅ Context Providers (contexto dinámico)
+- ✅ Middleware (interceptores)
+- ✅ Herramientas personalizadas
+
+**Producción:**
+- ✅ Observabilidad y telemetría
 - ✅ Gestión de recursos (cierre automático vs manual)
 - ✅ Factory pattern para executors
+- ✅ APIs WebSocket para integración con aplicaciones web
 
-**Próximo paso:** Explorar la documentación oficial de Microsoft para temas avanzados como RAG, workflows paralelos/condicionales y middleware.
+**Debugging:**
+- ✅ DevUI (interfaz web interactiva)
+- ✅ Workflow visualization
+- ✅ Event-based debugging
+- ✅ Auto-discovery de agentes y workflows
+
+**Próximo paso:** Explorar temas avanzados como RAG, error handling avanzado y vector stores.
 
 ---
 
@@ -2533,6 +3055,13 @@ Este proyecto es de código abierto con fines educativos.
 
 ---
 
-**Última actualización:** 2025-11-27
-**Versión:** 1.2.0
+**Última actualización:** 2025-12-07
+**Versión:** 1.3.0
 **Autor:** Curso de Microsoft Agent Framework
+
+**Novedades en v1.3.0:**
+- DevUI para debugging interactivo
+- Workflow visualization (múltiples formatos)
+- Agent helpers (utilidades de gestión)
+- Directorios agents/ y workflows/ para auto-discovery
+- Guías completas: DEVUI_GUIDE.md y WORKFLOW_VISUALIZATION_GUIDE.md
