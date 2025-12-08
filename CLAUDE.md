@@ -879,6 +879,178 @@ Planificador de vacaciones que recopila información de múltiples fuentes (dest
 
 ---
 
+### 023_rag_retrieval_augmented_generation.py
+**Propósito**: Implementar RAG (Retrieval Augmented Generation) para aumentar agentes con búsqueda en bases de conocimiento
+
+**Características**:
+- 11 ejemplos completos de implementación RAG
+- Búsqueda por keywords (simple y rápida)
+- Búsqueda semántica con embeddings
+- Chunking de documentos largos
+- RAG como Context Provider (automático)
+- RAG como Tool (manual/on-demand)
+- Comparación de estrategias
+- Template de producción con Azure AI Search
+- Mejores prácticas y recomendaciones
+
+**Conceptos RAG**:
+- **Retrieval**: Buscar información relevante en una base de conocimiento
+- **Augmentation**: Aumentar el contexto del agente con esa información
+- **Generation**: Generar respuestas basadas en el contexto aumentado
+
+**Estrategias de Búsqueda**:
+
+| Estrategia | Ventajas | Casos de Uso |
+|------------|----------|--------------|
+| **Keywords** | Rápida, simple, sin embeddings | Búsquedas exactas, términos técnicos |
+| **Embeddings** | Similitud semántica, sinónimos | Búsquedas complejas, lenguaje natural |
+| **Híbrida** | Combina exactitud + semántica | Mejor precisión general |
+
+**Código clave (RAG Context Provider)**:
+```python
+from agent_framework import ContextProvider, Context
+
+class RAGContextProvider(ContextProvider):
+    """Inyecta automáticamente información relevante antes de cada invocación"""
+
+    def __init__(self, documents: List[Dict], top_k: int = 2):
+        self.documents = documents
+        self.top_k = top_k
+
+    async def invoking(self, messages: List[Dict[str, Any]], **kwargs) -> Context:
+        # Extraer última pregunta del usuario
+        user_messages = [m for m in messages if m.get("role") == "user"]
+        if not user_messages:
+            return Context(instructions="", messages=[], tools=[])
+
+        query = user_messages[-1].get("content", "")
+
+        # Buscar documentos relevantes
+        results = search_by_keywords(query, self.documents, self.top_k)
+
+        # Construir contexto RAG
+        rag_context = "Información relevante de la base de conocimiento:\n\n"
+        for i, doc in enumerate(results, 1):
+            rag_context += f"[Documento {i}] {doc['title']}\n"
+            rag_context += f"{doc['content']}\n\n"
+
+        return Context(instructions=rag_context, messages=[], tools=[])
+
+# Usar con agente
+agent = client.create_agent(
+    name="RAG Assistant",
+    instructions="Responde basándote en la información del contexto",
+    context_providers=[RAGContextProvider(documents=KB)]
+)
+```
+
+**Código clave (RAG Tool)**:
+```python
+from typing import Annotated
+from pydantic import Field
+
+def search_knowledge_base(
+    query: Annotated[str, Field(description="Consulta de búsqueda")],
+    max_results: Annotated[int, Field(description="Número máximo de resultados")] = 2
+) -> str:
+    """Busca información en la base de conocimiento"""
+    results = search_by_keywords(query, KNOWLEDGE_BASE, max_results)
+
+    output = f"Encontré {len(results)} documento(s) relevante(s):\n\n"
+    for i, doc in enumerate(results, 1):
+        output += f"[{i}] {doc['title']}\n{doc['content']}\n\n"
+
+    return output
+
+# Usar con agente (las funciones se pasan directamente)
+agent = client.create_agent(
+    name="RAG Tool Assistant",
+    instructions="Usa search_knowledge_base cuando necesites información",
+    tools=[search_knowledge_base]
+)
+```
+
+**RAG Context Provider vs RAG Tool**:
+
+| Aspecto | Context Provider | Tool |
+|---------|------------------|------|
+| **Ejecución** | Automática (cada invocación) | Manual (agente decide) |
+| **Latencia** | Siempre busca | Solo cuando necesario |
+| **Tokens** | Más uso | Uso eficiente |
+| **Control** | Sistema controla | Agente controla |
+| **Mejor para** | Siempre necesita contexto | Búsquedas selectivas |
+
+**Producción con Azure AI Search**:
+```python
+from azure.search.documents import SearchClient
+from openai import AzureOpenAI
+
+class ProductionRAGProvider(ContextProvider):
+    def __init__(self, search_client: SearchClient, openai_client: AzureOpenAI):
+        self.search_client = search_client
+        self.openai_client = openai_client
+
+    def _get_embedding(self, text: str) -> List[float]:
+        response = self.openai_client.embeddings.create(
+            input=text,
+            model="text-embedding-3-small"
+        )
+        return response.data[0].embedding
+
+    def _search(self, query: str) -> List[Dict]:
+        query_vector = self._get_embedding(query)
+
+        # Búsqueda híbrida (vectorial + texto)
+        results = self.search_client.search(
+            search_text=query,
+            vector_queries=[{
+                "vector": query_vector,
+                "k_nearest_neighbors": 3,
+                "fields": "contentVector"
+            }],
+            top=3
+        )
+        return list(results)
+
+    async def invoking(self, messages, **kwargs) -> Context:
+        query = messages[-1].get("content", "")
+        docs = self._search(query)
+
+        context = "Información relevante:\n\n"
+        for doc in docs:
+            context += f"{doc['title']}\n{doc['content']}\n\n"
+
+        return Context(instructions=context, messages=[], tools=[])
+```
+
+**Mejores Prácticas**:
+1. **Embeddings**: Usar Azure OpenAI `text-embedding-3-small` o `text-embedding-3-large`
+2. **Chunking**: 200-500 tokens por chunk con 10-20% overlap
+3. **Retrieval**: Top-K de 3-5 documentos, umbral de similitud > 0.7
+4. **Índices**: Azure AI Search con búsqueda vectorial (HNSW algorithm)
+5. **Hybrid Search**: Combinar búsqueda vectorial + keywords para mejor precisión
+6. **Re-ranking**: Usar modelo de re-ranking después de retrieval inicial
+7. **Monitoreo**: Track query latency, retrieval quality, user satisfaction
+8. **Caching**: Cachear embeddings de documentos y queries frecuentes
+
+**Casos de Uso**:
+- Q&A sobre documentación técnica
+- Asistentes corporativos con bases de conocimiento
+- Chat sobre documentos/PDFs
+- Búsqueda en catálogos de productos
+- Soporte técnico con información actualizada
+
+**RAG vs Fine-Tuning**:
+
+| Usar RAG | Usar Fine-Tuning |
+|----------|------------------|
+| ✅ Información actualizada frecuentemente | ✅ Cambiar estilo/tono del modelo |
+| ✅ Base de conocimiento grande | ✅ Formato de salida específico |
+| ✅ Necesitas citar fuentes | ✅ Mejorar tarea específica |
+| ✅ Información factual específica | ✅ Información estática |
+
+---
+
 ## 🔧 Conceptos Técnicos Importantes
 
 ### 1. Cliente vs Agente
@@ -1432,12 +1604,12 @@ async with DefaultAzureCredential() as credential:
 7. ✅ **Workflows Condicionales**: Implementar flujos con decisiones dinámicas (implementado en 019_conditional_workflows.py)
 8. ✅ **Group Chat Workflows**: Panel de expertos con múltiples agentes (implementado en 020_group_chat_workflow.py)
 9. ✅ **Supervisor Pattern**: Implementar patrón supervisor con múltiples agentes herramientas (implementado en 021_supervisor_pattern.py)
-10. **RAG (Retrieval Augmented Generation)**: Integrar búsqueda de documentos
+10. ✅ **RAG (Retrieval Augmented Generation)**: Integrar búsqueda de documentos (implementado en 023_rag_retrieval_augmented_generation.py)
 11. **Herramientas/Tools Personalizadas Avanzadas**: Streaming tools, async tools
 
 ---
 
-**Última actualización**: 2025-12-01
+**Última actualización**: 2025-12-08
 **Agent ID Actual**: `asst_EkJeB3eaxhhwTsRxRp9JZBU4`
 **Thread ID Actual**: `thread_7dLiIQQlgsCOCUw3neCkjMbr`
 
@@ -1462,6 +1634,7 @@ async with DefaultAzureCredential() as credential:
 - `016_context_providers.py` - Context Providers (contexto dinámico)
 - `017_middleware.py` - Middleware (interceptores y cross-cutting concerns)
 - `018_observability_telemetry.py` - Observabilidad y Telemetría (métricas y monitoreo)
+- `023_rag_retrieval_augmented_generation.py` - RAG (búsqueda en bases de conocimiento, embeddings, chunking)
 
 ### Workflows Básicos
 - `012_sequential_workflow.py` - Workflow secuencial (cierre automático con `async with`)
