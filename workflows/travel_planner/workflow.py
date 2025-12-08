@@ -38,7 +38,7 @@ print("Creando agentes para Travel Planner Workflow...")
 # Agente 1: Location Selector
 location_client = AzureAIAgentClient(
     async_credential=credential,
-    should_cleanup_agent=False
+    should_cleanup_agent=True
 )
 location_picker_agent = location_client.create_agent(
     instructions="""Eres un experto en seleccionar destinos de viaje.
@@ -50,7 +50,7 @@ seleccionas el destino más apropiado y retornas SOLO el nombre de la ciudad/pa�
 # Agente 2: Destination Recommender
 destination_client = AzureAIAgentClient(
     async_credential=credential,
-    should_cleanup_agent=False
+    should_cleanup_agent=True
 )
 destination_recommender_agent = destination_client.create_agent(
     instructions="""Eres un experto en recomendar lugares turísticos.
@@ -62,7 +62,7 @@ actividades imperdibles y atracciones principales.""",
 # Agente 3: Weather Agent
 weather_client = AzureAIAgentClient(
     async_credential=credential,
-    should_cleanup_agent=False
+    should_cleanup_agent=True
 )
 weather_agent = weather_client.create_agent(
     instructions="""Eres un experto en clima y mejor época para viajar.
@@ -74,7 +74,7 @@ mejor temporada para visitar, qué empacar, etc.""",
 # Agente 4: Cuisine Suggestion
 cuisine_client = AzureAIAgentClient(
     async_credential=credential,
-    should_cleanup_agent=False
+    should_cleanup_agent=True
 )
 cuisine_agent = cuisine_client.create_agent(
     instructions="""Eres un experto en gastronomía local.
@@ -86,7 +86,7 @@ restaurantes populares y experiencias culinarias.""",
 # Agente 5: Itinerary Planner
 itinerary_client = AzureAIAgentClient(
     async_credential=credential,
-    should_cleanup_agent=False
+    should_cleanup_agent=True
 )
 itinerary_planner_agent = itinerary_client.create_agent(
     instructions="""Eres un planificador de viajes experto.
