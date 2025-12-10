@@ -1,7 +1,11 @@
 {
   "permissions": {
     "allow": [
-      "Bash(uv run:*)"
+      "Bash(uv run:*)",
+      "Bash(python:*)",
+      "Bash(source .venv/Scripts/activate)",
+      "Bash(timeout 60 python:*)",
+      "Bash(timeout 30 python:*)"
     ],
     "deny": [],
     "ask": []

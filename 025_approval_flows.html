@@ -1,0 +1,1135 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guía Completa: Flujos de Aprobación Humana - 025_approval_flows.py</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .section {
+            margin-bottom: 50px;
+        }
+
+        .section h2 {
+            color: #667eea;
+            font-size: 2em;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .section h3 {
+            color: #764ba2;
+            font-size: 1.5em;
+            margin-top: 30px;
+            margin-bottom: 15px;
+        }
+
+        .intro-box {
+            background: #f0f4ff;
+            border-left: 5px solid #667eea;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+
+        .concept-box {
+            background: #fff9e6;
+            border: 2px solid #ffd700;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+        }
+
+        .concept-box h4 {
+            color: #ff8c00;
+            margin-bottom: 10px;
+        }
+
+        .example-box {
+            background: #e8f5e9;
+            border-left: 5px solid #4caf50;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+
+        .warning-box {
+            background: #ffebee;
+            border-left: 5px solid #f44336;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+
+        .code-block {
+            border-radius: 10px;
+            overflow-x: auto;
+            margin: 20px 0;
+            font-size: 0.9em;
+            line-height: 1.5;
+        }
+
+        .code-block pre {
+            margin: 0;
+            padding: 20px;
+            background: #2d2d2d;
+            border-radius: 10px;
+        }
+
+        .code-block code {
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.95em;
+        }
+
+        .flow-diagram {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .comparison-table th {
+            background: #667eea;
+            color: white;
+            padding: 15px;
+            text-align: left;
+        }
+
+        .comparison-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .comparison-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        .comparison-table tr:hover {
+            background: #e9ecef;
+        }
+
+        .step-by-step {
+            counter-reset: step-counter;
+        }
+
+        .step {
+            position: relative;
+            padding-left: 60px;
+            margin-bottom: 30px;
+        }
+
+        .step::before {
+            counter-increment: step-counter;
+            content: counter(step-counter);
+            position: absolute;
+            left: 0;
+            top: 0;
+            background: #667eea;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        .step h4 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .visual-flow {
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+
+        .flow-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            min-width: 150px;
+            text-align: center;
+            margin: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        .flow-arrow {
+            font-size: 2em;
+            color: #667eea;
+            margin: 0 10px;
+        }
+
+        .use-case {
+            background: white;
+            border: 2px solid #667eea;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .use-case h4 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: bold;
+            margin: 5px;
+        }
+
+        .badge-high {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .badge-medium {
+            background: #fff9e6;
+            color: #f57c00;
+        }
+
+        .badge-low {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .toc {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+
+        .toc h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .toc ul {
+            list-style: none;
+        }
+
+        .toc li {
+            padding: 8px 0;
+        }
+
+        .toc a {
+            color: #667eea;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .toc a:hover {
+            color: #764ba2;
+            text-decoration: underline;
+        }
+
+        .highlight {
+            background: #fff3cd;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .content {
+                padding: 20px;
+            }
+
+            .visual-flow {
+                flex-direction: column;
+            }
+
+            .flow-arrow {
+                transform: rotate(90deg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔐 Guía Completa: Flujos de Aprobación Humana</h1>
+            <p>Entendiendo 025_approval_flows.py paso a paso</p>
+        </div>
+
+        <div class="content">
+            <!-- Tabla de Contenidos -->
+            <div class="toc">
+                <h3>📑 Tabla de Contenidos</h3>
+                <ul>
+                    <li><a href="#intro">1. ¿Qué son los Flujos de Aprobación?</a></li>
+                    <li><a href="#why">2. ¿Por qué son Importantes?</a></li>
+                    <li><a href="#components">3. Componentes Principales</a></li>
+                    <li><a href="#how-it-works">4. ¿Cómo Funciona?</a></li>
+                    <li><a href="#examples">5. Ejemplos Paso a Paso</a></li>
+                    <li><a href="#patterns">6. Patrones de Aprobación</a></li>
+                    <li><a href="#use-cases">7. Casos de Uso Reales</a></li>
+                    <li><a href="#best-practices">8. Mejores Prácticas</a></li>
+                </ul>
+            </div>
+
+            <!-- Sección 1: Introducción -->
+            <div class="section" id="intro">
+                <h2>1. ¿Qué son los Flujos de Aprobación?</h2>
+
+                <div class="intro-box">
+                    <p><strong>En palabras simples:</strong> Los flujos de aprobación son como un "sistema de confirmación"
+                    que le pregunta al usuario <strong>"¿Estás seguro?"</strong> antes de hacer algo importante o peligroso.</p>
+                </div>
+
+                <h3>Analogía del Mundo Real</h3>
+                <p>Imagina que tienes un asistente robot que puede hacer tareas por ti:</p>
+
+                <div class="visual-flow">
+                    <div class="flow-box">
+                        <strong>Tarea Simple</strong><br>
+                        "Muéstrame el clima"
+                    </div>
+                    <div class="flow-arrow">✓</div>
+                    <div class="flow-box">
+                        <strong>Ejecuta Directamente</strong><br>
+                        No requiere confirmación
+                    </div>
+                </div>
+
+                <div class="visual-flow" style="margin-top: 20px;">
+                    <div class="flow-box" style="background: linear-gradient(135deg, #f44336 0%, #e91e63 100%);">
+                        <strong>Tarea Peligrosa</strong><br>
+                        "Elimina todos mis archivos"
+                    </div>
+                    <div class="flow-arrow">⚠️</div>
+                    <div class="flow-box" style="background: linear-gradient(135deg, #ff9800 0%, #ff5722 100%);">
+                        <strong>ESPERA...</strong><br>
+                        ¿Estás seguro?
+                    </div>
+                    <div class="flow-arrow">👤</div>
+                    <div class="flow-box">
+                        <strong>Usuario Decide</strong><br>
+                        Sí o No
+                    </div>
+                </div>
+
+                <p style="margin-top: 20px;">Los flujos de aprobación son ese paso de <span class="highlight">"¿Estás seguro?"</span>
+                que previene errores costosos o peligrosos.</p>
+            </div>
+
+            <!-- Sección 2: Por qué son importantes -->
+            <div class="section" id="why">
+                <h2>2. ¿Por qué son Importantes?</h2>
+
+                <div class="concept-box">
+                    <h4>🎯 Razón Principal: Prevenir Errores Costosos</h4>
+                    <p>Imagina que un agente de IA puede:</p>
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        <li>❌ Eliminar usuarios de una base de datos</li>
+                        <li>💰 Transferir dinero entre cuentas</li>
+                        <li>📧 Enviar emails a miles de personas</li>
+                        <li>🗑️ Borrar archivos importantes</li>
+                        <li>☁️ Hacer cambios en servidores de producción</li>
+                    </ul>
+                    <p style="margin-top: 10px;"><strong>Sin aprobación:</strong> Un error del agente podría ser desastroso.</p>
+                    <p><strong>Con aprobación:</strong> El humano revisa y confirma antes de que suceda.</p>
+                </div>
+
+                <h3>Ejemplos del Mundo Real</h3>
+
+                <div class="use-case">
+                    <h4>🏦 Ejemplo 1: Transferencia de Dinero</h4>
+                    <p><strong>Sin Aprobación:</strong></p>
+                    <div class="code-block">
+                        <pre><code class="language-none">Usuario: "Transfiere $5000 a la cuenta 123"
+Agente: "Transferencia completada ✓"
+// ¡Error! Se transfirió a la cuenta equivocada</code></pre>
+                    </div>
+                    <p><strong>Con Aprobación:</strong></p>
+                    <div class="code-block">
+                        <pre><code class="language-none">Usuario: "Transfiere $5000 a la cuenta 123"
+Agente: "⚠️ CONFIRMACION REQUERIDA
+         - Transferir: $5000
+         - De: Cuenta A
+         - A: Cuenta 123
+         ¿Aprobar? (Sí/No)"
+Usuario: *revisa* "Espera, esa no es la cuenta correcta. NO"
+Agente: "Transferencia cancelada"
+// ¡Desastre evitado! ✓</code></pre>
+                    </div>
+                </div>
+
+                <div class="use-case">
+                    <h4>🗑️ Ejemplo 2: Eliminar Usuario</h4>
+                    <p><strong>Escenario:</strong> Un administrador le pide al agente eliminar un usuario de prueba.</p>
+                    <div class="code-block">
+                        <pre><code class="language-none">Usuario: "Elimina el usuario juan_test"
+Agente: // El agente entendió mal y va a eliminar "juan" (usuario real)
+Agente: "⚠️ CONFIRMACION REQUERIDA
+         Operación DESTRUCTIVA
+         - Usuario a eliminar: juan
+         - Última conexión: Hoy
+         - Archivos asociados: 1,234
+         ¿Aprobar? (Sí/No)"
+Usuario: "¡NO! Ese no es el usuario correcto"
+// ¡Crisis evitada!</code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sección 3: Componentes Principales -->
+            <div class="section" id="components">
+                <h2>3. Componentes Principales del Script</h2>
+
+                <p>El script 025_approval_flows.py tiene 3 componentes principales:</p>
+
+                <div class="step-by-step">
+                    <div class="step">
+                        <h4>ApprovalRequest (Solicitud de Aprobación)</h4>
+                        <p>Es como un <strong>"formulario"</strong> que contiene toda la información de la operación que necesita aprobación:</p>
+                        <div class="code-block">
+                            <pre><code class="language-python">class ApprovalRequest:
+    tool_name = "delete_user"        # ¿Qué quiere hacer?
+    arguments = {"user_id": "123"}  # ¿Con qué datos?
+    description = "Eliminar usuario" # Descripción clara
+    risk_level = "high"             # ¿Qué tan peligroso?
+    timestamp = "2024-01-15 10:30"   # ¿Cuándo?</code></pre>
+                        </div>
+                    </div>
+
+                    <div class="step">
+                        <h4>ApprovalManager (Gestor de Aprobaciones)</h4>
+                        <p>Es el <strong>"controlador central"</strong> que:</p>
+                        <ul style="margin-left: 20px; margin-top: 10px;">
+                            <li>📝 Crea solicitudes de aprobación</li>
+                            <li>⏸️ Pausa la ejecución</li>
+                            <li>❓ Pregunta al usuario</li>
+                            <li>📊 Registra todas las decisiones (auditoría)</li>
+                            <li>✅/❌ Ejecuta o cancela según la respuesta</li>
+                        </ul>
+                    </div>
+
+                    <div class="step">
+                        <h4>ApprovalDecision (Decisión)</h4>
+                        <p>La respuesta del usuario. Puede ser:</p>
+                        <ul style="margin-left: 20px; margin-top: 10px;">
+                            <li>✅ <strong>APPROVED</strong> - "Sí, adelante"</li>
+                            <li>❌ <strong>REJECTED</strong> - "No, cancela"</li>
+                            <li>⏱️ <strong>TIMEOUT</strong> - El usuario no respondió a tiempo</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sección 4: Cómo Funciona -->
+            <div class="section" id="how-it-works">
+                <h2>4. ¿Cómo Funciona? - Flujo Completo</h2>
+
+                <div class="flow-diagram">
+                    <h3 style="text-align: center; color: #667eea; margin-bottom: 20px;">
+                        Flujo de una Operación con Aprobación
+                    </h3>
+                    <div class="mermaid">
+graph TD
+    A[👤 Usuario: Elimina el usuario 123] --> B{¿Requiere aprobación?}
+    B -->|No requiere| C[✓ Ejecutar directamente]
+    B -->|Sí requiere| D[⚠️ Crear ApprovalRequest]
+    D --> E[📝 Mostrar detalles al usuario]
+    E --> F{👤 Usuario decide}
+    F -->|✅ Aprobar| G[Ejecutar operación]
+    F -->|❌ Rechazar| H[Cancelar operación]
+    F -->|⏱️ Timeout| H
+    G --> I[📊 Registrar en auditoría]
+    H --> I
+    I --> J[Retornar resultado]
+                    </div>
+                </div>
+
+                <h3>Paso a Paso con Código</h3>
+
+                <div class="step-by-step">
+                    <div class="step">
+                        <h4>El usuario hace una petición</h4>
+                        <div class="code-block">
+                            <pre><code class="language-python"># El usuario quiere eliminar un usuario
+result = await delete_user_with_approval("user_12345")</code></pre>
+                        </div>
+                    </div>
+
+                    <div class="step">
+                        <h4>Se crea una solicitud de aprobación</h4>
+                        <div class="code-block">
+                            <pre><code class="language-python"># Dentro de la función delete_user_with_approval:
+request = approval_manager.create_request(
+    tool_name="delete_user",
+    arguments={"user_id": "user_12345"},
+    description="Eliminar usuario user_12345 del sistema",
+    risk_level="high"  # Alto riesgo = siempre requiere aprobación
+)</code></pre>
+                        </div>
+                    </div>
+
+                    <div class="step">
+                        <h4>Se solicita aprobación al usuario</h4>
+                        <div class="code-block">
+                            <pre><code class="language-python"># El sistema muestra esto al usuario:
+⚠️ APROBACION REQUERIDA
+Herramienta: delete_user
+Argumentos: {'user_id': 'user_12345'}
+Descripcion: Eliminar usuario user_12345 del sistema
+Nivel de riesgo: high
+Timeout: 30s
+
+# Espera la decisión del usuario...
+decision = await approval_manager.request_approval(request)</code></pre>
+                        </div>
+                    </div>
+
+                    <div class="step">
+                        <h4>Se ejecuta o cancela según la decisión</h4>
+                        <div class="code-block">
+                            <pre><code class="language-python">if decision == ApprovalDecision.APPROVED:
+    # Usuario dijo "Sí" - ejecutar la operación
+    return delete_user(user_id)
+else:
+    # Usuario dijo "No" o timeout - cancelar
+    return {
+        "success": False,
+        "error": "Operación rechazada"
+    }</code></pre>
+                        </div>
+                    </div>
+
+                    <div class="step">
+                        <h4>Se registra en el historial (auditoría)</h4>
+                        <div class="code-block">
+                            <pre><code class="language-python"># Automáticamente se guarda:
+{
+    "timestamp": "2024-01-15 10:30:00",
+    "tool_name": "delete_user",
+    "arguments": {"user_id": "user_12345"},
+    "risk_level": "high",
+    "decision": "approved",  // o "rejected"
+    "approved_by": "admin_user"
+}</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sección 5: Ejemplos Paso a Paso -->
+            <div class="section" id="examples">
+                <h2>5. Ejemplos Paso a Paso</h2>
+
+                <h3>Ejemplo 1: Aprobación Siempre Requerida</h3>
+                <div class="example-box">
+                    <p><strong>Escenario:</strong> Eliminar un usuario (operación destructiva)</p>
+
+                    <p><strong>Código:</strong></p>
+                    <div class="code-block">
+                        <pre><code class="language-python">async def delete_user_with_approval(user_id):
+    # 1. Crear solicitud
+    request = approval_manager.create_request(
+        tool_name="delete_user",
+        arguments={"user_id": user_id},
+        description=f"Eliminar usuario {user_id}",
+        risk_level="high"  # SIEMPRE requiere aprobación
+    )
+
+    # 2. Pedir aprobación
+    decision = await approval_manager.request_approval(request)
+
+    # 3. Ejecutar o cancelar
+    if decision == ApprovalDecision.APPROVED:
+        return delete_user(user_id)  # ✓ Ejecutar
+    else:
+        return {"error": "Rechazado"}       # ✗ Cancelar</code></pre>
+                    </div>
+
+                    <p><strong>Flujo:</strong></p>
+                    <div class="visual-flow">
+                        <div class="flow-box">Usuario pide<br>eliminar</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-box" style="background: #ff9800;">PAUSA<br>Pregunta</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-box">Usuario<br>aprueba/rechaza</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-box">Ejecuta o<br>cancela</div>
+                    </div>
+                </div>
+
+                <h3>Ejemplo 2: Aprobación Condicional</h3>
+                <div class="example-box">
+                    <p><strong>Escenario:</strong> Transferencia de dinero (solo montos grandes requieren aprobación)</p>
+
+                    <p><strong>Lógica:</strong></p>
+                    <ul style="margin-left: 20px;">
+                        <li>💰 Monto ≤ $100 → <span class="badge badge-low">AUTO-APROBADO</span></li>
+                        <li>💰 Monto > $100 y ≤ $1000 → <span class="badge badge-medium">REQUIERE APROBACIÓN</span></li>
+                        <li>💰 Monto > $1000 → <span class="badge badge-high">REQUIERE APROBACIÓN CRÍTICA</span></li>
+                    </ul>
+
+                    <p><strong>Código:</strong></p>
+                    <div class="code-block">
+                        <pre><code class="language-python">async def transfer_money_conditional(from_account, to_account, amount):
+    # 1. Determinar si requiere aprobación
+    requires_approval = amount > 100
+
+    if not requires_approval:
+        # Monto pequeño - ejecutar directamente
+        return execute_transfer(from_account, to_account, amount)
+
+    # 2. Determinar nivel de riesgo
+    risk_level = "high" if amount > 1000 else "medium"
+
+    # 3. Crear solicitud
+    request = approval_manager.create_request(
+        tool_name="transfer_money",
+        arguments={"amount": amount},
+        risk_level=risk_level
+    )
+
+    # 4. Pedir aprobación
+    decision = await approval_manager.request_approval(request)
+
+    # 5. Ejecutar o cancelar
+    if decision == ApprovalDecision.APPROVED:
+        return execute_transfer(from_account, to_account, amount)
+    else:
+        return {"error": "Transferencia rechazada"}</code></pre>
+                    </div>
+
+                    <p><strong>Ejemplos de uso:</strong></p>
+                    <div class="code-block">
+                        <pre><code class="language-python"># Caso 1: Monto pequeño ($50)
+result = await transfer_money_conditional("ACC1", "ACC2", 50)
+# ✓ Se ejecuta inmediatamente (no requiere aprobación)
+
+# Caso 2: Monto mediano ($500)
+result = await transfer_money_conditional("ACC1", "ACC2", 500)
+# ⚠️ Requiere aprobación (riesgo medio)
+
+# Caso 3: Monto grande ($5000)
+result = await transfer_money_conditional("ACC1", "ACC2", 5000)
+# ⚠️⚠️ Requiere aprobación CRÍTICA (riesgo alto)</code></pre>
+                    </div>
+                </div>
+
+                <h3>Ejemplo 3: Decorador Reutilizable</h3>
+                <div class="example-box">
+                    <p><strong>Problema:</strong> ¿Cómo agregar aprobación a múltiples funciones sin repetir código?</p>
+                    <p><strong>Solución:</strong> Un decorador que se puede aplicar a cualquier función</p>
+
+                    <div class="code-block">
+                        <pre><code class="language-python"># 1. Definir el decorador
+def require_approval(risk_level="medium", timeout=30.0):
+    def decorator(func):
+        async def wrapper(*args, **kwargs):
+            # Crear solicitud automáticamente
+            request = approval_manager.create_request(
+                tool_name=func.__name__,
+                risk_level=risk_level
+            )
+
+            # Pedir aprobación
+            decision = await approval_manager.request_approval(request)
+
+            # Ejecutar si aprobado
+            if decision == ApprovalDecision.APPROVED:
+                return await func(*args, **kwargs)
+            else:
+                return {"error": "Rechazado"}
+        return wrapper
+    return decorator
+
+# 2. Usar el decorador (¡super fácil!)
+@require_approval(risk_level="high")
+def send_email_to_all_users(subject, body):
+    # Esta función ahora requiere aprobación automáticamente
+    return send_emails(subject, body)
+
+# 3. Al llamarla, automáticamente pide aprobación
+result = await send_email_to_all_users(
+    "Importante",
+    "Mensaje a todos"
+)
+# ⚠️ El decorador intercepta y pide aprobación antes de enviar</code></pre>
+                    </div>
+
+                    <p><strong>Ventajas del decorador:</strong></p>
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        <li>✅ Código reutilizable</li>
+                        <li>✅ Fácil de aplicar a múltiples funciones</li>
+                        <li>✅ No repites el código de aprobación</li>
+                        <li>✅ Solo agregas una línea: <code>@require_approval(...)</code></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Sección 6: Patrones de Aprobación -->
+            <div class="section" id="patterns">
+                <h2>6. Patrones de Aprobación</h2>
+
+                <p>El script implementa varios patrones. Aquí está cuándo usar cada uno:</p>
+
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>Patrón</th>
+                            <th>Cuándo Usar</th>
+                            <th>Ejemplo</th>
+                            <th>Nivel de Riesgo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Always Require</strong><br>(Siempre requerir)</td>
+                            <td>Operaciones destructivas o irreversibles</td>
+                            <td>Eliminar usuarios, borrar bases de datos, enviar emails masivos</td>
+                            <td><span class="badge badge-high">ALTO</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Never Require</strong><br>(Nunca requerir)</td>
+                            <td>Operaciones seguras, solo lectura</td>
+                            <td>Consultar datos, listar usuarios, ver estadísticas</td>
+                            <td><span class="badge badge-low">BAJO</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Condicional (Monto)</strong></td>
+                            <td>Basado en un valor numérico</td>
+                            <td>Transferencias > $100, compras > $500</td>
+                            <td><span class="badge badge-medium">MEDIO/ALTO</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Condicional (Tamaño)</strong></td>
+                            <td>Basado en tamaño o cantidad</td>
+                            <td>Archivos > 1GB, emails a > 100 personas</td>
+                            <td><span class="badge badge-medium">MEDIO</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Workflow Multi-Punto</strong></td>
+                            <td>Procesos con varios pasos críticos</td>
+                            <td>Deploy a producción, procesamiento de nómina</td>
+                            <td><span class="badge badge-high">ALTO</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>Workflow con Múltiples Puntos de Aprobación</h3>
+                <div class="example-box">
+                    <p><strong>Escenario:</strong> Deploy a producción (proceso con 4 pasos, 2 requieren aprobación)</p>
+
+                    <div class="flow-diagram">
+                        <div class="mermaid">
+graph LR
+    A[1. Tests] -->|Auto| B[2. Build]
+    B -->|⚠️ Aprobación 1| C[3. Deploy]
+    C -->|⚠️ Aprobación 2| D[4. Notificar]
+    D --> E[✓ Completado]
+                        </div>
+                    </div>
+
+                    <p><strong>Código simplificado:</strong></p>
+                    <div class="code-block">
+                        <pre><code class="language-python">async def deploy_to_production_workflow():
+    # Paso 1: Tests (no requiere aprobación)
+    run_tests()
+
+    # Paso 2: Build (requiere aprobación - riesgo medio)
+    decision = await request_approval("build_production", "medium")
+    if decision != APPROVED:
+        return {"error": "Build rechazado"}
+    build_production()
+
+    # Paso 3: Deploy (requiere aprobación - riesgo alto)
+    decision = await request_approval("deploy_production", "high")
+    if decision != APPROVED:
+        return {"error": "Deploy rechazado"}
+    deploy_production()
+
+    # Paso 4: Notificar (no requiere aprobación)
+    notify_team()
+
+    return {"success": True}</code></pre>
+                    </div>
+
+                    <p><strong>Ventaja:</strong> Si cualquier aprobación es rechazada, el workflow se detiene inmediatamente, previniendo despliegues no autorizados.</p>
+                </div>
+            </div>
+
+            <!-- Sección 7: Casos de Uso Reales -->
+            <div class="section" id="use-cases">
+                <h2>7. Casos de Uso Reales</h2>
+
+                <h3>¿Cuándo necesitas aprobaciones en el mundo real?</h3>
+
+                <div class="use-case">
+                    <h4>🏦 1. Operaciones Financieras</h4>
+                    <p><strong>Operaciones que requieren aprobación:</strong></p>
+                    <ul style="margin-left: 20px;">
+                        <li>Transferencias bancarias > umbral</li>
+                        <li>Pagos a proveedores</li>
+                        <li>Reembolsos a clientes</li>
+                        <li>Cambios de configuración de pagos</li>
+                    </ul>
+                    <p><strong>¿Por qué?</strong> Un error puede costar miles de dólares y es difícil de revertir.</p>
+                </div>
+
+                <div class="use-case">
+                    <h4>👥 2. Gestión de Usuarios</h4>
+                    <p><strong>Operaciones que requieren aprobación:</strong></p>
+                    <ul style="margin-left: 20px;">
+                        <li>Eliminar usuarios</li>
+                        <li>Cambiar roles/permisos</li>
+                        <li>Desactivar cuentas de administrador</li>
+                        <li>Modificar datos sensibles</li>
+                    </ul>
+                    <p><strong>¿Por qué?</strong> Afecta a personas reales y puede causar problemas de seguridad o acceso.</p>
+                </div>
+
+                <div class="use-case">
+                    <h4>☁️ 3. Infraestructura y Deploy</h4>
+                    <p><strong>Operaciones que requieren aprobación:</strong></p>
+                    <ul style="margin-left: 20px;">
+                        <li>Deploy a producción</li>
+                        <li>Cambios de configuración en servidores</li>
+                        <li>Escalado de recursos (que cuesta dinero)</li>
+                        <li>Modificación de bases de datos de producción</li>
+                    </ul>
+                    <p><strong>¿Por qué?</strong> Un error puede tirar el servicio completo y afectar a miles de usuarios.</p>
+                </div>
+
+                <div class="use-case">
+                    <h4>📧 4. Comunicaciones Masivas</h4>
+                    <p><strong>Operaciones que requieren aprobación:</strong></p>
+                    <ul style="margin-left: 20px;">
+                        <li>Emails a todos los usuarios</li>
+                        <li>Notificaciones push masivas</li>
+                        <li>SMS a clientes</li>
+                        <li>Publicaciones en redes sociales de la empresa</li>
+                    </ul>
+                    <p><strong>¿Por qué?</strong> Un mensaje equivocado puede dañar la reputación de la empresa y molestar a usuarios.</p>
+                </div>
+
+                <div class="use-case">
+                    <h4>📊 5. Datos Sensibles</h4>
+                    <p><strong>Operaciones que requieren aprobación:</strong></p>
+                    <ul style="margin-left: 20px;">
+                        <li>Eliminar datos masivamente</li>
+                        <li>Exportar datos personales (GDPR/privacidad)</li>
+                        <li>Cambios masivos en bases de datos</li>
+                        <li>Acceso a logs de auditoría</li>
+                    </ul>
+                    <p><strong>¿Por qué?</strong> Requisitos legales (GDPR, HIPAA) y protección de privacidad.</p>
+                </div>
+            </div>
+
+            <!-- Sección 8: Mejores Prácticas -->
+            <div class="section" id="best-practices">
+                <h2>8. Mejores Prácticas</h2>
+
+                <h3>✅ Qué SÍ hacer</h3>
+
+                <div class="example-box">
+                    <h4>1. Clasificar Operaciones por Nivel de Riesgo</h4>
+                    <p>Define niveles claros:</p>
+                    <ul style="margin-left: 20px;">
+                        <li><span class="badge badge-low">LOW</span> - Solo lectura, sin efectos secundarios</li>
+                        <li><span class="badge badge-medium">MEDIUM</span> - Cambios reversibles, impacto limitado</li>
+                        <li><span class="badge badge-high">HIGH</span> - Irreversible, destructivo, o costoso</li>
+                        <li><span class="badge badge-high">CRITICAL</span> - Puede tirar el servicio o causar pérdidas grandes</li>
+                    </ul>
+                </div>
+
+                <div class="example-box">
+                    <h4>2. Usar Timeouts Apropiados</h4>
+                    <div class="code-block">
+                        <pre><code class="language-python"># Operaciones estándar: 30 segundos
+timeout = 30.0
+
+# Operaciones críticas: 60-120 segundos (más tiempo para revisar)
+timeout = 60.0
+
+# Si timeout, rechazar por defecto (más seguro)
+if timeout_occurred:
+    decision = ApprovalDecision.REJECTED</code></pre>
+                    </div>
+                </div>
+
+                <div class="example-box">
+                    <h4>3. Proporcionar Contexto Rico</h4>
+                    <p>El usuario debe entender EXACTAMENTE qué está aprobando:</p>
+                    <div class="code-block">
+                        <pre><code class="language-python"># ❌ MAL - Contexto pobre
+"¿Aprobar operación?"
+
+# ✅ BIEN - Contexto rico
+"""
+⚠️ APROBACION REQUERIDA
+Operación: Eliminar usuario
+Usuario: john_doe (ID: 12345)
+Última conexión: 2024-01-10
+Archivos asociados: 1,234
+Proyectos activos: 3
+
+¿Aprobar esta operación IRREVERSIBLE?
+"""</code></pre>
+                    </div>
+                </div>
+
+                <div class="example-box">
+                    <h4>4. Registrar TODO en Auditoría</h4>
+                    <p>Cada decisión debe quedar registrada:</p>
+                    <div class="code-block">
+                        <pre><code class="language-python">{
+    "timestamp": "2024-01-15 10:30:00",
+    "operation": "delete_user",
+    "user_id": "12345",
+    "approved_by": "admin@company.com",
+    "decision": "approved",
+    "risk_level": "high",
+    "ip_address": "192.168.1.100"
+}</code></pre>
+                    </div>
+                    <p><strong>¿Por qué?</strong> Para compliance, seguridad, y poder investigar incidentes.</p>
+                </div>
+
+                <h3>❌ Qué NO hacer</h3>
+
+                <div class="warning-box">
+                    <h4>1. No Requerir Aprobación para TODO</h4>
+                    <p><strong>Problema:</strong> "Fatiga de aprobaciones" - el usuario aprueba sin leer</p>
+                    <p><strong>Solución:</strong> Solo operaciones realmente sensibles/destructivas</p>
+                    <div class="code-block">
+                        <pre><code class="language-python"># ❌ MAL - Requiere aprobación para leer datos (innecesario)
+@require_approval(risk_level="high")
+def get_user_profile(user_id):
+    return database.get(user_id)
+
+# ✅ BIEN - Solo lectura, no requiere aprobación
+def get_user_profile(user_id):
+    return database.get(user_id)</code></pre>
+                    </div>
+                </div>
+
+                <div class="warning-box">
+                    <h4>2. No Usar Aprobaciones Sin Timeout</h4>
+                    <p><strong>Problema:</strong> Operación queda en limbo indefinidamente</p>
+                    <div class="code-block">
+                        <pre><code class="language-python"># ❌ MAL - Sin timeout
+decision = await request_approval(request)  # Espera infinito
+
+# ✅ BIEN - Con timeout y fallback
+decision = await request_approval(request, timeout=30.0)
+if decision == ApprovalDecision.TIMEOUT:
+    # Rechazar por defecto (más seguro)
+    decision = ApprovalDecision.REJECTED</code></pre>
+                    </div>
+                </div>
+
+                <div class="warning-box">
+                    <h4>3. No Aprobar Operaciones Sin Validar Primero</h4>
+                    <p><strong>Problema:</strong> Pedir aprobación para una operación inválida</p>
+                    <div class="code-block">
+                        <pre><code class="language-python"># ❌ MAL - Pide aprobación sin validar
+async def delete_user(user_id):
+    decision = await request_approval(...)  # user_id puede no existir
+    database.delete(user_id)  # Falla aquí
+
+# ✅ BIEN - Validar ANTES de pedir aprobación
+async def delete_user(user_id):
+    if not database.exists(user_id):
+        return {"error": "Usuario no existe"}  # No pedir aprobación
+
+    decision = await request_approval(...)  # Solo si es válido
+    if approved:
+        database.delete(user_id)</code></pre>
+                    </div>
+                </div>
+
+                <h3>🎯 Resumen de Mejores Prácticas</h3>
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>Práctica</th>
+                            <th>Descripción</th>
+                            <th>Beneficio</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Clasificación de riesgo</td>
+                            <td>Usar niveles: low, medium, high, critical</td>
+                            <td>Claridad en qué requiere aprobación</td>
+                        </tr>
+                        <tr>
+                            <td>Timeouts apropiados</td>
+                            <td>30-60s estándar, 60-120s crítico</td>
+                            <td>No dejar operaciones en limbo</td>
+                        </tr>
+                        <tr>
+                            <td>Contexto rico</td>
+                            <td>Mostrar detalles completos de la operación</td>
+                            <td>Usuario puede tomar decisión informada</td>
+                        </tr>
+                        <tr>
+                            <td>Auditoría completa</td>
+                            <td>Registrar todas las decisiones</td>
+                            <td>Compliance, seguridad, investigación</td>
+                        </tr>
+                        <tr>
+                            <td>Validar antes de aprobar</td>
+                            <td>Verificar operación es válida primero</td>
+                            <td>No desperdiciar tiempo en aprobaciones inútiles</td>
+                        </tr>
+                        <tr>
+                            <td>Granularidad apropiada</td>
+                            <td>No requerir aprobación para TODO</td>
+                            <td>Evitar fatiga de aprobaciones</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Conclusión -->
+            <div class="section">
+                <h2>🎓 Conclusión</h2>
+
+                <div class="intro-box">
+                    <h3>Resumen Final</h3>
+                    <p><strong>¿Qué son los flujos de aprobación?</strong></p>
+                    <p>Un sistema de "confirmación humana" que pregunta "¿Estás seguro?" antes de ejecutar operaciones sensibles, destructivas o costosas.</p>
+
+                    <p style="margin-top: 20px;"><strong>¿Por qué son importantes?</strong></p>
+                    <p>Previenen errores costosos, cumplen requisitos legales, y agregan una capa de seguridad crítica.</p>
+
+                    <p style="margin-top: 20px;"><strong>¿Cómo funcionan?</strong></p>
+                    <ol style="margin-left: 20px; margin-top: 10px;">
+                        <li>Usuario solicita una operación</li>
+                        <li>Sistema determina si requiere aprobación</li>
+                        <li>Si requiere, pausa y pregunta al usuario</li>
+                        <li>Usuario aprueba o rechaza</li>
+                        <li>Sistema ejecuta o cancela según la decisión</li>
+                        <li>Todo queda registrado en auditoría</li>
+                    </ol>
+
+                    <p style="margin-top: 20px;"><strong>¿Cuándo usar?</strong></p>
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        <li>✅ Operaciones destructivas (eliminar, borrar)</li>
+                        <li>✅ Operaciones financieras (transferencias, pagos)</li>
+                        <li>✅ Cambios de infraestructura (deploy, config)</li>
+                        <li>✅ Comunicaciones masivas (emails, SMS)</li>
+                        <li>✅ Datos sensibles (exportar, modificar)</li>
+                    </ul>
+                </div>
+
+                <div class="concept-box">
+                    <h4>💡 Concepto Clave para Recordar</h4>
+                    <p style="font-size: 1.1em;">
+                        Los flujos de aprobación son como un <strong>"cinturón de seguridad digital"</strong>.
+                        No previenen todos los accidentes, pero reducen significativamente el riesgo de
+                        errores costosos y te dan una segunda oportunidad para reconsiderar antes de
+                        ejecutar algo peligroso.
+                    </p>
+                </div>
+
+                <div class="example-box">
+                    <h4>🚀 Próximos Pasos</h4>
+                    <p>Ahora que entiendes los flujos de aprobación, puedes:</p>
+                    <ol style="margin-left: 20px; margin-top: 10px;">
+                        <li>Ejecutar el script: <code>python 025_approval_flows.py</code></li>
+                        <li>Modificar los ejemplos para tus necesidades</li>
+                        <li>Implementar aprobaciones en tus propias aplicaciones</li>
+                        <li>Combinar con otros patrones (workflows, agentes, etc.)</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Inicializar Mermaid para diagramas
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'default',
+            flowchart: {
+                useMaxWidth: true,
+                htmlLabels: true,
+                curve: 'basis'
+            }
+        });
+
+        // Asegurar que Prism.js formatee el código cuando la página cargue
+        document.addEventListener('DOMContentLoaded', function() {
+            Prism.highlightAll();
+        });
+    </script>
+</body>
+</html>

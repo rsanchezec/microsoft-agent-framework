@@ -2957,9 +2957,9 @@ MicrosoftAgentFramework/
 
 ### Próximos Temas Sugeridos
 
-1. **RAG (Retrieval Augmented Generation):** Búsqueda de documentos
-2. **Custom Tools:** Herramientas personalizadas avanzadas
-3. **Approvals:** Flujos de aprobación humana
+1. ✅  **RAG (Retrieval Augmented Generation):** Búsqueda de documentos (implementado en 023)
+2. ✅ **Custom Tools:** Herramientas personalizadas avanzadas (implementado en 024)
+3. ✅ **Approvals:** Flujos de aprobación humana (implementado en 025)
 4. ✅ **Observability:** Logging y telemetría (implementado en 018)
 5. ✅ **Workflows Secuenciales:** Orquestación de agentes (implementado en 012 y 013)
 6. ✅ **Workflows Paralelos:** Fan-out/Fan-in (implementado en 014)

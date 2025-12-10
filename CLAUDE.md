@@ -1051,6 +1051,478 @@ class ProductionRAGProvider(ContextProvider):
 
 ---
 
+### 024_custom_tools_advanced.py
+**Propósito**: Demostrar herramientas personalizadas avanzadas con patrones de producción
+
+**Características**:
+- 10 ejemplos completos de patrones avanzados de herramientas
+- Herramientas asíncronas (async tools) para operaciones I/O
+- Herramientas con estado compartido (stateful tools)
+- Retry logic automático con backoff exponencial
+- Rate limiting con ventana deslizante
+- Caching con TTL (time-to-live)
+- Herramientas compuestas (composite tools)
+- Logging y telemetría automática
+- Validación avanzada con Pydantic
+- Comparación de patrones y mejores prácticas
+
+**Patrones Implementados**:
+
+| Patrón | Cuándo Usar | Ejemplo |
+|--------|-------------|---------|
+| **Herramienta Básica** | Operación simple | `calculate_basic(a, b)` |
+| **Herramienta Avanzada** | Validación/logging | `calculate_advanced(a, b, operation)` |
+| **Async Tools** | I/O no bloqueante | `fetch_url_async(url)` |
+| **Stateful Tools** | Estado compartido | `DatabaseSimulator.save_record()` |
+| **Retry Logic** | APIs poco fiables | `@retry_on_failure` |
+| **Rate Limiting** | Límite de llamadas | `RateLimiter(max_calls, window)` |
+| **Caching** | Operaciones costosas | `SimpleCache(ttl_seconds)` |
+| **Composite Tools** | Workflows complejos | `analyze_and_translate()` |
+| **Monitored Tools** | Producción/métricas | `@monitored_tool` |
+
+**Código clave (Herramienta Avanzada con Validación)**:
+```python
+from typing import Annotated, Literal, Dict, Any
+from pydantic import Field
+from agent_framework import ai_function
+
+@ai_function(
+    name="calculate_advanced",
+    description="Realiza operaciones matemáticas avanzadas con validación."
+)
+def calculate_advanced(
+    a: Annotated[float, Field(description="Primer número", ge=-1000, le=1000)],
+    b: Annotated[float, Field(description="Segundo número", ge=-1000, le=1000)],
+    operation: Annotated[
+        Literal["add", "subtract", "multiply", "divide"],
+        Field(description="Operación: add, subtract, multiply, divide")
+    ] = "add"
+) -> Dict[str, Any]:
+    """
+    Operaciones matemáticas con validación y manejo de errores.
+
+    Características:
+    - Validación de rangos (ge=-1000, le=1000)
+    - Múltiples operaciones
+    - Manejo de división por cero
+    - Retorno estructurado con metadata
+    """
+    try:
+        if operation == "divide" and b == 0:
+            return {
+                "success": False,
+                "error": "División por cero no permitida",
+                "result": None
+            }
+
+        operations = {
+            "add": a + b,
+            "subtract": a - b,
+            "multiply": a * b,
+            "divide": a / b
+        }
+
+        return {
+            "success": True,
+            "result": operations[operation],
+            "operation": operation,
+            "inputs": {"a": a, "b": b},
+            "timestamp": datetime.now().isoformat()
+        }
+
+    except Exception as e:
+        return {"success": False, "error": str(e), "result": None}
+```
+
+**Código clave (Async Tool con Retry)**:
+```python
+def retry_on_failure(max_retries: int = 3, delay: float = 1.0):
+    """Decorador que agrega retry logic con backoff exponencial."""
+    def decorator(func):
+        @wraps(func)
+        async def wrapper(*args, **kwargs):
+            for attempt in range(max_retries):
+                try:
+                    result = await func(*args, **kwargs)
+                    if isinstance(result, dict) and not result.get("success", True):
+                        raise Exception(result.get("error"))
+                    return result
+                except Exception as e:
+                    if attempt < max_retries - 1:
+                        await asyncio.sleep(delay * (attempt + 1))  # Backoff
+                    else:
+                        return {
+                            "success": False,
+                            "error": f"Falló después de {max_retries} intentos: {e}"
+                        }
+        return wrapper
+    return decorator
+
+@retry_on_failure(max_retries=3, delay=0.5)
+async def unreliable_api_call(endpoint: str) -> Dict[str, Any]:
+    """API call con retry automático."""
+    # ... implementación ...
+```
+
+**Código clave (Stateful Tool con Base de Datos)**:
+```python
+class DatabaseSimulator:
+    """Base de datos simulada con estado compartido entre invocaciones."""
+
+    def __init__(self):
+        self.records: Dict[str, Any] = {}
+        self.operation_count = 0
+
+    def save_record(
+        self,
+        key: Annotated[str, Field(description="Clave única")],
+        value: Annotated[str, Field(description="Valor a guardar")]
+    ) -> Dict[str, Any]:
+        """Guarda un registro manteniendo el estado."""
+        self.operation_count += 1
+        self.records[key] = {
+            "value": value,
+            "created_at": datetime.now().isoformat(),
+            "operation_number": self.operation_count
+        }
+
+        return {
+            "success": True,
+            "key": key,
+            "total_records": len(self.records),
+            "operation_count": self.operation_count
+        }
+
+# Instancia global (compartida entre invocaciones)
+db_simulator = DatabaseSimulator()
+
+# Usar en agente
+agent = client.create_agent(
+    name="Stateful Agent",
+    tools=[db_simulator.save_record, db_simulator.get_record]
+)
+```
+
+**Código clave (Caching con TTL)**:
+```python
+class SimpleCache:
+    """Cache simple con TTL (time-to-live)."""
+
+    def __init__(self, ttl_seconds: float = 60.0):
+        self.cache: Dict[str, Dict[str, Any]] = {}
+        self.ttl_seconds = ttl_seconds
+
+    def get(self, key: str) -> Optional[Any]:
+        """Obtiene valor si no expiró."""
+        if key not in self.cache:
+            return None
+
+        entry = self.cache[key]
+        if time.time() - entry["timestamp"] > self.ttl_seconds:
+            del self.cache[key]  # Expirado
+            return None
+
+        return entry["value"]
+
+    def set(self, key: str, value: Any) -> None:
+        """Guarda valor con timestamp."""
+        self.cache[key] = {"value": value, "timestamp": time.time()}
+
+# Cache global: TTL de 30 segundos
+expensive_operation_cache = SimpleCache(ttl_seconds=30.0)
+
+async def expensive_operation(input_data: str) -> Dict[str, Any]:
+    """Operación costosa con caching automático."""
+    cache_key = f"expensive_op:{input_data}"
+
+    # Verificar cache
+    cached_result = expensive_operation_cache.get(cache_key)
+    if cached_result is not None:
+        return {
+            "success": True,
+            "result": cached_result,
+            "from_cache": True
+        }
+
+    # Ejecutar operación costosa
+    await asyncio.sleep(3)  # Simular latencia
+    result = f"Resultado procesado de '{input_data}'"
+
+    # Guardar en cache
+    expensive_operation_cache.set(cache_key, result)
+
+    return {
+        "success": True,
+        "result": result,
+        "from_cache": False
+    }
+```
+
+**Mejores Prácticas**:
+1. **Validación**: Usar Annotated + Field con constraints (ge, le, regex)
+2. **Async**: Usar async/await para operaciones I/O (APIs, DB, files)
+3. **Retornos**: Retornar Dict[str, Any] estructurado con success/error/result
+4. **Documentación**: Docstrings detallados + Field descriptions
+5. **Manejo de errores**: Try/except con retornos estructurados
+6. **Logging**: Print con prefijos ([TOOL], [ERROR]) para debugging
+7. **Estado**: Usar clases para herramientas con estado compartido
+8. **Retry**: Decorador con backoff exponencial para operaciones poco fiables
+9. **Rate Limiting**: Ventana deslizante para limitar llamadas por tiempo
+10. **Caching**: TTL para operaciones costosas con resultados reutilizables
+
+**Anti-Patrones a Evitar**:
+- ❌ Herramientas sin validación de entrada
+- ❌ Bloquear event loop con `time.sleep()` en async
+- ❌ Retornos inconsistentes (int vs dict)
+- ❌ Estado global mutable sin thread-safety
+- ❌ Logging sin contexto (solo "Error")
+
+**Casos de Uso**:
+- APIs externas con retry y rate limiting
+- Operaciones costosas con caching
+- Bases de datos con estado compartido
+- Workflows complejos con herramientas compuestas
+- Monitoreo de producción con telemetría
+
+---
+
+### 025_approval_flows.py
+**Propósito**: Implementar flujos de aprobación humana para operaciones sensibles
+
+**Características**:
+- 10 ejemplos completos de patrones de aprobación
+- Aprobaciones siempre requeridas (always_require)
+- Aprobaciones condicionales (basadas en criterios)
+- Decorador reutilizable para aprobaciones
+- Workflows con múltiples puntos de aprobación
+- Sistema de auditoría completo
+- Clasificación por nivel de riesgo (low/medium/high)
+- Timeouts con fallback automático
+- Logging y tracking de decisiones
+- Integración con agentes de Azure AI
+
+**Patrones de Aprobación**:
+
+| Patrón | Cuándo Usar | Ejemplo |
+|--------|-------------|---------|
+| **Always Require** | Operaciones destructivas | `delete_user`, `drop_database` |
+| **Never Require** | Operaciones seguras/lectura | `get_user`, `list_items` |
+| **Condicional (monto)** | Basado en valor | `transfer_money` (> $100) |
+| **Condicional (tamaño)** | Basado en tamaño | `upload_file` (> 1GB) |
+| **Decorador** | Aplicar a múltiples | `@require_approval()` |
+| **Workflow multi-punto** | Proceso complejo | `deploy_to_production` |
+| **Por nivel de riesgo** | Clasificación riesgo | low/medium/high/critical |
+
+**Código clave (Aprobación Siempre Requerida)**:
+```python
+class ApprovalManager:
+    """Gestiona solicitudes de aprobación con auditoría."""
+
+    def __init__(self):
+        self.pending_requests: List[ApprovalRequest] = []
+        self.history: List[ApprovalRequest] = []
+
+    async def request_approval(
+        self,
+        request: ApprovalRequest,
+        timeout: float = 30.0
+    ) -> ApprovalDecision:
+        """Solicita aprobación del usuario con timeout."""
+        print(f"[APROBACION REQUERIDA]")
+        print(f"Herramienta: {request.tool_name}")
+        print(f"Argumentos: {request.arguments}")
+        print(f"Nivel de riesgo: {request.risk_level}")
+
+        # En producción: mostrar prompt real al usuario
+        # Esperar decisión o timeout
+
+        # Registrar en historial
+        self.history.append(request)
+        return request.decision
+
+async def delete_user_with_approval(user_id: str) -> Dict[str, Any]:
+    """Eliminar usuario (requiere aprobación SIEMPRE)."""
+
+    # Crear solicitud de aprobación
+    request = approval_manager.create_request(
+        tool_name="delete_user",
+        arguments={"user_id": user_id},
+        description=f"Eliminar usuario {user_id} del sistema",
+        risk_level="high"
+    )
+
+    # Solicitar aprobación
+    decision = await approval_manager.request_approval(request)
+
+    if decision == ApprovalDecision.APPROVED:
+        # Ejecutar operación
+        return delete_user(user_id)
+    else:
+        return {"success": False, "error": "Operación rechazada"}
+```
+
+**Código clave (Aprobación Condicional)**:
+```python
+async def transfer_money_conditional(
+    from_account: str,
+    to_account: str,
+    amount: float
+) -> Dict[str, Any]:
+    """Transferencia con aprobación CONDICIONAL."""
+
+    # Determinar si requiere aprobación
+    requires_approval = amount > 100
+
+    if not requires_approval:
+        # Auto-aprobado (monto pequeño)
+        return execute_transfer(from_account, to_account, amount)
+
+    # Determinar nivel de riesgo
+    risk_level = "high" if amount > 1000 else "medium"
+
+    # Solicitar aprobación
+    request = approval_manager.create_request(
+        tool_name="transfer_money",
+        arguments={"from": from_account, "to": to_account, "amount": amount},
+        description=f"Transferir ${amount}",
+        risk_level=risk_level
+    )
+
+    decision = await approval_manager.request_approval(request)
+
+    if decision == ApprovalDecision.APPROVED:
+        return execute_transfer(from_account, to_account, amount)
+    else:
+        return {"success": False, "error": "Transferencia rechazada"}
+```
+
+**Código clave (Decorador Reutilizable)**:
+```python
+def require_approval(
+    risk_level: str = "medium",
+    timeout: float = 30.0,
+    condition: Optional[Callable] = None
+):
+    """Decorador que agrega aprobación automática a funciones."""
+    def decorator(func):
+        async def wrapper(*args, **kwargs):
+            # Si hay condición, evaluar
+            if condition is not None:
+                requires = condition(*args, **kwargs)
+                if not requires:
+                    # No requiere aprobación
+                    return await func(*args, **kwargs)
+
+            # Crear solicitud de aprobación
+            request = approval_manager.create_request(
+                tool_name=func.__name__,
+                arguments={...},
+                risk_level=risk_level
+            )
+
+            # Solicitar aprobación
+            decision = await approval_manager.request_approval(request, timeout)
+
+            if decision == ApprovalDecision.APPROVED:
+                return await func(*args, **kwargs)
+            else:
+                return {"success": False, "error": "Operación rechazada"}
+
+        return wrapper
+    return decorator
+
+# Uso
+@require_approval(risk_level="high", timeout=30.0)
+def send_email_to_all_users(subject: str, body: str) -> Dict[str, Any]:
+    """Envía email a TODOS los usuarios (operación sensible)."""
+    # ...
+
+# Uso con condición
+def large_file_condition(*args, **kwargs) -> bool:
+    """Requiere aprobación solo si file_size > 1GB."""
+    file_size_mb = kwargs.get("file_size_mb", args[0] if args else 0)
+    return file_size_mb > 1024
+
+@require_approval(risk_level="medium", condition=large_file_condition)
+def upload_file(file_size_mb: float) -> Dict[str, Any]:
+    """Sube archivo. Requiere aprobación si > 1GB."""
+    # ...
+```
+
+**Código clave (Sistema de Auditoría)**:
+```python
+class ApprovalAuditor:
+    """Sistema de auditoría para aprobaciones."""
+
+    def __init__(self, approval_manager: ApprovalManager):
+        self.approval_manager = approval_manager
+
+    def generate_report(self) -> Dict[str, Any]:
+        """Genera reporte de auditoría completo."""
+        history = self.approval_manager.history
+
+        # Estadísticas
+        total = len(history)
+        approved = sum(1 for req in history if req.decision == ApprovalDecision.APPROVED)
+        rejected = sum(1 for req in history if req.decision == ApprovalDecision.REJECTED)
+
+        # Por nivel de riesgo
+        by_risk = {}
+        for req in history:
+            risk = req.risk_level
+            if risk not in by_risk:
+                by_risk[risk] = {"total": 0, "approved": 0, "rejected": 0}
+            by_risk[risk]["total"] += 1
+            if req.decision == ApprovalDecision.APPROVED:
+                by_risk[risk]["approved"] += 1
+
+        return {
+            "total_requests": total,
+            "approved": approved,
+            "rejected": rejected,
+            "approval_rate": f"{(approved / total * 100):.1f}%",
+            "by_risk_level": by_risk
+        }
+
+    def export_audit_log(self, filename: str = "approval_audit.json"):
+        """Exporta log de auditoría a archivo JSON."""
+        audit_data = {
+            "export_timestamp": datetime.now().isoformat(),
+            "total_requests": len(self.approval_manager.history),
+            "requests": self.approval_manager.get_audit_log()
+        }
+        # Escribir a archivo...
+```
+
+**Mejores Prácticas**:
+1. **Clasificar por riesgo**: Usar niveles low/medium/high/critical
+2. **Timeouts apropiados**: 30-60s estándar, 60-120s para operaciones críticas
+3. **Auditoría completa**: Registrar TODAS las decisiones con timestamp y usuario
+4. **Contexto rico**: Descripción clara, argumentos visibles, consecuencias
+5. **Fallback automático**: Timeout → rechazar por defecto
+6. **Granularidad apropiada**: No requerir aprobación para TODO
+7. **Aprobaciones condicionales**: Basadas en valor, tamaño, o criterios
+8. **Testing**: Modo auto-approve para testing y demos
+
+**Anti-Patrones a Evitar**:
+- [X] Requerir aprobación para TODO (fatiga de aprobaciones)
+- [X] Sin timeout (operaciones en limbo)
+- [X] Contexto insuficiente (usuario no sabe qué aprueba)
+- [X] Sin auditoría (no hay registro de decisiones)
+- [X] Aprobar operaciones inválidas (validar ANTES de solicitar)
+- [X] Bloquear operaciones críticas (override de emergencia)
+- [X] No comunicar decisión (usuario sin feedback)
+
+**Casos de Uso**:
+- Operaciones financieras (transferencias, pagos, reembolsos)
+- Gestión de usuarios (eliminar, cambiar permisos, desactivar)
+- Infraestructura (deploy, cambios de config, escalado)
+- Datos sensibles (eliminar, exportar, cambios masivos)
+- Comunicaciones (emails masivos, notificaciones push, SMS)
+- Compliance (acceso auditado, operaciones reguladas, impacto legal)
+
+---
+
 ## 🔧 Conceptos Técnicos Importantes
 
 ### 1. Cliente vs Agente
@@ -1605,7 +2077,8 @@ async with DefaultAzureCredential() as credential:
 8. ✅ **Group Chat Workflows**: Panel de expertos con múltiples agentes (implementado en 020_group_chat_workflow.py)
 9. ✅ **Supervisor Pattern**: Implementar patrón supervisor con múltiples agentes herramientas (implementado en 021_supervisor_pattern.py)
 10. ✅ **RAG (Retrieval Augmented Generation)**: Integrar búsqueda de documentos (implementado en 023_rag_retrieval_augmented_generation.py)
-11. **Herramientas/Tools Personalizadas Avanzadas**: Streaming tools, async tools
+11. ✅ **Herramientas/Tools Personalizadas Avanzadas**: Async tools, retry logic, caching, rate limiting (implementado en 024_custom_tools_advanced.py)
+12. ✅ **Approval Flows**: Flujos de aprobación humana para operaciones sensibles (implementado en 025_approval_flows.py)
 
 ---
 
@@ -1629,6 +2102,8 @@ async with DefaultAzureCredential() as credential:
 
 ### Herramientas y MCP
 - `015_agent_with_mcp_tools.py` - Agentes usando HostedMCPTool (Model Context Protocol)
+- `024_custom_tools_advanced.py` - Herramientas personalizadas avanzadas (async, retry, caching, rate limiting)
+- `025_approval_flows.py` - Flujos de aprobación humana (always_require, condicionales, auditoría)
 
 ### Conceptos Avanzados de Producción
 - `016_context_providers.py` - Context Providers (contexto dinámico)
