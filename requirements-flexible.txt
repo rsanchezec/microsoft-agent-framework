@@ -1,0 +1,17 @@
+# Microsoft Agent Framework - Versiones flexibles (permite actualizaciones menores)
+# Generado: 2024-12-10
+# ADVERTENCIA: Usar solo en desarrollo, no en producción
+#
+# Este archivo permite actualizaciones automáticas de parches y versiones menores,
+# pero no de versiones mayores (breaking changes).
+#
+# Formato: >=version_actual,<next_major_version
+# Ejemplo: >=1.0.0b251114,<2.0.0 permite 1.x.x pero no 2.0.0
+
+agent-framework>=1.0.0b251114,<2.0.0
+agent-framework-devui>=1.0.0b251120,<2.0.0
+
+# Notas:
+# - Las versiones 1.x.x son compatibles entre sí (siguiendo semver)
+# - Para producción, usar requirements.txt (versiones exactas)
+# - Para obtener las últimas versiones: pip install --upgrade agent-framework
